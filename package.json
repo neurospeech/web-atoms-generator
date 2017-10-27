@@ -1,0 +1,34 @@
+{
+  "name": "web-atoms-generator",
+  "version": "1.0.0",
+  "description": "Web Atoms MVVM Component Generator",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/neurospeech/web-atoms-generator.git"
+  },
+  "preferGlobal": true,
+  "author": "Akash Kava",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/neurospeech/web-atoms-generator/issues"
+  },
+  "dependencies": {
+    "deasync": "^0.1.10",
+    "htmlparser2": "^3.9.2",
+    "less": "^2.7.3",
+    "systemjs": "^0.20.18",
+    "manakin": "^0.5.1"
+  },
+  "homepage": "https://github.com/neurospeech/web-atoms-generator#readme",
+  "devDependencies": {
+    "@types/node": "^8.0.26",
+    "systemjs": "^0.20.18",
+    "tslint": "^5.7.0",
+    "ts-promise": "^0.3.4",
+    "typescript":"^2.5.3" 
+  }
+}
