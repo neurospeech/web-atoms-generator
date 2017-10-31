@@ -25,9 +25,9 @@ export class AtomEvaluator {
 			return be;
 		}
 
-		var regex:RegExp = /(?:(\$)(window|viewModel|appScope|scope|data|owner|localScope))(?:\.[a-zA-Z_][a-zA-Z_0-9]*(\()?)*/gi;
+		var regex:RegExp = /(?:(\$)(window|localViewModel|viewModel|appScope|scope|data|owner|localScope))(?:\.[a-zA-Z_][a-zA-Z_0-9]*(\()?)*/gi;
 
-		var keywords:RegExp = /(window|viewModel|appScope|scope|data|owner|localScope)/gi;
+		var keywords:RegExp = /(window|localViewModel|viewModel|appScope|scope|data|owner|localScope)/gi;
 
 		var path:Array<string[]> = [];
 		var vars:string[] = [];
