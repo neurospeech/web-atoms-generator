@@ -50,6 +50,9 @@ class HtmlComponent {
             this.generatedStyle += "\r\n";
             return;
         }
+        if (/br/i.test(a.name)) {
+            return;
+        }
         if (a.name === "form-layout") {
             // console.log(`converting form layout with ${a.children.length} children`);
             a = html_content_1.HtmlContent.formLayoutNode(a);

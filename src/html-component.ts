@@ -67,6 +67,10 @@ export class HtmlComponent {
 			return;
 		}
 
+		if(/br/i.test(a.name)) {
+			return;
+		}
+
 		if(a.name === "form-layout") {
 			// console.log(`converting form layout with ${a.children.length} children`);
 			a = HtmlContent.formLayoutNode(a);
