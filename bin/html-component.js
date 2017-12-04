@@ -58,9 +58,9 @@ class HtmlComponent {
         var r = [a.name];
         var ca = {};
         // debugger;
-        if (!a.children) {
-            return r;
-        }
+        // if(!a.children) {
+        // 	return r;
+        // }
         var aa = a.attribs || {};
         var inits = [];
         if (aa) {

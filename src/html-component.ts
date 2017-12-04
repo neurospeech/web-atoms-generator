@@ -81,9 +81,9 @@ export class HtmlComponent {
 		var ca:any = {};
 
 		// debugger;
-		if(!a.children) {
-			return r;
-		}
+		// if(!a.children) {
+		// 	return r;
+		// }
 
 		var aa:any = a.attribs || {};
 
