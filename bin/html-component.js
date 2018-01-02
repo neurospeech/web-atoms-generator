@@ -113,6 +113,10 @@ class HtmlComponent {
 							});`);
                         continue;
                     }
+                    if (/^atom\-/i.test(key)) {
+                        inits.push(`this.setLocalValue('${ckey}',${JSON.stringify(v)})`);
+                        continue;
+                    }
                     ca[key] = aa[key];
                 }
                 catch (er) {
