@@ -149,7 +149,7 @@ export class HtmlComponent {
 					}
 
 					if(/^atom\-/i.test(key) && key !== "atom-type" && key !== "atom-template" && key !== "atom-presenter") {
-						inits.push(`this.setLocalValue('${ckey}',${ JSON.stringify(v) })`);
+						inits.push(`this.setLocalValue('${ckey}',${ JSON.stringify(v) }, e)`);
 						continue;
 					}
 
