@@ -113,7 +113,7 @@ class HtmlComponent {
 							});`);
                         continue;
                     }
-                    if (/^atom\-/i.test(key)) {
+                    if (/^atom\-/i.test(key) && key !== "atom-type" && key !== "atom-template" && key !== "atom-presenter") {
                         inits.push(`this.setLocalValue('${ckey}',${JSON.stringify(v)})`);
                         continue;
                     }
