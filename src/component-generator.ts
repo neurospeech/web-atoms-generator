@@ -127,7 +127,7 @@ export class ComponentGenerator {
 			result += node.generated;
 
 			if(node.nsNamespace) {
-				declarations += `declare namespace ${node.nsNamespace}{    class ${node.name}{ }   }\r\n`;
+				declarations += `declare namespace ${node.nsNamespace}{    class ${node.name} extends WebAtoms.AtomControl { }   }\r\n`;
 				// mock += `namespace ${node.nsNamespace} { export  class ${node.name} {}  }`;
 				mock += ` var ${node.nsNamespace} = ${node.nsNamespace} || {}; `;
 				mock += ` ${node.nsNamespace}.${node.name} = {}; `;
