@@ -3,7 +3,7 @@ import { XamlFile } from "./xaml/xaml-file";
 function test() {
     const f:XamlFile = new XamlFile("","");
     
-    f.compileContent(`<atom:AtomPage xmlns:atom="http://web-atoms.com/xaml" xmlns="clr-namespace:Xamarin.Forms">
+    f.compileContent(`<atom:AtomPage xmlns:atom="http://web-atoms.org/xaml" xmlns="clr-namespace:Xamarin.Forms">
         <Grid>
             <Grid.RowDefinitions>
                 <RowDefinition/>
