@@ -2,6 +2,7 @@ import * as less from "less";
 import * as deasync from "deasync";
 import { HtmlNode, HtmlContent } from "./html-content";
 import { GeneratorContext } from "./generator-context";
+import { IMarkupComponent } from "./imarkup-file";
 
 export class TagInitializerList {
 	component:string;
@@ -32,7 +33,7 @@ export class TagInitializer {
 	}
 }
 
-export class HtmlComponent {
+export class HtmlComponent implements IMarkupComponent {
 
 	baseType:string = null;
 	name:string = null;

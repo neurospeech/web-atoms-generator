@@ -3,29 +3,20 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const http_file_1 = require("./http-file");
 const fs = require("fs");
 const path = require("path");
+const xaml_file_1 = require("./xaml/xaml-file");
+const core_html_file_1 = require("./core/core-html-file");
+var Mode;
+(function (Mode) {
+    Mode["None"] = "";
+    Mode["Core"] = "Core";
+})(Mode = exports.Mode || (exports.Mode = {}));
 class ComponentGenerator {
-    loadFiles(folder) {
-        // scan all html files...
-        for (var file of fs.readdirSync(folder)) {
-            var fullName = path.join(folder, file);
-            var s = fs.statSync(fullName);
-            if (s.isDirectory()) {
-                this.loadFiles(fullName);
-            }
-            else {
-                if (/\.html$/i.test(fullName)) {
-                    if (this.files.findIndex(x => x.file === fullName) !== -1) {
-                        continue;
-                    }
-                    this.files.push(new http_file_1.HtmlFile(fullName, this.nsNamesapce));
-                }
-            }
-        }
-    }
-    constructor(folder, outFile, nsNamespace, emitDeclaration) {
+    constructor(folder, outFile, mode, nsNamespace, emitDeclaration) {
+        this.mode = Mode.None;
         this.folder = folder;
         this.outFile = outFile;
         this.nsNamesapce = nsNamespace;
+        this.mode = mode;
         if (emitDeclaration !== undefined) {
             this.emitDeclaration = emitDeclaration;
         }
@@ -38,8 +29,53 @@ class ComponentGenerator {
         console.log(`${(new Date()).toLocaleTimeString()} - Compilation complete. Watching for file changes.`);
         console.log("    ");
     }
+    loadFiles(folder) {
+        // scan all html files...
+        for (var file of fs.readdirSync(folder)) {
+            var fullName = path.join(folder, file);
+            var s = fs.statSync(fullName);
+            if (s.isDirectory()) {
+                this.loadFiles(fullName);
+            }
+            else {
+                const isHtml = /\.html$/i.test(fullName);
+                const isXml = /\.(xml|xaml)/$i.test(fullName);
+                if (isHtml || isXml) {
+                    if (this.files.findIndex(x => x.file === fullName) !== -1) {
+                        continue;
+                    }
+                    if (this.mode == Mode.None) {
+                        this.files.push(new http_file_1.HtmlFile(fullName, this.nsNamesapce));
+                    }
+                    else {
+                        if (isXml) {
+                            this.files.push(new xaml_file_1.XamlFile(fullName, this.nsNamesapce));
+                        }
+                        else {
+                            this.files.push(new core_html_file_1.CoreHtmlFile(fullName, this.nsNamesapce));
+                        }
+                    }
+                }
+            }
+        }
+    }
+    // compileCore(): void {
+    // 	for(var file of this.files) {
+    // 		if(file.currentTime !== file.lastTime) {
+    // 			if(!fs.existsSync(file.file)) {
+    // 				fs.unlinkSync(`${file.file}.generated.ts`);
+    // 			}
+    // 			// console.log(`Generating ${file.file}`);
+    // 			file.compile();
+    // 		}
+    // 	}
+    // }
     compile() {
         this.loadFiles(this.folder);
+        // if(this.mode == Mode.Core){
+        // 	this.compileCore();			
+        // 	return;
+        // }
         var deletedFiles = [];
         var nodes = [];
         for (var file of this.files) {
@@ -142,7 +178,7 @@ function parseFolder(folder) {
                 var config = JSON.parse(fs.readFileSync(fullName, "utf8"));
                 config.srcFolder = path.join(folder, config.srcFolder);
                 config.outFile = path.join(folder, config.outFile);
-                var cc = new ComponentGenerator(config.srcFolder, config.outFile, config.namespace || "", config.emitDeclaration);
+                var cc = new ComponentGenerator(config.srcFolder, config.outFile, config.mode, config.namespace || "", config.emitDeclaration);
                 return;
             }
         }

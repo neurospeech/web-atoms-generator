@@ -3,8 +3,9 @@ import * as fs from "fs";
 import * as path from "path";
 import { HtmlComponent } from "./html-component";
 import { GeneratorContext } from "./generator-context";
+import { IMarkupFile } from "./imarkup-file";
 
-export class HtmlFile {
+export class HtmlFile implements IMarkupFile {
 
 	nsNamespace: string;
 

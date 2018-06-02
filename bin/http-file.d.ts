@@ -1,5 +1,6 @@
 import { HtmlComponent } from "./html-component";
-export declare class HtmlFile {
+import { IMarkupFile } from "./imarkup-file";
+export declare class HtmlFile implements IMarkupFile {
     nsNamespace: string;
     file: string;
     lastTime: number;

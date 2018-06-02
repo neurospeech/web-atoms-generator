@@ -1,4 +1,5 @@
 import { HtmlNode } from "./html-content";
+import { IMarkupComponent } from "./imarkup-file";
 export declare class TagInitializerList {
     component: string;
     tags: Array<TagInitializer>;
@@ -10,7 +11,7 @@ export declare class TagInitializer {
     constructor(inits: Array<string>);
     toScript(): string;
 }
-export declare class HtmlComponent {
+export declare class HtmlComponent implements IMarkupComponent {
     baseType: string;
     name: string;
     nsNamespace: string;

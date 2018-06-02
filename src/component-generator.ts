@@ -2,19 +2,29 @@ import { HtmlFile } from "./http-file";
 import * as fs from "fs";
 import * as path from "path";
 import { HtmlComponent } from "./html-component";
+import { IMarkupFile, IMarkupComponent } from "./imarkup-file";
+import { XamlFile } from "./xaml/xaml-file";
+import { CoreHtmlFile } from "./core/core-html-file";
 
 type WAConfig = {
 	srcFolder?: string,
 	outFile?: string,
+	mode?: Mode;
 	namespace?: string,
 	emitDeclaration?: boolean
 };
 
+export enum Mode {
+	None = "",
+	Core = "Core"
+}
 export class ComponentGenerator {
 
 	nsNamesapce: string;
 
 	emitDeclaration: boolean;
+
+	mode: Mode = Mode.None;
 
 	loadFiles(folder: string): void {
 
@@ -26,13 +36,23 @@ export class ComponentGenerator {
 			if(s.isDirectory()) {
 				this.loadFiles(fullName);
 			} else {
-				if( /\.html$/i.test(fullName)) {
+				const isHtml = /\.html$/i.test(fullName);
+				const isXml = /\.(xml|xaml)/$i.test(fullName); 
+				if( isHtml ||  isXml) {
 
 					if(this.files.findIndex( x => x.file === fullName)  !== -1) {
 						continue;
 					}
 
-					this.files.push( new HtmlFile(fullName, this.nsNamesapce));
+					if(this.mode == Mode.None) {
+						this.files.push( new HtmlFile(fullName, this.nsNamesapce));
+					} else {
+						if(isXml) {
+							this.files.push( new XamlFile(fullName, this.nsNamesapce));							
+						} else {
+							this.files.push( new CoreHtmlFile(fullName, this.nsNamesapce));
+						}
+					}
 				}
 			}
 		}
@@ -42,14 +62,15 @@ export class ComponentGenerator {
 
 	folder: string;
 
-	files:Array<HtmlFile>;
+	files:Array<IMarkupFile>;
 
 
 
-	constructor(folder: string, outFile?:string, nsNamespace?:string, emitDeclaration?:boolean) {
+	constructor(folder: string, outFile?:string, mode?: Mode, nsNamespace?:string, emitDeclaration?:boolean) {
 		this.folder = folder;
 		this.outFile = outFile;
 		this.nsNamesapce = nsNamespace;
+		this.mode = mode;
 
 		if(emitDeclaration !== undefined) {
 			this.emitDeclaration = emitDeclaration;
@@ -67,15 +88,34 @@ export class ComponentGenerator {
 
 	}
 
+	// compileCore(): void {
+	// 	for(var file of this.files) {
+	// 		if(file.currentTime !== file.lastTime) {
+
+	// 			if(!fs.existsSync(file.file)) {
+	// 				fs.unlinkSync(`${file.file}.generated.ts`);
+	// 			}
+
+	// 			// console.log(`Generating ${file.file}`);
+	// 			file.compile();
+	// 		}
+	// 	}
+		
+	// }
 
 	compile():void {
 
 		this.loadFiles(this.folder);
 
+		// if(this.mode == Mode.Core){
+		// 	this.compileCore();			
+		// 	return;
+		// }
 
-		var deletedFiles:Array<HtmlFile> = [];
 
-		var nodes:Array<HtmlComponent> = [];
+		var deletedFiles:Array<IMarkupFile> = [];
+
+		var nodes:Array<IMarkupComponent> = [];
 
 		for(var file of this.files) {
 			if(file.currentTime !== file.lastTime) {
@@ -207,6 +247,7 @@ function parseFolder (folder:string):void {
 				var cc:ComponentGenerator = new ComponentGenerator(
 					config.srcFolder,
 					config.outFile,
+					config.mode,
 					config.namespace || "",
 					config.emitDeclaration);
 				return;

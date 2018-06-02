@@ -1,12 +1,17 @@
-import { HtmlFile } from "./http-file";
+import { IMarkupFile } from "./imarkup-file";
+export declare enum Mode {
+    None = "",
+    Core = "Core"
+}
 export declare class ComponentGenerator {
     nsNamesapce: string;
     emitDeclaration: boolean;
+    mode: Mode;
     loadFiles(folder: string): void;
     outFile: string;
     folder: string;
-    files: Array<HtmlFile>;
-    constructor(folder: string, outFile?: string, nsNamespace?: string, emitDeclaration?: boolean);
+    files: Array<IMarkupFile>;
+    constructor(folder: string, outFile?: string, mode?: Mode, nsNamespace?: string, emitDeclaration?: boolean);
     compile(): void;
     createDirectories(fn: string): void;
     watch(): void;
