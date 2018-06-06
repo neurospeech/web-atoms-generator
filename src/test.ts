@@ -1,29 +1,17 @@
-import { XamlFile } from "./xaml/xaml-file";
+import { TestRunner } from "web-atoms-core/bin/unit/base-test";
 
-function test() {
-    const f:XamlFile = new XamlFile("","");
-    
-    f.compileContent(`<atom:AtomPage xmlns:atom="http://web-atoms.org/xaml" xmlns="clr-namespace:Xamarin.Forms">
-        <Grid>
-            <Grid.RowDefinitions>
-                <RowDefinition/>
-                <RowDefinition/>
-                <RowDefinition/>
-            </Grid.RowDefinitions>
+import "./xaml/xaml-file-test";
+import "./core/core-html-file-test";
 
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition/>
-                <ColumnDefinition/>
-                <ColumnDefinition/>
-            </Grid.ColumnDefinitions>
-            
-            <Label  
-                Grid.Row="1"
-                Grid.Column="1"
-                Text="{ \`\${$viewModel.firstName}\` }"
-            />
-        </Grid>
-    </atom:AtomPage>`);
-}
+const instance: TestRunner = TestRunner.instance;
 
-test();
+// export Atom;
+declare var process: any;
+
+instance.run().then(() => {
+    console.log("Tests ran successfully.");
+    process.exit();
+}).catch( (e) => {
+    console.error(e);
+    process.abort();
+});
