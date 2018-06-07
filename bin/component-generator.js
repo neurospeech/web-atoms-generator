@@ -19,7 +19,7 @@ class ComponentGenerator {
             this.emitDeclaration = config.emitDeclaration;
         }
         else {
-            if (this.mode != types_1.Mode.Core) {
+            if (!/core/i.test(this.mode)) {
                 this.emitDeclaration = true;
             }
         }

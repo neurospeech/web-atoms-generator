@@ -66,7 +66,7 @@ export class ComponentGenerator {
 		if (config.emitDeclaration !== undefined) {
 			this.emitDeclaration = config.emitDeclaration;
 		} else {
-			if(this.mode != Mode.Core) {
+			if(!/core/i.test(this.mode)) {
 				this.emitDeclaration = true;
 			}
 		}

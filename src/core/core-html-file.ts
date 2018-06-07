@@ -312,7 +312,7 @@ export class CoreHtmlFile implements IMarkupFile {
 
     public compile(): void {
 
-        this.nodes = [];
+        this.nodes.length = 0;
 
         const content = readFileSync(this.file, { encoding: "utf-8" });
 
