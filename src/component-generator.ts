@@ -41,11 +41,10 @@ export class ComponentGenerator {
 						if (isXml) {
 							this.files.push(new XamlFile(fullName, this.config));
 						} else {
+							console.log(fullName);
 							this.files.push(new CoreHtmlFile(fullName, this.config));
 						}
 					}
-				} else {
-					console.log(fullName);
 				}
 			}
 		}

@@ -53,12 +53,10 @@ class ComponentGenerator {
                             this.files.push(new xaml_file_1.XamlFile(fullName, this.config));
                         }
                         else {
+                            console.log(fullName);
                             this.files.push(new core_html_file_1.CoreHtmlFile(fullName, this.config));
                         }
                     }
-                }
-                else {
-                    console.log(fullName);
                 }
             }
         }
