@@ -6,12 +6,195 @@ import { IHtmlNode } from "../html-node";
 import { IMarkupComponent, IMarkupFile } from "../imarkup-file";
 import { IWAConfig } from "../types";
 
+enum Binding {
+    None,
+    OneTime,
+    OneWay,
+    TwoWay
+}
+
+class WANode {
+
+    public get atomParent(): WAComponent {
+        if (this instanceof WAComponent) {
+            return this as WAComponent;
+        }
+        return this.parent.atomParent;
+    }
+
+    public get namedParent(): WAComponent {
+        if (this instanceof WAComponent) {
+            const p = this as WAComponent;
+            if (p.name) {
+                return p;
+            }
+        }
+        return this.parent.namedParent;
+    }
+
+    constructor(public parent: WAElement, public name?: string) {
+    }
+
+}
+
+class WAAttribute extends WANode {
+
+    public binding: Binding = Binding.None;
+
+    public value: string;
+
+    public template: string;
+
+}
+
+class WAElement extends WANode {
+
+    public attributes: WAAttribute[] = [];
+
+    public children: WAElement[] = [];
+
+    public presenterParent: { name: string, parent: WAComponent };
+
+    public id: string;
+
+    constructor(p: WAElement, protected element: IHtmlNode, name?: string) {
+        super(p, name);
+
+        for (const key in this.element.attribs) {
+            if (this.element.attribs.hasOwnProperty(key)) {
+                const item = this.element.attribs[key];
+
+                if (key === "atom-type") {
+                    continue;
+                }
+
+                if (key === "atom-presenter") {
+                    this.presenterParent = {
+                        name: item,
+                        parent: this.atomParent
+                    };
+                    continue;
+                }
+
+                this.setAttribute(key, item);
+            }
+        }
+
+        if (!this.element.children) {
+            return;
+        }
+        for (const iterator of this.element.children) {
+            this.parseNode(iterator);
+        }
+
+    }
+
+    public addChild(child: WAElement): void {
+        this.children.push(child);
+        child.parent = this;
+    }
+
+    public setAttribute(name: string, value: string, tn?: string): void {
+        const a = new WAAttribute(this);
+        // a.binding = binding;
+        a.name = name;
+        a.value = value;
+        a.template = tn;
+        this.attributes.push(a);
+    }
+
+    public parseNode(e: IHtmlNode): void {
+
+        const tt = e.attribs ? e.attribs["atom-template"] : null;
+
+        if (tt) {
+
+            const np = this.namedParent;
+            const ap = this.atomParent;
+
+            const tn = `${np.name}_${tt}_${ap.templates.length + 1}`;
+
+            const tc = new WAComponent(this, e, tn);
+            np.templates.push(tc);
+
+            ap.setAttribute(tt, null, tn);
+            return;
+        }
+
+        const at = e.attribs ? e.attribs["atom-type"] : null;
+        if (at) {
+            const ac = new WAComponent(this, e, "", at);
+            this.addChild(ac);
+        } else {
+            this.addChild(new WAElement(this, e));
+        }
+    }
+
+    public resolveNames(c: CoreHtmlComponent) {
+
+        if (!this.id) {
+            this.id = `e${this.namedParent.ids++}`;
+        }
+
+        for (const iterator of this.children) {
+            iterator.resolveNames(c);
+        }
+    }
+
+}
+
+class WAComponent extends WAElement {
+
+    public ids: number = 1;
+
+    public get templates() {
+        return this.mTemplates || (this.mTemplates = []);
+    }
+    private mTemplates: WAComponent[];
+
+    constructor(
+        p: WAElement,
+        protected element: IHtmlNode,
+        public name: string,
+        public baseType?: string) {
+        super(p, element, name);
+    }
+
+    public resolveNames(e: CoreHtmlComponent): void {
+        super.resolveNames(e);
+
+        if (this.baseType) {
+            this.baseType = e.resolve(this.baseType);
+        }
+    }
+
+    public toString(): string {
+
+        if (this.name) {
+            return `
+    export class ${this.name} extends ${this.baseType} {
+
+        public create(): void {
+            super.create();
+
+            this.element = document.createElement("${this.element.name}");
+        }
+    }
+            `;
+        }
+
+        return "";
+    }
+}
+
 export class CoreHtmlFile implements IMarkupFile {
 
     public currentTime: number;
     public lastTime: number;
     // public file: PathLike;
     public nodes: CoreHtmlComponent[] = [];
+
+    private imports: {[key: string]: { prefix?: string, name?: string, import?: string }} = {};
 
     constructor(public file: PathLike, private config: IWAConfig) {
 
@@ -46,17 +229,86 @@ export class CoreHtmlFile implements IMarkupFile {
             throw new Error("Only single top level root allowed");
         }
 
+        const pname = parse(this.file.toString());
+
+        const name = pname.name.split("-").map( (s) => s.charAt(0).toUpperCase() + s.substr(1)).join("");
+
         const root = new CoreHtmlComponent();
-        root.root = roots[0];
+        root.root = new WAComponent(null, roots[0], name) ;
 
         this.nodes.push(root);
 
-        const pname = parse(this.file.toString());
-
-        root.name = pname.name.split("-").map( (s) => s.charAt(0).toUpperCase() + s.substr(1)).join("");
         root.config = this.config;
         root.generateCode();
 
+    }
+
+}
+
+export class CoreHtmlComponent implements IMarkupComponent {
+
+    public baseType: string;
+    public name: string;
+    public nsNamespace: string;
+    public generated: string = "// tslint:disable\r\n";
+    public config: IWAConfig;
+
+    public root: WAComponent;
+
+    private index: number = 1;
+
+    private imports: {[key: string]: { prefix?: string, name?: string, import?: string }} = {};
+
+    private importNameIndex = 1;
+
+    public resolve(name: string): string {
+        if (name === "AtomControl") {
+            return name;
+        }
+        const tokens = name.split(":");
+        if (tokens.length === 1) {
+            return name;
+        }
+        const prefix = tokens[0];
+        name = tokens[1];
+
+        const p = `i${this.importNameIndex++}`;
+
+        const im = this.imports[name] || (this.imports[name] = { prefix: `${p}`, name: `${p}_${name}` });
+        if (!im.import) {
+            im.import = this.config.imports[prefix];
+            if (!im.import.endsWith("/")) {
+                im.import += "/";
+            }
+            im.import += name;
+        }
+        return im.name;
+    }
+
+    public generateCode(): void {
+
+        // let us resolve all names...
+        this.root.resolveNames(this);
+
+        let importStatement: string = "";
+        for (const key in this.imports) {
+            if (this.imports.hasOwnProperty(key)) {
+                const element = this.imports[key];
+                if (element.prefix) {
+                    importStatement += `import * as ${element.prefix} from "${element.import}"\r\n`;
+                } else {
+                    importStatement += `import ${element.name} from "${element.import}"\r\n`;
+                }
+            }
+        }
+
+        this.generated = importStatement + "\r\n" +
+        this.root.toString();
+
+    }
+
+    public writeLine(line?: string): void {
+        this.generated += (line || "") + "\r\n";
     }
 
 }
@@ -139,170 +391,4 @@ class HtmlContent {
             return v;
         }).join("");
     }
-}
-
-export class CoreHtmlComponent implements IMarkupComponent {
-
-    public baseType: string;
-    public name: string;
-    public nsNamespace: string;
-    public generated: string = "// tslint:disable\r\n";
-    public config: IWAConfig;
-
-    public root: IHtmlNode;
-
-    private index: number = 1;
-
-    private imports: {[key: string]: { prefix?: string, name?: string, import?: string }} = {};
-
-    private importNameIndex = 1;
-
-    public resolve(name: string): string {
-        if (name === "AtomControl") {
-            return name;
-        }
-        const tokens = name.split(":");
-        if (tokens.length === 1) {
-            return name;
-        }
-        const prefix = tokens[0];
-        name = tokens[1];
-
-        const p = `i${this.importNameIndex++}`;
-
-        const im = this.imports[name] || (this.imports[name] = { prefix: `${p}`, name: `${p}_${name}` });
-        if (!im.import) {
-            im.import = this.config.imports[prefix];
-            if (!im.import.endsWith("/")) {
-                im.import += "/";
-            }
-            im.import += name;
-        }
-        return im.name;
-    }
-
-    public generateCode(): void {
-
-        this.imports.AtomControl = { name: "AtomControl", import: "web-atoms-core/bin/controls/AtomControl"};
-
-        // resolve base type..
-        this.baseType = this.resolve(this.baseType || "AtomControl");
-
-        this.writeLine(`
-        export class ${this.name} extends ${this.baseType} {
-
-            public create(): void {
-                this.element = document.createElement("${this.root.name}");
-
-                ${this.generateChildren(this.root, "this", "this.element")};
-            }
-        }
-
-        `);
-
-        let importStatement: string = "";
-        for (const key in this.imports) {
-            if (this.imports.hasOwnProperty(key)) {
-                const element = this.imports[key];
-                if (element.prefix) {
-                    importStatement += `import * as ${element.prefix} from "${element.import}"\r\n`;
-                } else {
-                    importStatement += `import ${element.name} from "${element.import}"\r\n`;
-                }
-            }
-        }
-
-        this.generated = "// tslint:disable\r\n"
-        + importStatement
-        + this.generated;
-    }
-
-    public generateChildren(parent: IHtmlNode, controlName: string, elementName: string): string {
-        let text: string = "";
-        if (!parent.children) {
-            return text;
-        }
-        const parentName = controlName;
-        for (const iterator of parent.children) {
-
-            text += "\r\n";
-
-            let itemName = `e${this.index++}`;
-            if (iterator.type === "text") {
-                text += ` const ${itemName} = document.createTextNode(${JSON.stringify(iterator.data)});
-                ${elementName}.appendChild(${itemName});`;
-                continue;
-            }
-
-            if (iterator.type === "comment") {
-                text += ` const ${itemName} = document.createCommentNode(${JSON.stringify(iterator.data)});
-                ${elementName}.appendChild(${itemName});`;
-                continue;
-            }
-
-            if (iterator.type !== "tag") {
-                throw new Error(`Node ${iterator.type} not supported`);
-            }
-
-            let at = iterator.attribs["atom-type"];
-            if (at) {
-
-                at = this.resolve(at);
-
-                text += ` const ${itemName} = new ${at} (document.createElement("${iterator.name}"));
-                ${parentName}.append(${itemName});
-                `;
-                controlName = itemName;
-                itemName = `${controlName}.element`;
-            } else {
-                text += ` const ${itemName} = document.createElement("${iterator.name}");
-                ${parentName}.append(${itemName});`;
-            }
-
-            for (const key in iterator.attribs) {
-                if (iterator.attribs.hasOwnProperty(key)) {
-                    const value = iterator.attribs[key];
-                    text += this.generateAttribute(key, value, itemName, controlName);
-                }
-            }
-
-            text += this.generateChildren(iterator, controlName, itemName);
-
-        }
-        return text;
-    }
-
-    public generateAttribute(key: string, value: string, itemName: string, controlName: string): string {
-        let text: string = "\r\n";
-        key = HtmlContent.camelCase(key);
-        value = value.trim();
-
-        // one time binding
-        if (value.startsWith("{") && value.endsWith("}")) {
-            value = HtmlContent.processOneTimeBinding(value);
-            text += `${controlName}.setLocalValue(${itemName}, "${key}", ${value});`;
-            return text;
-        }
-
-        if (value.startsWith("[") && value.endsWith("]")) {
-            value = HtmlContent.processOneWayBinding(value);
-            text += `${controlName}.bind(${itemName}, "${key}", ${value});`;
-            return text;
-        }
-
-        if (value.startsWith("$[") && value.endsWith("]")) {
-            value = HtmlContent.processTwoWayBinding(value);
-            text += `${controlName}.bind(${itemName}, "${key}", ${value});`;
-            return text;
-        }
-
-        text += `${controlName}.setLocalValue(${itemName}, "${key}", "${value}");`;
-
-        return text;
-    }
-
-    public writeLine(line?: string): void {
-        this.generated += (line || "") + "\r\n";
-    }
-
 }

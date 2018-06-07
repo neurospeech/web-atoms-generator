@@ -20,7 +20,7 @@ export class TestCase extends TestItem {
             <span atom-text="{\` \${$viewModel.firstName} \${$viewModel.lastName} \`}"></span>
 
             <div atom-type="atom:AtomItemsControl" atom-items="[$viewModel.items]">
-                <div atom-template="itemTemplate">
+                <div atom-template="itemTemplate" atom-text="a">
                 </div>
             </div>
         </div>
