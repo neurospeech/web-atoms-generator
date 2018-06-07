@@ -1,3 +1,5 @@
+/// <reference types="node" />
+import * as fs from "fs";
 import { IMarkupFile } from "./imarkup-file";
 import { IWAConfig, Mode } from "./types";
 export declare class ComponentGenerator {
@@ -12,6 +14,7 @@ export declare class ComponentGenerator {
     constructor(config: IWAConfig);
     compile(): void;
     createDirectories(fn: string): void;
+    watcher: fs.FSWatcher;
     watch(): void;
     last: any;
     postCompile(): void;

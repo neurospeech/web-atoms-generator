@@ -1,3 +1,4 @@
+// tslint:disable
 import * as fs from "fs";
 import * as path from "path";
 import { CoreHtmlFile } from "./core/core-html-file";
@@ -190,8 +191,10 @@ ${nsStart}['${ns}'] = {};
 		}
 	}
 
+	watcher: fs.FSWatcher;
+
 	watch(): void {
-		fs.watch(this.folder, { recursive: true }, (event, file) => {
+		this.watcher = fs.watch(this.folder, { recursive: true }, (event, file) => {
 			this.postCompile();
 		});
 	}
@@ -199,6 +202,10 @@ ${nsStart}['${ns}'] = {};
 	last: any;
 
 	postCompile(): void {
+		if(this.watcher) {
+			this.watcher.close();
+			this.watcher = null;
+		}
 		if (this.last) {
 			clearTimeout(this.last);
 		}
@@ -211,7 +218,7 @@ ${nsStart}['${ns}'] = {};
 			console.log("     ");
 			console.log(`${(new Date()).toLocaleTimeString()} - Compilation complete. Watching for file changes.`);
 
-
+			this.watch();
 		}, 100);
 	}
 }

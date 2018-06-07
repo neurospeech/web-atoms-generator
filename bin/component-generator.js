@@ -1,5 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
+// tslint:disable
 const fs = require("fs");
 const path = require("path");
 const core_html_file_1 = require("./core/core-html-file");
@@ -142,11 +143,15 @@ ${nsStart}['${ns}'] = {};
         }
     }
     watch() {
-        fs.watch(this.folder, { recursive: true }, (event, file) => {
+        this.watcher = fs.watch(this.folder, { recursive: true }, (event, file) => {
             this.postCompile();
         });
     }
     postCompile() {
+        if (this.watcher) {
+            this.watcher.close();
+            this.watcher = null;
+        }
         if (this.last) {
             clearTimeout(this.last);
         }
@@ -158,6 +163,7 @@ ${nsStart}['${ns}'] = {};
             this.compile();
             console.log("     ");
             console.log(`${(new Date()).toLocaleTimeString()} - Compilation complete. Watching for file changes.`);
+            this.watch();
         }, 100);
     }
 }
