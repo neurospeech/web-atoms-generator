@@ -27,7 +27,7 @@ export class ComponentGenerator {
 				this.loadFiles(fullName);
 			} else {
 				const isHtml = /\.html$/i.test(fullName);
-				const isXml = /\.(xml|xaml)/$i.test(fullName);
+				const isXml = /\.(xml|xaml)$/i.test(fullName);
 				if (isHtml || isXml) {
 
 					if (this.files.findIndex(x => x.file === fullName) !== -1) {
