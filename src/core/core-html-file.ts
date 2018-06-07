@@ -6,7 +6,6 @@ import { IHtmlNode } from "../html-node";
 import { IMarkupComponent, IMarkupFile } from "../imarkup-file";
 import { IWAConfig } from "../types";
 
-
 enum Binding {
     None,
     OneTime,
@@ -66,6 +65,11 @@ class WAAttribute extends WANode {
             ${this.atomParent.id}.bind(${this.parent.eid}, "${this.name}", ${v});`;
         }
 
+        if (this.value.startsWith("$[") && this.value.endsWith("]")) {
+            const v = HtmlContent.processTwoWayBinding(this.value);
+            return `
+            ${this.atomParent.id}.bind(${this.parent.eid}, "${this.name}", ${v});`;
+        }
         return `
         ${this.atomParent.id}.setLocalValue(${this.parent.eid}, "${this.name}", ${JSON.stringify(this.value)});
         `;
