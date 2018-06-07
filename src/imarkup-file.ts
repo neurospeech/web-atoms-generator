@@ -5,15 +5,16 @@ export interface IMarkupFile {
     lastTime: number;
     file: PathLike;
 
+    nodes: IMarkupComponent[];
+
     compile(): void;
 
-    nodes: Array<IMarkupComponent>;
 }
 
 export interface IMarkupComponent {
-    baseType: string;
-    name: string;
-    nsNamespace: string;
+    baseType?: string;
+    name?: string;
+    nsNamespace?: string;
 
     generated: string;
 }

@@ -283,6 +283,16 @@ class WAComponent extends WAElement {
     }
 }
 
+export interface IImportDefinition {
+    prefix?: string;
+    name?: string;
+    import?: string ;
+}
+
+export interface IImportDefinitions {
+    [key: string]: IImportDefinition;
+}
+
 export class CoreHtmlFile implements IMarkupFile {
 
     public get currentTime(): number {
@@ -291,9 +301,10 @@ export class CoreHtmlFile implements IMarkupFile {
 
     public lastTime: number;
     // public file: PathLike;
-    public nodes: CoreHtmlComponent[] = [];
+    public nodes: IMarkupComponent[] = [];
 
-    private imports: {[key: string]: { prefix?: string, name?: string, import?: string }} = {};
+    public imports: IImportDefinitions = {};
+    public importNameIndex = 1;
 
     constructor(public file: PathLike, private config: IWAConfig) {
 
@@ -302,8 +313,29 @@ export class CoreHtmlFile implements IMarkupFile {
     public compile(): void {
         const content = readFileSync(this.file, { encoding: "utf-8" });
 
+        const root = { generated: "" };
+
+        this.nodes.push(root);
+
+        this.imports.AtomControl = { name: "AtomControl", import: "web-atoms-core/bin/controls/AtomControl"};
+
         this.compileContent(content);
         this.lastTime = this.currentTime;
+
+        let importStatement: string = "";
+        for (const key in this.imports) {
+            if (this.imports.hasOwnProperty(key)) {
+                const element = this.imports[key];
+                if (element.prefix) {
+                    importStatement += `import * as ${element.prefix} from "${element.import}"\r\n`;
+                } else {
+                    importStatement += `import ${element.name} from "${element.import}"\r\n`;
+                }
+            }
+        }
+
+        root.generated = importStatement;
+
     }
 
     public compileContent(content: string): void {
@@ -333,7 +365,7 @@ export class CoreHtmlFile implements IMarkupFile {
 
         const name = pname.name.split("-").map( (s) => s.charAt(0).toUpperCase() + s.substr(1)).join("");
 
-        const root = new CoreHtmlComponent();
+        const root = new CoreHtmlComponent(this);
         root.root = new WAComponent(null, roots[0], name) ;
 
         this.nodes.push(root);
@@ -356,9 +388,9 @@ export class CoreHtmlComponent implements IMarkupComponent {
 
     private index: number = 1;
 
-    private imports: {[key: string]: { prefix?: string, name?: string, import?: string }} = {};
+    constructor(private file: CoreHtmlFile) {
 
-    private importNameIndex = 1;
+    }
 
     public resolve(name: string): string {
         if (name === "AtomControl") {
@@ -371,9 +403,9 @@ export class CoreHtmlComponent implements IMarkupComponent {
         const prefix = tokens[0];
         name = tokens[1];
 
-        const p = `i${this.importNameIndex++}`;
+        const p = `i${this.file.importNameIndex++}`;
 
-        const im = this.imports[name] || (this.imports[name] = { prefix: `${p}`, name: `${p}_${name}` });
+        const im = this.file.imports[name] || (this.file.imports[name] = { prefix: `${p}`, name: `${p}_${name}` });
         if (!im.import) {
             im.import = this.config.imports[prefix];
             if (!im.import.endsWith("/")) {
@@ -386,24 +418,10 @@ export class CoreHtmlComponent implements IMarkupComponent {
 
     public generateCode(): void {
 
-        this.imports.AtomControl = { name: "AtomControl", import: "web-atoms-core/bin/controls/AtomControl"};
         // let us resolve all names...
         this.root.resolveNames(this);
 
-        let importStatement: string = "";
-        for (const key in this.imports) {
-            if (this.imports.hasOwnProperty(key)) {
-                const element = this.imports[key];
-                if (element.prefix) {
-                    importStatement += `import * as ${element.prefix} from "${element.import}"\r\n`;
-                } else {
-                    importStatement += `import ${element.name} from "${element.import}"\r\n`;
-                }
-            }
-        }
-
-        this.generated = importStatement + "\r\n" +
-        this.root.toString();
+        this.generated = this.root.toString();
 
     }
 
