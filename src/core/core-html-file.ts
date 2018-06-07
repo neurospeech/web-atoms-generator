@@ -1,17 +1,19 @@
 import { PathLike, readFileSync } from "fs";
 import { DomHandler, Parser } from "htmlparser2";
+import { parse } from "path";
 import { AtomEvaluator, CompiledMethod } from "../atom-evaluator";
 import { IHtmlNode } from "../html-node";
 import { IMarkupComponent, IMarkupFile } from "../imarkup-file";
+import { IWAConfig } from "../types";
 
 export class CoreHtmlFile implements IMarkupFile {
 
     public currentTime: number;
     public lastTime: number;
-    public file: PathLike;
+    // public file: PathLike;
     public nodes: CoreHtmlComponent[] = [];
 
-    constructor(private fileName: string, private nsNamespace: string) {
+    constructor(public file: PathLike, private config: IWAConfig) {
 
     }
 
@@ -49,6 +51,10 @@ export class CoreHtmlFile implements IMarkupFile {
 
         this.nodes.push(root);
 
+        const pname = parse(this.file.toString());
+
+        root.name = pname.name.split("-").map( (s) => s.charAt(0).toUpperCase() + s.substr(1)).join("");
+        root.config = this.config;
         root.generateCode();
 
     }
@@ -141,15 +147,49 @@ export class CoreHtmlComponent implements IMarkupComponent {
     public name: string;
     public nsNamespace: string;
     public generated: string = "// tslint:disable\r\n";
+    public config: IWAConfig;
 
     public root: IHtmlNode;
 
     private index: number = 1;
 
-    public generateCode(): void {
-        this.writeLine(`import { AtomControl } from "web-atoms-core/bin/controls/atom-control";
+    private imports: {[key: string]: { prefix?: string, name?: string, import?: string }} = {};
 
-        export class ${this.name} extends ${this.baseType || "AtomControl"} {
+    private importNameIndex = 1;
+
+    public resolve(name: string): string {
+        if (name === "AtomControl") {
+            return name;
+        }
+        const tokens = name.split(":");
+        if (tokens.length === 1) {
+            return name;
+        }
+        const prefix = tokens[0];
+        name = tokens[1];
+
+        const p = `i${this.importNameIndex++}`;
+
+        const im = this.imports[name] || (this.imports[name] = { prefix: `${p}`, name: `${p}_${name}` });
+        if (!im.import) {
+            im.import = this.config.imports[prefix];
+            if (!im.import.endsWith("/")) {
+                im.import += "/";
+            }
+            im.import += name;
+        }
+        return im.name;
+    }
+
+    public generateCode(): void {
+
+        this.imports.AtomControl = { name: "AtomControl", import: "web-atoms-core/bin/controls/AtomControl"};
+
+        // resolve base type..
+        this.baseType = this.resolve(this.baseType || "AtomControl");
+
+        this.writeLine(`
+        export class ${this.name} extends ${this.baseType} {
 
             public create(): void {
                 this.element = document.createElement("${this.root.name}");
@@ -159,6 +199,22 @@ export class CoreHtmlComponent implements IMarkupComponent {
         }
 
         `);
+
+        let importStatement: string = "";
+        for (const key in this.imports) {
+            if (this.imports.hasOwnProperty(key)) {
+                const element = this.imports[key];
+                if (element.prefix) {
+                    importStatement += `import * as ${element.prefix} from "${element.import}"\r\n`;
+                } else {
+                    importStatement += `import ${element.name} from "${element.import}"\r\n`;
+                }
+            }
+        }
+
+        this.generated = "// tslint:disable\r\n"
+        + importStatement
+        + this.generated;
     }
 
     public generateChildren(parent: IHtmlNode, controlName: string, elementName: string): string {
@@ -188,8 +244,11 @@ export class CoreHtmlComponent implements IMarkupComponent {
                 throw new Error(`Node ${iterator.type} not supported`);
             }
 
-            const at = iterator.attribs["atom-type"];
+            let at = iterator.attribs["atom-type"];
             if (at) {
+
+                at = this.resolve(at);
+
                 text += ` const ${itemName} = new ${at} (document.createElement("${iterator.name}"));
                 ${parentName}.append(${itemName});
                 `;
@@ -222,12 +281,22 @@ export class CoreHtmlComponent implements IMarkupComponent {
         if (value.startsWith("{") && value.endsWith("}")) {
             value = HtmlContent.processOneTimeBinding(value);
             text += `${controlName}.setLocalValue(${itemName}, "${key}", ${value});`;
+            return text;
         }
 
         if (value.startsWith("[") && value.endsWith("]")) {
             value = HtmlContent.processOneWayBinding(value);
             text += `${controlName}.bind(${itemName}, "${key}", ${value});`;
+            return text;
         }
+
+        if (value.startsWith("$[") && value.endsWith("]")) {
+            value = HtmlContent.processTwoWayBinding(value);
+            text += `${controlName}.bind(${itemName}, "${key}", ${value});`;
+            return text;
+        }
+
+        text += `${controlName}.setLocalValue(${itemName}, "${key}", "${value}");`;
 
         return text;
     }

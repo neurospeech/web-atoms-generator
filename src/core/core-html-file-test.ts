@@ -6,7 +6,11 @@ export class TestCase extends TestItem {
 
     @Test()
     public test(): void {
-        const chf = new CoreHtmlFile("", "" );
+        const chf = new CoreHtmlFile("stripe-control", {
+            imports: {
+                atom: "web-atoms-core/bin/controls/"
+            }
+        });
 
         chf.compileContent(`
         <div>
@@ -15,7 +19,7 @@ export class TestCase extends TestItem {
 
             <span atom-text="{\` \${$viewModel.firstName} \${$viewModel.lastName} \`}"></span>
 
-            <div atom-type="AtomItemsControl" atom-items="[$viewModel.items]">
+            <div atom-type="atom:AtomItemsControl" atom-items="[$viewModel.items]">
                 <div atom-template="itemTemplate">
                 </div>
             </div>

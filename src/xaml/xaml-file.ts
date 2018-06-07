@@ -1,6 +1,7 @@
 import { PathLike, readFileSync } from "fs";
 import { XmlDocument, XmlElement } from "xmldoc";
 import { IMarkupComponent, IMarkupFile } from "../imarkup-file";
+import { IWAConfig } from "../types";
 
 export class XamlComponent implements IMarkupComponent {
     public baseType: string;
@@ -17,7 +18,7 @@ export class XamlFile implements IMarkupFile {
 
     public nsMap: {[key: string]: string} = {};
 
-    constructor(private fileName: string, private nsNamespace: string) {
+    constructor(private fileName: string, private config: IWAConfig) {
 
     }
     public compile(): void {

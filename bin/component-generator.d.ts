@@ -1,9 +1,7 @@
 import { IMarkupFile } from "./imarkup-file";
-export declare enum Mode {
-    None = "",
-    Core = "Core"
-}
+import { IWAConfig, Mode } from "./types";
 export declare class ComponentGenerator {
+    private config;
     nsNamesapce: string;
     emitDeclaration: boolean;
     mode: Mode;
@@ -11,7 +9,7 @@ export declare class ComponentGenerator {
     outFile: string;
     folder: string;
     files: Array<IMarkupFile>;
-    constructor(folder: string, outFile?: string, mode?: Mode, nsNamespace?: string, emitDeclaration?: boolean);
+    constructor(config: IWAConfig);
     compile(): void;
     createDirectories(fn: string): void;
     watch(): void;

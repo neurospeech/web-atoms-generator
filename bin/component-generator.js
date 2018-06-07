@@ -1,24 +1,21 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-const http_file_1 = require("./http-file");
 const fs = require("fs");
 const path = require("path");
-const xaml_file_1 = require("./xaml/xaml-file");
 const core_html_file_1 = require("./core/core-html-file");
-var Mode;
-(function (Mode) {
-    Mode["None"] = "";
-    Mode["Core"] = "Core";
-})(Mode = exports.Mode || (exports.Mode = {}));
+const http_file_1 = require("./http-file");
+const types_1 = require("./types");
+const xaml_file_1 = require("./xaml/xaml-file");
 class ComponentGenerator {
-    constructor(folder, outFile, mode, nsNamespace, emitDeclaration) {
-        this.mode = Mode.None;
-        this.folder = folder;
-        this.outFile = outFile;
-        this.nsNamesapce = nsNamespace;
-        this.mode = mode;
-        if (emitDeclaration !== undefined) {
-            this.emitDeclaration = emitDeclaration;
+    constructor(config) {
+        this.config = config;
+        this.mode = types_1.Mode.None;
+        this.folder = config.srcFolder;
+        this.outFile = config.outFile;
+        this.nsNamesapce = config.namespace;
+        this.mode = config.mode;
+        if (config.emitDeclaration !== undefined) {
+            this.emitDeclaration = config.emitDeclaration;
         }
         else {
             this.emitDeclaration = true;
@@ -44,15 +41,15 @@ class ComponentGenerator {
                     if (this.files.findIndex(x => x.file === fullName) !== -1) {
                         continue;
                     }
-                    if (this.mode == Mode.None) {
+                    if (this.mode == types_1.Mode.None) {
                         this.files.push(new http_file_1.HtmlFile(fullName, this.nsNamesapce));
                     }
                     else {
                         if (isXml) {
-                            this.files.push(new xaml_file_1.XamlFile(fullName, this.nsNamesapce));
+                            this.files.push(new xaml_file_1.XamlFile(fullName, this.config));
                         }
                         else {
-                            this.files.push(new core_html_file_1.CoreHtmlFile(fullName, this.nsNamesapce));
+                            this.files.push(new core_html_file_1.CoreHtmlFile(fullName, this.config));
                         }
                     }
                 }
@@ -108,8 +105,8 @@ class ComponentGenerator {
                 var nsStart = "window";
                 for (var ns of node.nsNamespace.split(".")) {
                     result += `if(!${nsStart}['${ns}']){
-						${nsStart}['${ns}'] = {};
-					}`;
+${nsStart}['${ns}'] = {};
+}`;
                     nsStart += "." + ns;
                 }
             }
@@ -178,7 +175,8 @@ function parseFolder(folder) {
                 var config = JSON.parse(fs.readFileSync(fullName, "utf8"));
                 config.srcFolder = path.join(folder, config.srcFolder);
                 config.outFile = path.join(folder, config.outFile);
-                var cc = new ComponentGenerator(config.srcFolder, config.outFile, config.mode, config.namespace || "", config.emitDeclaration);
+                config.namespace = config.namespace || "";
+                var cc = new ComponentGenerator(config);
                 return;
             }
         }
@@ -188,16 +186,14 @@ function parseFolder(folder) {
     }
 }
 if (process && process.argv) {
-    if (process.argv[2] !== undefined) {
-        if (process.argv[3]) {
-            var cc = new ComponentGenerator(process.argv[2], process.argv[3]);
-        }
-        else {
-            parseFolder(process.argv[2]);
-        }
-    }
-    else {
-        parseFolder(".");
-    }
+    // if (process.argv[2] !== undefined) {
+    // 	if (process.argv[3]) {
+    // 		var cc: ComponentGenerator = new ComponentGenerator(process.argv[2], process.argv[3]);
+    // 	} else {
+    // 		parseFolder(process.argv[2]);
+    // 	}
+    // } else {
+    parseFolder(".");
+    // }
 }
 //# sourceMappingURL=component-generator.js.map
