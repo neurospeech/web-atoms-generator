@@ -1,5 +1,6 @@
 import { PathLike, readFileSync } from "fs";
 import { DomHandler, Parser } from "htmlparser2";
+import { AtomEvaluator, CompiledMethod } from "../atom-evaluator";
 import { IHtmlNode } from "../html-node";
 import { IMarkupComponent, IMarkupFile } from "../imarkup-file";
 
@@ -54,7 +55,71 @@ export class CoreHtmlFile implements IMarkupFile {
 
 }
 
-export class CoreHtmlComponent implements IMarkupComponent {
+class HtmlContent {
+
+    public static processTwoWayBinding(v: string): string {
+        v = v.substr(2, v.length - 3);
+
+        if (v.startsWith("$")) {
+            v = v.substr(1);
+        }
+
+        const plist = v.split(".");
+
+        v = ` ${JSON.stringify(plist)}, 1 `;
+
+        return v;
+    }
+
+    public static escapeLambda(v: string): string {
+
+        v = v.trim();
+
+        if (v.startsWith("()=>") || v.startsWith("() =>") || v.startsWith("=>")) {
+            v = v.replace("()=>", "");
+            v = v.replace("() =>", "");
+            v = v.replace("=>", "");
+            return `function(){
+    return ${v};
+}`;
+        }
+
+        return v;
+    }
+
+    public static processOneWayBinding(v: string): string {
+        v = v.substr(1, v.length - 2);
+
+        v = HtmlContent.escapeLambda(v);
+
+        const vx = AtomEvaluator.instance.parse(v);
+
+        v = "";
+
+        const plist: string = vx.path.map((p, i) => `v${i + 1}`).join(",");
+
+        v += ` ${JSON.stringify(vx.path)}, false , (${plist}) => ${vx.original}`;
+
+        return v;
+    }
+
+    public static processOneTimeBinding(v: string): string {
+        v = v.substr(1, v.length - 2);
+
+        v = HtmlContent.escapeLambda(v);
+
+        const vx = AtomEvaluator.instance.parse(v);
+
+        v = vx.original;
+
+        for (let i: number = 0; i < vx.path.length; i++) {
+            const p: string[] = vx.path[i];
+            const start: string = "this";
+            v = v.replace(`v${i + 1}`, `Atom.get(this,"${p.join(".")}")`);
+        }
+
+        return v;
+    }
 
     public static camelCase(text: string): string {
         if (text.startsWith("atom-")) {
@@ -68,6 +133,9 @@ export class CoreHtmlComponent implements IMarkupComponent {
             return v;
         }).join("");
     }
+}
+
+export class CoreHtmlComponent implements IMarkupComponent {
 
     public baseType: string;
     public name: string;
@@ -122,13 +190,13 @@ export class CoreHtmlComponent implements IMarkupComponent {
 
             const at = iterator.attribs["atom-type"];
             if (at) {
-                text += ` const ${itemName} = new ${at} (document.createElement("${iterator.name}")); 
+                text += ` const ${itemName} = new ${at} (document.createElement("${iterator.name}"));
                 ${parentName}.append(${itemName});
                 `;
                 controlName = itemName;
                 itemName = `${controlName}.element`;
             } else {
-                text += ` const ${itemName} = document.createElement("${iterator.name}"); 
+                text += ` const ${itemName} = document.createElement("${iterator.name}");
                 ${parentName}.append(${itemName});`;
             }
 
@@ -139,7 +207,7 @@ export class CoreHtmlComponent implements IMarkupComponent {
                 }
             }
 
-            this.generateChildren(iterator, controlName, itemName);
+            text += this.generateChildren(iterator, controlName, itemName);
 
         }
         return text;
@@ -147,15 +215,17 @@ export class CoreHtmlComponent implements IMarkupComponent {
 
     public generateAttribute(key: string, value: string, itemName: string, controlName: string): string {
         let text: string = "\r\n";
-        key = CoreHtmlComponent.camelCase(key);
+        key = HtmlContent.camelCase(key);
         value = value.trim();
 
         // one time binding
         if (value.startsWith("{") && value.endsWith("}")) {
+            value = HtmlContent.processOneTimeBinding(value);
             text += `${controlName}.setLocalValue(${itemName}, "${key}", ${value});`;
         }
 
         if (value.startsWith("[") && value.endsWith("]")) {
+            value = HtmlContent.processOneWayBinding(value);
             text += `${controlName}.bind(${itemName}, "${key}", ${value});`;
         }
 
