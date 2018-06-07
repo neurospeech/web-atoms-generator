@@ -311,6 +311,9 @@ export class CoreHtmlFile implements IMarkupFile {
     }
 
     public compile(): void {
+
+        this.nodes = [];
+
         const content = readFileSync(this.file, { encoding: "utf-8" });
 
         const root = { generated: "" };
