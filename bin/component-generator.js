@@ -41,6 +41,7 @@ class ComponentGenerator {
                 const isHtml = /\.html$/i.test(fullName);
                 const isXml = /\.(xml|xaml)$/i.test(fullName);
                 if (isHtml || isXml) {
+                    console.log(fullName);
                     if (this.files.findIndex(x => x.file === fullName) !== -1) {
                         continue;
                     }
@@ -55,6 +56,9 @@ class ComponentGenerator {
                             this.files.push(new core_html_file_1.CoreHtmlFile(fullName, this.config));
                         }
                     }
+                }
+                else {
+                    console.log(fullName);
                 }
             }
         }
@@ -83,7 +87,7 @@ class ComponentGenerator {
                 if (!fs.existsSync(file.file)) {
                     deletedFiles.push(file);
                 }
-                console.log(`Generating ${file.file}`);
+                // console.log(`Generating ${file.file}`);
                 file.compile();
             }
             for (var n of file.nodes) {

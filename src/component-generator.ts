@@ -21,7 +21,6 @@ export class ComponentGenerator {
 
 		// scan all html files...
 		for (var file of fs.readdirSync(folder)) {
-
 			var fullName: string = path.join(folder, file);
 			var s: fs.Stats = fs.statSync(fullName);
 			if (s.isDirectory()) {
@@ -31,6 +30,7 @@ export class ComponentGenerator {
 				const isXml = /\.(xml|xaml)$/i.test(fullName);
 				if (isHtml || isXml) {
 
+					console.log(fullName);
 					if (this.files.findIndex(x => x.file === fullName) !== -1) {
 						continue;
 					}
@@ -44,6 +44,8 @@ export class ComponentGenerator {
 							this.files.push(new CoreHtmlFile(fullName, this.config));
 						}
 					}
+				} else {
+					console.log(fullName);
 				}
 			}
 		}
@@ -117,7 +119,7 @@ export class ComponentGenerator {
 					deletedFiles.push(file);
 				}
 
-				console.log(`Generating ${file.file}`);
+				// console.log(`Generating ${file.file}`);
 				file.compile();
 			}
 			for (var n of file.nodes) {
