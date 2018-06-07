@@ -329,7 +329,7 @@ export class CoreHtmlFile implements IMarkupFile {
                 if (element.prefix) {
                     importStatement += `import * as ${element.prefix} from "${element.import}"\r\n`;
                 } else {
-                    importStatement += `import ${element.name} from "${element.import}"\r\n`;
+                    importStatement += `import {${element.name}} from "${element.import}"\r\n`;
                 }
             }
         }
