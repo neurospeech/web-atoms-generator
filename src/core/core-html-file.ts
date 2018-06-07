@@ -6,6 +6,7 @@ import { IHtmlNode } from "../html-node";
 import { IMarkupComponent, IMarkupFile } from "../imarkup-file";
 import { IWAConfig } from "../types";
 
+
 enum Binding {
     None,
     OneTime,
@@ -45,6 +46,31 @@ class WAAttribute extends WANode {
 
     public template: string;
 
+    public toString(): string {
+
+        if (this.template) {
+            return `
+        ${this.atomParent.id}.${this.name} = ${this.template};
+            `;
+        }
+
+        if (this.value.startsWith("{") && this.value.endsWith("}")) {
+            const v = HtmlContent.processOneTimeBinding(this.value);
+            return `
+            ${this.atomParent.id}.setLocalValue(${this.parent.eid}, "${this.name}", Atom.get(${v}) );`;
+        }
+
+        if (this.value.startsWith("[") && this.value.endsWith("]")) {
+            const v = HtmlContent.processOneWayBinding(this.value);
+            return `
+            ${this.atomParent.id}.bind(${this.parent.eid}, "${this.name}", ${v});`;
+        }
+
+        return `
+        ${this.atomParent.id}.setLocalValue(${this.parent.eid}, "${this.name}", ${JSON.stringify(this.value)});
+        `;
+    }
+
 }
 
 class WAElement extends WANode {
@@ -57,6 +83,22 @@ class WAElement extends WANode {
 
     public id: string;
 
+    public get eid(): string {
+        if (this instanceof WAComponent) {
+            return `${this.id}.element`;
+        }
+        return this.id;
+    }
+
+    public get presenterToString(): string {
+        if (! this.presenterParent) {
+            return "";
+        }
+
+        return `
+        ${this.presenterParent.parent.id}.${this.presenterParent.name} = ${this.id};`;
+    }
+
     constructor(p: WAElement, protected element: IHtmlNode, name?: string) {
         super(p, name);
 
@@ -64,7 +106,7 @@ class WAElement extends WANode {
             if (this.element.attribs.hasOwnProperty(key)) {
                 const item = this.element.attribs[key];
 
-                if (key === "atom-type") {
+                if (key === "atom-type" || key === "atom-template") {
                     continue;
                 }
 
@@ -95,7 +137,7 @@ class WAElement extends WANode {
     }
 
     public setAttribute(name: string, value: string, tn?: string): void {
-        const a = new WAAttribute(this);
+        const a = new WAAttribute(this, name);
         // a.binding = binding;
         a.name = name;
         a.value = value;
@@ -104,6 +146,11 @@ class WAElement extends WANode {
     }
 
     public parseNode(e: IHtmlNode): void {
+
+        if (e.type === "text") {
+            this.addChild(new WATextElement(this, e));
+            return;
+        }
 
         const tt = e.attribs ? e.attribs["atom-template"] : null;
 
@@ -141,11 +188,35 @@ class WAElement extends WANode {
         }
     }
 
+    public toString(): string {
+
+        return `
+        const ${this.id} = document.createElement("${this.element.name}");
+        ${this.presenterToString}
+        ${this.atomParent.id}.appendChild(${this.id});
+        ${this.attributes.join("\r\n")}`;
+
+    }
+}
+
+class WATextElement extends WAElement {
+    constructor(p: WAElement, e: IHtmlNode) {
+        super(p, e);
+    }
+
+    public toString(): string {
+        return `
+        const ${this.id} = document.createTextNode(${JSON.stringify(this.element.data)});
+        ${this.presenterToString}
+        ${this.atomParent.id}.appendChild(${this.id});`;
+    }
 }
 
 class WAComponent extends WAElement {
 
     public ids: number = 1;
+
+    public export: boolean = false;
 
     public get templates() {
         return this.mTemplates || (this.mTemplates = []);
@@ -158,6 +229,10 @@ class WAComponent extends WAElement {
         public name: string,
         public baseType?: string) {
         super(p, element, name);
+
+        if (this.name) {
+            this.id = "this";
+        }
     }
 
     public resolveNames(e: CoreHtmlComponent): void {
@@ -166,24 +241,41 @@ class WAComponent extends WAElement {
         if (this.baseType) {
             this.baseType = e.resolve(this.baseType);
         }
+
+        for (const item of this.templates) {
+            item.resolveNames(e);
+        }
     }
 
     public toString(): string {
 
         if (this.name) {
             return `
-    export class ${this.name} extends ${this.baseType} {
+    ${this.export ? "export" : ""} class ${this.name} extends ${this.baseType || "AtomControl"} {
 
         public create(): void {
             super.create();
 
             this.element = document.createElement("${this.element.name}");
+            ${this.presenterToString}
+            ${this.children.join("\r\n")}
+            ${this.attributes.join("\r\n")}
         }
     }
+
+    ${this.templates.join("\r\n")}
+
             `;
+        } else {
+            return `
+            const ${this.id} = new ${this.baseType}(document.createElement("${this.element.name}"));
+            ${this.presenterToString}
+            ${this.children.join("\r\n")}
+            ${this.attributes.join("\r\n")}
+            ${this.parent.atomParent.id}.appendChild(${this.id});
+`;
         }
 
-        return "";
     }
 }
 
@@ -287,6 +379,7 @@ export class CoreHtmlComponent implements IMarkupComponent {
 
     public generateCode(): void {
 
+        this.imports.AtomControl = { name: "AtomControl", import: "web-atoms-core/bin/controls/AtomControl"};
         // let us resolve all names...
         this.root.resolveNames(this);
 
