@@ -1,4 +1,4 @@
-import { PathLike, readFileSync } from "fs";
+import { PathLike, readFileSync, statSync } from "fs";
 import { XmlDocument, XmlElement } from "xmldoc";
 import { IMarkupComponent, IMarkupFile } from "../imarkup-file";
 import { IWAConfig } from "../types";
@@ -11,10 +11,13 @@ export class XamlComponent implements IMarkupComponent {
 }
 
 export class XamlFile implements IMarkupFile {
-    public currentTime: number;
+
     public lastTime: number;
     public file: PathLike;
     public nodes: XamlComponent[];
+    public get currentTime(): number {
+        return statSync(this.file).mtime.getTime();
+    }
 
     public nsMap: {[key: string]: string} = {};
 
@@ -26,6 +29,7 @@ export class XamlFile implements IMarkupFile {
 
         this.compileContent(content);
 
+        this.lastTime = this.currentTime;
     }
 
     public compileContent(content: string): void {

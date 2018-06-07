@@ -1,4 +1,4 @@
-import { PathLike, readFileSync } from "fs";
+import { PathLike, readFileSync, statSync } from "fs";
 import { DomHandler, Parser } from "htmlparser2";
 import { parse } from "path";
 import { AtomEvaluator, CompiledMethod } from "../atom-evaluator";
@@ -285,7 +285,10 @@ class WAComponent extends WAElement {
 
 export class CoreHtmlFile implements IMarkupFile {
 
-    public currentTime: number;
+    public get currentTime(): number {
+        return statSync(this.file).mtime.getTime();
+    }
+
     public lastTime: number;
     // public file: PathLike;
     public nodes: CoreHtmlComponent[] = [];
@@ -300,6 +303,7 @@ export class CoreHtmlFile implements IMarkupFile {
         const content = readFileSync(this.file, { encoding: "utf-8" });
 
         this.compileContent(content);
+        this.lastTime = this.currentTime;
     }
 
     public compileContent(content: string): void {
