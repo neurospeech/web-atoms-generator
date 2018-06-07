@@ -9,6 +9,7 @@ export declare class ComponentGenerator {
     mode: Mode;
     loadFiles(folder: string): void;
     outFile: string;
+    outFolder: string;
     folder: string;
     files: Array<IMarkupFile>;
     constructor(config: IWAConfig);

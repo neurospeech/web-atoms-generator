@@ -330,9 +330,9 @@ export class CoreHtmlFile implements IMarkupFile {
             if (this.imports.hasOwnProperty(key)) {
                 const element = this.imports[key];
                 if (element.prefix) {
-                    importStatement += `import * as ${element.prefix} from "${element.import}"\r\n`;
+                    importStatement += `import * as ${element.prefix} from "${element.import}";\r\n`;
                 } else {
-                    importStatement += `import {${element.name}} from "${element.import}"\r\n`;
+                    importStatement += `import {${element.name}} from "${element.import}";\r\n`;
                 }
             }
         }
@@ -370,6 +370,7 @@ export class CoreHtmlFile implements IMarkupFile {
 
         const root = new CoreHtmlComponent(this);
         root.root = new WAComponent(null, roots[0], name) ;
+        root.root.export = true;
 
         this.nodes.push(root);
 

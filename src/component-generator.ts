@@ -30,7 +30,7 @@ export class ComponentGenerator {
 				const isXml = /\.(xml|xaml)$/i.test(fullName);
 				if (isHtml || isXml) {
 
-					console.log(fullName);
+					// console.log(fullName);
 					if (this.files.findIndex(x => x.file === fullName) !== -1) {
 						continue;
 					}
@@ -51,6 +51,8 @@ export class ComponentGenerator {
 
 	outFile: string;
 
+	outFolder: string;
+
 	folder: string;
 
 	files: Array<IMarkupFile>;
@@ -62,6 +64,7 @@ export class ComponentGenerator {
 		this.outFile = config.outFile;
 		this.nsNamesapce = config.namespace;
 		this.mode = config.mode;
+		this.outFolder = config.outFolder;
 
 		if (config.emitDeclaration !== undefined) {
 			this.emitDeclaration = config.emitDeclaration;
@@ -100,6 +103,13 @@ export class ComponentGenerator {
 
 		this.loadFiles(this.folder);
 
+		if (this.outFolder && /core/i.test(this.mode)) {
+			this.createDirectories(this.outFolder);
+			if (!fs.existsSync(this.outFolder)) {
+				fs.mkdirSync(this.outFolder);
+			}
+
+		}
 		// if(this.mode == Mode.Core){
 		// 	this.compileCore();			
 		// 	return;
@@ -125,6 +135,10 @@ export class ComponentGenerator {
 			}
 		}
 
+		if(this.outFolder && /core/i.test(this.mode)) {
+			return;
+		}
+
 
 		// sort by baseType...
 		nodes = nodes.sort((a, b) => {
@@ -137,6 +151,7 @@ export class ComponentGenerator {
 		for (var fx of deletedFiles) {
 			this.files = this.files.filter(x => x.file === fx.file);
 		}
+
 
 		var result: string = "";
 
