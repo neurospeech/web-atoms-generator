@@ -336,7 +336,6 @@ export class CoreHtmlFile implements IMarkupFile {
 
         root.config = this.config;
         root.generateCode();
-
     }
 
 }

@@ -66,7 +66,9 @@ export class ComponentGenerator {
 		if (config.emitDeclaration !== undefined) {
 			this.emitDeclaration = config.emitDeclaration;
 		} else {
-			this.emitDeclaration = true;
+			if(this.mode != Mode.Core) {
+				this.emitDeclaration = true;
+			}
 		}
 
 		this.files = [];
@@ -115,7 +117,7 @@ export class ComponentGenerator {
 					deletedFiles.push(file);
 				}
 
-				// console.log(`Generating ${file.file}`);
+				console.log(`Generating ${file.file}`);
 				file.compile();
 			}
 			for (var n of file.nodes) {

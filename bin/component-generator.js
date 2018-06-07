@@ -19,7 +19,9 @@ class ComponentGenerator {
             this.emitDeclaration = config.emitDeclaration;
         }
         else {
-            this.emitDeclaration = true;
+            if (this.mode != types_1.Mode.Core) {
+                this.emitDeclaration = true;
+            }
         }
         this.files = [];
         this.watch();
@@ -81,7 +83,7 @@ class ComponentGenerator {
                 if (!fs.existsSync(file.file)) {
                     deletedFiles.push(file);
                 }
-                // console.log(`Generating ${file.file}`);
+                console.log(`Generating ${file.file}`);
                 file.compile();
             }
             for (var n of file.nodes) {
