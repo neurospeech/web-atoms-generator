@@ -197,7 +197,7 @@ class WAElement extends WANode {
         return `
         const ${this.id} = document.createElement("${this.element.name}");
         ${this.presenterToString}
-        ${this.atomParent.id}.appendChild(${this.id});
+        ${this.atomParent.id}.append(${this.id});
         ${this.attributes.join("\r\n")}`;
 
     }
@@ -212,7 +212,7 @@ class WATextElement extends WAElement {
         return `
         const ${this.id} = document.createTextNode(${JSON.stringify(this.element.data)});
         ${this.presenterToString}
-        ${this.atomParent.id}.appendChild(${this.id});`;
+        ${this.atomParent.id}.append(${this.id});`;
     }
 }
 
@@ -276,7 +276,7 @@ class WAComponent extends WAElement {
             ${this.presenterToString}
             ${this.children.join("\r\n")}
             ${this.attributes.join("\r\n")}
-            ${this.parent.atomParent.id}.appendChild(${this.id});
+            ${this.parent.atomParent.id}.append(${this.id});
 `;
         }
 
