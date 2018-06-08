@@ -1,6 +1,6 @@
-import { PathLike, readFileSync, statSync, writeFileSync, existsSync } from "fs";
+import { existsSync, PathLike, readFileSync, statSync, writeFileSync } from "fs";
 import { DomHandler, Parser } from "htmlparser2";
-import { parse, dirname, sep } from "path";
+import { dirname, parse, sep } from "path";
 import { AtomEvaluator, CompiledMethod } from "../atom-evaluator";
 import { IHtmlNode } from "../html-node";
 import { IMarkupComponent, IMarkupFile } from "../imarkup-file";
@@ -381,6 +381,7 @@ export class CoreHtmlFile implements IMarkupFile {
 
         const root = new CoreHtmlComponent(this);
         root.root = new WAComponent(null, roots[0], name) ;
+        root.name = name;
         root.root.export = true;
 
         this.nodes.push(root);
