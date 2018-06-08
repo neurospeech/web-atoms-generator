@@ -478,7 +478,7 @@ class HtmlContent {
 
         const plist = v.split(".");
 
-        v = ` [${JSON.stringify(plist)}], 1 `;
+        v = ` [${JSON.stringify(plist)}], true `;
 
         return v;
     }
