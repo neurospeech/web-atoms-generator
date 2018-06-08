@@ -325,7 +325,7 @@ export class CoreHtmlFile implements IMarkupFile {
         this.compileContent(content);
         this.lastTime = this.currentTime;
 
-        let importStatement: string = "";
+        let importStatement: string = "// tslint:disable\r\n";
         for (const key in this.imports) {
             if (this.imports.hasOwnProperty(key)) {
                 const element = this.imports[key];
