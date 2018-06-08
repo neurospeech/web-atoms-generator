@@ -1,6 +1,6 @@
-import { PathLike, readFileSync, statSync } from "fs";
+import { PathLike, readFileSync, statSync, writeFileSync, existsSync } from "fs";
 import { DomHandler, Parser } from "htmlparser2";
-import { parse } from "path";
+import { parse, dirname, sep } from "path";
 import { AtomEvaluator, CompiledMethod } from "../atom-evaluator";
 import { IHtmlNode } from "../html-node";
 import { IMarkupComponent, IMarkupFile } from "../imarkup-file";
@@ -316,9 +316,9 @@ export class CoreHtmlFile implements IMarkupFile {
 
         const content = readFileSync(this.file, { encoding: "utf-8" });
 
-        const root = { generated: "" };
+        // const root = { generated: "" };
 
-        this.nodes.push(root);
+        // this.nodes.push(root);
 
         this.imports.AtomControl = { name: "AtomControl", import: "web-atoms-core/bin/controls/AtomControl"};
 
@@ -337,7 +337,18 @@ export class CoreHtmlFile implements IMarkupFile {
             }
         }
 
-        root.generated = importStatement;
+        // root.generated = importStatement;
+
+        const root = this.nodes[0];
+
+        const p = parse(this.file.toString());
+
+        const fname = p.dir + sep + root.name + ".ts";
+
+        // if (existsSync(fname)) {
+
+        // }
+        writeFileSync(fname, importStatement + root.generated );
 
     }
 
