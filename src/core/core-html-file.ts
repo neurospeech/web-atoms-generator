@@ -57,7 +57,7 @@ export class WAAttribute extends WANode {
         if (this.value.startsWith("{") && this.value.endsWith("}")) {
             const v = HtmlContent.processOneTimeBinding(this.value);
             return `
-            ${this.atomParent.id}.setLocalValue(${this.parent.eid}, "${this.name}", Atom.get(${v}) );`;
+            ${this.atomParent.id}.setLocalValue(${this.parent.eid}, "${this.name}", ${v});`;
         }
 
         if (this.value.startsWith("[") && this.value.endsWith("]")) {
