@@ -193,7 +193,9 @@ function parseFolder(folder) {
             if (/^waconfig\.json$/i.test(file)) {
                 var config = JSON.parse(fs.readFileSync(fullName, "utf8"));
                 config.srcFolder = path.join(folder, config.srcFolder);
-                config.outFile = path.join(folder, config.outFile);
+                if (config.outFile) {
+                    config.outFile = path.join(folder, config.outFile);
+                }
                 config.namespace = config.namespace || "";
                 var cc = new ComponentGenerator(config);
                 return;
