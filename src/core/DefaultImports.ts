@@ -4,5 +4,6 @@ export const DefaultImports = [
     "AtomListBox",
     "AtomPageView",
     "AtomToggleButtonBar",
-    "AtomWindow"
+    "AtomWindow",
+    "AtomDockPanel"
 ];

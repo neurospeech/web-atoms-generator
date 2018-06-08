@@ -237,11 +237,22 @@ export class WAComponent extends WAElement {
 
         if (this.name) {
             this.id = "this";
+
+            const at = element.attribs ? element.attribs["atom-type"] : "";
+            if (at) {
+                this.baseType = at;
+            }
         }
     }
 
     public resolveNames(e: CoreHtmlComponent): void {
         super.resolveNames(e);
+
+        if (this.name) {
+            if (!this.baseType) {
+                this.baseType = "AtomControl";
+            }
+        }
 
         if (this.baseType) {
             this.baseType = e.resolve(this.baseType);
@@ -256,7 +267,7 @@ export class WAComponent extends WAElement {
 
         if (this.name) {
             return `
-    ${this.export ? "export" : ""} class ${this.name} extends ${this.baseType || "AtomControl"} {
+    ${this.export ? "export" : ""} class ${this.name} extends ${this.baseType} {
 
         public create(): void {
             super.create();
@@ -317,14 +328,6 @@ export class CoreHtmlFile implements IMarkupFile {
 
         const content = readFileSync(this.file, { encoding: "utf-8" });
 
-        // const root = { generated: "" };
-
-        // this.nodes.push(root);
-
-        for (const imp of DefaultImports) {
-            this.imports[imp] = { name: imp, import: `web-atoms-core/bin/controls/${imp}`};
-        }
-
         this.compileContent(content);
         this.lastTime = this.currentTime;
 
@@ -373,6 +376,10 @@ export class CoreHtmlFile implements IMarkupFile {
     public processNodes(nodes: IHtmlNode[]): void {
         // root node must be single..
 
+        const script = nodes.find( (x) => x.type === "script");
+
+        nodes = nodes.filter( (x) => x !== script);
+
         const roots = nodes.filter( (x) => x.type && x.type === "tag");
         if (roots.length > 1) {
             throw new Error("Only single top level root allowed");
@@ -383,7 +390,7 @@ export class CoreHtmlFile implements IMarkupFile {
         const name = pname.name.split("-").map( (s) => s.charAt(0).toUpperCase() + s.substr(1)).join("");
 
         const root = new CoreHtmlComponent(this);
-        root.root = new WAComponent(null, roots[0], name) ;
+        root.root = new WAComponent(null, roots[0], name, "AtomControl") ;
         root.name = name;
         root.root.export = true;
 
@@ -391,6 +398,10 @@ export class CoreHtmlFile implements IMarkupFile {
 
         root.config = this.config;
         root.generateCode();
+
+        if (script) {
+            root.generated = script.data + "\r\n" + root.generated;
+        }
     }
 
 }
@@ -412,9 +423,14 @@ export class CoreHtmlComponent implements IMarkupComponent {
     }
 
     public resolve(name: string): string {
-        if (name === "AtomControl") {
+
+        if (DefaultImports.indexOf(name) !== -1) {
+            if (!this.file.imports[name]) {
+                this.file.imports[name] = { name, import: `web-atoms-core/bin/controls/${name}` };
+            }
             return name;
         }
+
         const tokens = name.split(":");
         if (tokens.length === 1) {
             return name;
