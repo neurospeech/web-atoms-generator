@@ -5,15 +5,16 @@ import { AtomEvaluator, CompiledMethod } from "../atom-evaluator";
 import { IHtmlNode } from "../html-node";
 import { IMarkupComponent, IMarkupFile } from "../imarkup-file";
 import { IWAConfig } from "../types";
+import { DefaultImports } from "./DefaultImports";
 
-enum Binding {
+export enum Binding {
     None,
     OneTime,
     OneWay,
     TwoWay
 }
 
-class WANode {
+export class WANode {
 
     public get atomParent(): WAComponent {
         if (this instanceof WAComponent) {
@@ -37,7 +38,7 @@ class WANode {
 
 }
 
-class WAAttribute extends WANode {
+export class WAAttribute extends WANode {
 
     public binding: Binding = Binding.None;
 
@@ -77,7 +78,7 @@ class WAAttribute extends WANode {
 
 }
 
-class WAElement extends WANode {
+export class WAElement extends WANode {
 
     public attributes: WAAttribute[] = [];
 
@@ -203,7 +204,7 @@ class WAElement extends WANode {
     }
 }
 
-class WATextElement extends WAElement {
+export class WATextElement extends WAElement {
     constructor(p: WAElement, e: IHtmlNode) {
         super(p, e);
     }
@@ -216,7 +217,7 @@ class WATextElement extends WAElement {
     }
 }
 
-class WAComponent extends WAElement {
+export class WAComponent extends WAElement {
 
     public ids: number = 1;
 
@@ -320,7 +321,9 @@ export class CoreHtmlFile implements IMarkupFile {
 
         // this.nodes.push(root);
 
-        this.imports.AtomControl = { name: "AtomControl", import: "web-atoms-core/bin/controls/AtomControl"};
+        for (const imp of DefaultImports) {
+            this.imports[imp] = { name: imp, import: `web-atoms-core/bin/controls/${imp}`};
+        }
 
         this.compileContent(content);
         this.lastTime = this.currentTime;
