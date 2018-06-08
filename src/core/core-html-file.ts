@@ -478,7 +478,7 @@ class HtmlContent {
 
         const plist = v.split(".");
 
-        v = ` ${JSON.stringify(plist)}, 1 `;
+        v = ` [${JSON.stringify(plist)}], 1 `;
 
         return v;
     }
@@ -487,14 +487,14 @@ class HtmlContent {
 
         v = v.trim();
 
-        if (v.startsWith("()=>") || v.startsWith("() =>") || v.startsWith("=>")) {
-            v = v.replace("()=>", "");
-            v = v.replace("() =>", "");
-            v = v.replace("=>", "");
-            return `function(){
-    return ${v};
-}`;
-        }
+//         if (v.startsWith("()=>") || v.startsWith("() =>") || v.startsWith("=>")) {
+//             v = v.replace("()=>", "");
+//             v = v.replace("() =>", "");
+//             v = v.replace("=>", "");
+//             return `function(){
+//     return ${v};
+// }`;
+//         }
 
         return v;
     }
