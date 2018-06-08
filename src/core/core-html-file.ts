@@ -400,7 +400,8 @@ export class CoreHtmlFile implements IMarkupFile {
         root.generateCode();
 
         if (script) {
-            root.generated = script.data + "\r\n" + root.generated;
+            root.generated = (script.data || script.children.map((s) => s.data).join("\r\n") ) + "\r\n"
+                + root.generated;
         }
     }
 
