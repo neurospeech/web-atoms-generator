@@ -2,6 +2,7 @@ import { existsSync, PathLike, readFileSync, statSync, writeFileSync } from "fs"
 import { DomHandler, Parser } from "htmlparser2";
 import { dirname, parse, sep } from "path";
 import { AtomEvaluator, CompiledMethod } from "../atom-evaluator";
+import { GeneratorContext } from "../generator-context";
 import { IHtmlNode } from "../html-node";
 import { IMarkupComponent, IMarkupFile } from "../imarkup-file";
 import { IWAConfig } from "../types";
@@ -107,31 +108,45 @@ export class WAElement extends WANode {
     constructor(p: WAElement, protected element: IHtmlNode, name?: string) {
         super(p, name);
 
-        for (const key in this.element.attribs) {
-            if (this.element.attribs.hasOwnProperty(key)) {
-                const item = this.element.attribs[key];
+        try {
 
-                if (key === "atom-type" || key === "atom-template") {
-                    continue;
+            for (const key in this.element.attribs) {
+                if (this.element.attribs.hasOwnProperty(key)) {
+                    const item = this.element.attribs[key];
+
+                    if (key === "atom-type" || key === "atom-template") {
+                        continue;
+                    }
+
+                    if (key === "atom-presenter") {
+                        this.presenterParent = {
+                            name: item,
+                            parent: this.atomParent
+                        };
+                        continue;
+                    }
+
+                    this.setAttribute(key, item);
                 }
-
-                if (key === "atom-presenter") {
-                    this.presenterParent = {
-                        name: item,
-                        parent: this.atomParent
-                    };
-                    continue;
-                }
-
-                this.setAttribute(key, item);
             }
-        }
 
-        if (!this.element.children) {
-            return;
-        }
-        for (const iterator of this.element.children) {
-            this.parseNode(iterator);
+            if (!this.element.children) {
+                return;
+            }
+            for (const iterator of this.element.children) {
+                if (iterator) {
+                    this.parseNode(iterator);
+                }
+            }
+        } catch (er) {
+            const en = element.startIndex || 0;
+            let cn = 0;
+            const ln = GeneratorContext.instance.fileLines.findIndex( (x) => en < x );
+            const sln = GeneratorContext.instance.fileLines[ln - 1];
+            cn = en - sln;
+            const errorText = `${er.message}`.split("\n").join(" ").split("\r").join("");
+            // tslint:disable-next-line:no-console
+            console.error(`${GeneratorContext.instance.fileName}(${ln},${cn}): error TS0001: ${errorText}.`);
         }
 
     }
@@ -327,37 +342,43 @@ export class CoreHtmlFile implements IMarkupFile {
 
     public compile(): void {
 
-        this.nodes.length = 0;
+        try {
 
-        const content = readFileSync(this.file, { encoding: "utf-8" });
+            this.nodes.length = 0;
 
-        this.compileContent(content);
-        this.lastTime = this.currentTime;
+            const content = readFileSync(this.file, { encoding: "utf-8" });
 
-        let importStatement: string = "// tslint:disable\r\n";
-        for (const key in this.imports) {
-            if (this.imports.hasOwnProperty(key)) {
-                const element = this.imports[key];
-                if (element.prefix) {
-                    importStatement += `import * as ${element.prefix} from "${element.import}";\r\n`;
-                } else {
-                    importStatement += `import {${element.name}} from "${element.import}";\r\n`;
+            this.compileContent(content);
+            this.lastTime = this.currentTime;
+
+            let importStatement: string = "// tslint:disable\r\n";
+            for (const key in this.imports) {
+                if (this.imports.hasOwnProperty(key)) {
+                    const element = this.imports[key];
+                    if (element.prefix) {
+                        importStatement += `import * as ${element.prefix} from "${element.import}";\r\n`;
+                    } else {
+                        importStatement += `import {${element.name}} from "${element.import}";\r\n`;
+                    }
                 }
             }
+
+            // root.generated = importStatement;
+
+            const root = this.nodes[0];
+
+            const p = parse(this.file.toString());
+
+            const fname = p.dir + sep + root.name + ".ts";
+
+            // if (existsSync(fname)) {
+
+            // }
+            writeFileSync(fname, importStatement + root.generated );
+        } catch (error) {
+            // tslint:disable-next-line:no-console
+            console.error(error);
         }
-
-        // root.generated = importStatement;
-
-        const root = this.nodes[0];
-
-        const p = parse(this.file.toString());
-
-        const fname = p.dir + sep + root.name + ".ts";
-
-        // if (existsSync(fname)) {
-
-        // }
-        writeFileSync(fname, importStatement + root.generated );
 
     }
 
