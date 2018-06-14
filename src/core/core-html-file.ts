@@ -238,7 +238,7 @@ export class WATextElement extends WAElement {
         return `
         const ${this.id} = document.createTextNode(${JSON.stringify(this.element.data)});
         ${this.presenterToString}
-        ${this.atomParent.id}.append(${this.id});`;
+        ${this.parent.eid}.appendChild(${this.id});`;
     }
 }
 
