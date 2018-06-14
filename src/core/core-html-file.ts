@@ -90,8 +90,7 @@ export class WAAttribute extends WANode {
         }
 
         return `
-        ${this.atomParent.id}.runAfterInit(() =>
-        ${this.atomParent.id}.setLocalValue(${this.parent.eid}, "${name}", ${JSON.stringify(this.value)} ) );
+        ${this.atomParent.id}.setLocalValue(${this.parent.eid}, "${name}", ${JSON.stringify(this.value)} );
         `;
     }
 
