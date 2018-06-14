@@ -566,7 +566,7 @@ class HtmlContent {
         for (let i: number = 0; i < vx.path.length; i++) {
             const p: string[] = vx.path[i];
             const start: string = "this";
-            v = v.replace(`v${i + 1}`, `this.getValue("${p.join(".")}")`);
+            v = v.replace(`v${i + 1}`, `this.${p.join(".")}`);
         }
 
         return v;
