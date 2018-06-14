@@ -292,8 +292,6 @@ export class WAComponent extends WAElement {
             ${this.presenterToString}
             ${this.children.join("\r\n")}
             ${this.attributes.join("\r\n")}
-
-            this.init();
         }
     }
 
