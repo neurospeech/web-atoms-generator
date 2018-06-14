@@ -93,8 +93,14 @@ export class WAAttribute extends WANode {
             ${this.atomParent.id}.bind(${this.parent.eid}, "${name}", ${v});`;
         }
 
+        /**
+         * The reason this is set to runAfterInit is due to constructor initialization sequece
+         * in JavaScript, JavaScript does not initialize fields before constructor as opposed to C#.
+         * So properties set in `create` method will be overwritten with base class's constructor.
+         */
         return `
-        ${this.atomParent.id}.setLocalValue(${this.parent.eid}, "${name}", ${JSON.stringify(this.value)} );
+        ${this.atomParent.id}.runAfterInit( () =>
+        ${this.atomParent.id}.setLocalValue(${this.parent.eid}, "${name}", ${JSON.stringify(this.value)} ));
         `;
     }
 
