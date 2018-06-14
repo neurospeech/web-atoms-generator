@@ -68,7 +68,7 @@ export class WAAttribute extends WANode {
             const v = HtmlContent.processOneTimeBinding(this.value);
             if (/^(viewmodel|localviewmodel)$/i.test(name)) {
                 return `
-                ${this.atomParent.id}.setLocalValue(${this.parent.eid}, "${name}", ${v} );`;
+                ${this.atomParent.id}.${name} = ${v};`;
                 }
             return `
             ${this.atomParent.id}.runAfterInit( () =>
