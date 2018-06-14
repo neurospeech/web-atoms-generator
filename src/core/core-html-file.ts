@@ -56,7 +56,7 @@ export class WAAttribute extends WANode {
         }
 
         name = name.split("-").map(
-            (a, i) => (i ? a.charAt(0).toLowerCase() : a.charAt(0).toUpperCase())  + a.substr(1) ).join("");
+            (a, i) => (i ? a.charAt(0).toUpperCase() : a.charAt(0).toLowerCase())  + a.substr(1) ).join("");
 
         if (this.template) {
             return `
