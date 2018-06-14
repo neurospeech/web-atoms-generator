@@ -67,7 +67,8 @@ export class WAAttribute extends WANode {
         if (this.value.startsWith("{") && this.value.endsWith("}")) {
             const v = HtmlContent.processOneTimeBinding(this.value);
             return `
-            ${this.atomParent.id}.setLocalValue(${this.parent.eid}, "${name}", ${v});`;
+            ${this.atomParent.id}.runAfterInit( () =>
+            ${this.atomParent.id}.setLocalValue(${this.parent.eid}, "${name}", ${v}) );`;
         }
 
         if (this.value.startsWith("[") && this.value.endsWith("]")) {
@@ -89,7 +90,8 @@ export class WAAttribute extends WANode {
         }
 
         return `
-        ${this.atomParent.id}.setLocalValue(${this.parent.eid}, "${name}", ${JSON.stringify(this.value)});
+        ${this.atomParent.id}.runAfterInit(() =>
+        ${this.atomParent.id}.setLocalValue(${this.parent.eid}, "${name}", ${JSON.stringify(this.value)} ) );
         `;
     }
 
