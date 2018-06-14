@@ -49,31 +49,40 @@ export class WAAttribute extends WANode {
 
     public toString(): string {
 
+        let name = this.name;
+
+        if (/atom\-/i.test(name)) {
+            name = name.substring(5);
+        }
+
+        name = name.split("-").map(
+            (a, i) => (i ? a.charAt(0).toLowerCase() : a.charAt(0).toUpperCase())  + a.substr(1) ).join("");
+
         if (this.template) {
             return `
-        ${this.atomParent.id}.${this.name} = ${this.template};
+        ${this.atomParent.id}.${name} = ${this.template};
             `;
         }
 
         if (this.value.startsWith("{") && this.value.endsWith("}")) {
             const v = HtmlContent.processOneTimeBinding(this.value);
             return `
-            ${this.atomParent.id}.setLocalValue(${this.parent.eid}, "${this.name}", ${v});`;
+            ${this.atomParent.id}.setLocalValue(${this.parent.eid}, "${name}", ${v});`;
         }
 
         if (this.value.startsWith("[") && this.value.endsWith("]")) {
             const v = HtmlContent.processOneWayBinding(this.value);
             return `
-            ${this.atomParent.id}.bind(${this.parent.eid}, "${this.name}", ${v});`;
+            ${this.atomParent.id}.bind(${this.parent.eid}, "${name}", ${v});`;
         }
 
         if (this.value.startsWith("$[") && this.value.endsWith("]")) {
             const v = HtmlContent.processTwoWayBinding(this.value);
             return `
-            ${this.atomParent.id}.bind(${this.parent.eid}, "${this.name}", ${v});`;
+            ${this.atomParent.id}.bind(${this.parent.eid}, "${name}", ${v});`;
         }
         return `
-        ${this.atomParent.id}.setLocalValue(${this.parent.eid}, "${this.name}", ${JSON.stringify(this.value)});
+        ${this.atomParent.id}.setLocalValue(${this.parent.eid}, "${name}", ${JSON.stringify(this.value)});
         `;
     }
 
