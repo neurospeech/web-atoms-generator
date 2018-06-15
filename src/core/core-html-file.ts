@@ -478,27 +478,26 @@ export class CoreHtmlComponent implements IMarkupComponent {
             if (!this.file.imports[name]) {
                 this.file.imports[name] = { name, import: `web-atoms-core/bin/controls/${name}` };
             }
-            return name;
         }
 
-        const tokens = name.split(":");
-        if (tokens.length === 1) {
-            return name;
-        }
-        const prefix = tokens[0];
-        name = tokens[1];
+        // const tokens = name.split(":");
+        // if (tokens.length === 1) {
+        //     return name;
+        // }
+        // const prefix = tokens[0];
+        // name = tokens[1];
 
-        const p = `i${this.file.importNameIndex++}`;
+        // const p = `i${this.file.importNameIndex++}`;
 
-        const im = this.file.imports[name] || (this.file.imports[name] = { prefix: `${p}`, name: `${p}_${name}` });
-        if (!im.import) {
-            im.import = this.config.imports[prefix];
-            if (!im.import.endsWith("/")) {
-                im.import += "/";
-            }
-            im.import += name;
-        }
-        return im.name;
+        // const im = this.file.imports[name] || (this.file.imports[name] = { prefix: `${p}`, name: `${p}_${name}` });
+        // if (!im.import) {
+        //     im.import = this.config.imports[prefix];
+        //     if (!im.import.endsWith("/")) {
+        //         im.import += "/";
+        //     }
+        //     im.import += name;
+        // }
+        return name;
     }
 
     public generateCode(): void {
