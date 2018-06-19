@@ -244,7 +244,7 @@ export class WAElement extends WANode {
         return `
         const ${this.id} = document.createElement("${this.element.name}");
         ${this.presenterToString}
-        ${this.parent.id}.appendChild(${this.id});
+        ${this.parent.eid}.appendChild(${this.id});
         ${this.attributes.join("\r\n")}
         ${this.children.join("\r\n")}`;
 
