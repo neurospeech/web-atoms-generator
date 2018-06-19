@@ -66,6 +66,10 @@ export class WAAttribute extends WANode {
 
         if (this.value.startsWith("{") && this.value.endsWith("}")) {
             const v = HtmlContent.processOneTimeBinding(this.value);
+            if (v === this.value) {
+                return `
+                ${this.atomParent.id}.setPrimitiveValue(${this.parent.id}, "${name}", ${v});`;
+            }
             if (/^(viewmodel|localviewmodel)$/i.test(name)) {
                 return `
                 ${this.atomParent.id}.${name} = ${v};`;
@@ -94,13 +98,12 @@ export class WAAttribute extends WANode {
         }
 
         /**
-         * The reason this is set to runAfterInit is due to constructor initialization sequece
-         * in JavaScript, JavaScript does not initialize fields before constructor as opposed to C#.
-         * So properties set in `create` method will be overwritten with base class's constructor.
+         * setPrimitiveValue will defer setLocalValue if it is to be set on control property, otherwise
+         * it will set element attribute directly, this is done to fill element attributes quickly
+         * for attributes such as class, row, column etc
          */
         return `
-        ${this.atomParent.id}.runAfterInit( () =>
-        ${this.atomParent.id}.setLocalValue(${this.parent.eid}, "${name}", ${JSON.stringify(this.value)} ));
+        ${this.atomParent.id}.setPrimitiveValue(${this.parent.eid}, "${name}", ${JSON.stringify(this.value)} );
         `;
     }
 
@@ -564,6 +567,7 @@ class HtmlContent {
     }
 
     public static processOneTimeBinding(v: string): string {
+        let original = v;
         v = v.substr(1, v.length - 2);
 
         v = HtmlContent.escapeLambda(v);
@@ -576,9 +580,10 @@ class HtmlContent {
             const p: string[] = vx.path[i];
             const start: string = "this";
             v = v.replace(`v${i + 1}`, `this.${p.join(".")}`);
+            original = null;
         }
 
-        return v;
+        return original || v;
     }
 
     public static camelCase(text: string): string {
