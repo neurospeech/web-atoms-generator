@@ -332,7 +332,7 @@ export class WAComponent extends WAElement {
             `;
         } else {
             return `
-            const ${this.id} = new ${this.baseType}(document.createElement("${this.element.name}"));
+            const ${this.id} = new ${this.baseType}(this.app, document.createElement("${this.element.name}"));
             ${this.presenterToString}
             ${this.children.join("\r\n")}
             ${this.attributes.join("\r\n")}
