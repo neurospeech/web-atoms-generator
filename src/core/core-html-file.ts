@@ -481,7 +481,7 @@ export class CoreHtmlComponent implements IMarkupComponent {
 
         if (DefaultImports.indexOf(name) !== -1) {
             if (!this.file.imports[name]) {
-                this.file.imports[name] = { name, import: `web-atoms-core/bin/controls/${name}` };
+                this.file.imports[name] = { name, import: `web-atoms-core/bin/web/controls/${name}` };
             }
         }
 
