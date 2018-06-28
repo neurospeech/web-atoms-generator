@@ -74,12 +74,12 @@ class ComponentGenerator {
     // }
     compile() {
         this.loadFiles(this.folder);
-        if (this.outFolder && /core/i.test(this.mode)) {
-            this.createDirectories(this.outFolder);
-            if (!fs.existsSync(this.outFolder)) {
-                fs.mkdirSync(this.outFolder);
-            }
-        }
+        // if (this.outFolder && /core/i.test(this.mode)) {
+        // 	this.createDirectories(this.outFolder);
+        // 	if (!fs.existsSync(this.outFolder)) {
+        // 		fs.mkdirSync(this.outFolder);
+        // 	}
+        // }
         // if(this.mode == Mode.Core){
         // 	this.compileCore();			
         // 	return;
@@ -98,7 +98,7 @@ class ComponentGenerator {
                 nodes.push(n);
             }
         }
-        if (this.outFolder && /core/i.test(this.mode)) {
+        if (/core/i.test(this.mode)) {
             return;
         }
         // sort by baseType...

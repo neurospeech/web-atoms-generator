@@ -103,13 +103,13 @@ export class ComponentGenerator {
 
 		this.loadFiles(this.folder);
 
-		if (this.outFolder && /core/i.test(this.mode)) {
-			this.createDirectories(this.outFolder);
-			if (!fs.existsSync(this.outFolder)) {
-				fs.mkdirSync(this.outFolder);
-			}
+		// if (this.outFolder && /core/i.test(this.mode)) {
+		// 	this.createDirectories(this.outFolder);
+		// 	if (!fs.existsSync(this.outFolder)) {
+		// 		fs.mkdirSync(this.outFolder);
+		// 	}
 
-		}
+		// }
 		// if(this.mode == Mode.Core){
 		// 	this.compileCore();			
 		// 	return;
@@ -135,7 +135,7 @@ export class ComponentGenerator {
 			}
 		}
 
-		if(this.outFolder && /core/i.test(this.mode)) {
+		if(/core/i.test(this.mode)) {
 			return;
 		}
 
