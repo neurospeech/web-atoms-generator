@@ -1,10 +1,12 @@
 
-export type CompiledMethod = {
-	length: number,
-	method: Function,
-	path: Array<string[]>,
-	original: string
-};
+// tslint:disable-next-line:interface-name
+export interface CompiledMethod {
+	length?: number;
+	// tslint:disable-next-line:ban-types
+	method?: Function;
+	path?: string[][];
+	original?: string;
+}
 
 export class AtomEvaluator {
 
@@ -20,16 +22,16 @@ export class AtomEvaluator {
 		// http://jsfiddle.net/A3vg6/45/ (working)
 		// http://jsfiddle.net/A3vg6/51/ (including $ sign)
 
-		var be:CompiledMethod = this.becache[txt];
+		let be:CompiledMethod = this.becache[txt];
 		if (be) {
 			return be;
 		}
 
-		var regex:RegExp = /(?:(\$)(window|localViewModel|viewModel|appScope|scope|data|owner|localScope))(?:\.[a-zA-Z_][a-zA-Z_0-9]*(\()?)*/gi;
+		var regex:RegExp = /(?:(\$)(window|localViewModel|viewModel|data|owner|this))(?:\.[a-zA-Z_][a-zA-Z_0-9]*(\()?)*/gi;
 
-		var keywords:RegExp = /(window|localViewModel|viewModel|appScope|scope|data|owner|localScope)/gi;
+		var keywords:RegExp = /(window|localViewModel|viewModel|data|this|owner)/gi;
 
-		var path:Array<string[]> = [];
+		var path:string[][] = [];
 		var vars:string[] = [];
 
 		var found:any = {};
