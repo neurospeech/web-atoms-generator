@@ -9,12 +9,12 @@ class AtomEvaluator {
         // http://jsfiddle.net/A3vg6/44/ (recommended)
         // http://jsfiddle.net/A3vg6/45/ (working)
         // http://jsfiddle.net/A3vg6/51/ (including $ sign)
-        var be = this.becache[txt];
+        let be = this.becache[txt];
         if (be) {
             return be;
         }
-        var regex = /(?:(\$)(window|localViewModel|viewModel|appScope|scope|data|owner|localScope))(?:\.[a-zA-Z_][a-zA-Z_0-9]*(\()?)*/gi;
-        var keywords = /(window|localViewModel|viewModel|appScope|scope|data|owner|localScope)/gi;
+        var regex = /(?:(\$)(window|localViewModel|viewModel|data|owner|this))(?:\.[a-zA-Z_][a-zA-Z_0-9]*(\()?)*/gi;
+        var keywords = /(window|localViewModel|viewModel|data|this|owner)/gi;
         var path = [];
         var vars = [];
         var found = {};

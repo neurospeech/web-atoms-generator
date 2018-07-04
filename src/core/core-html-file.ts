@@ -356,6 +356,9 @@ export interface IImportDefinitions {
 export class CoreHtmlFile implements IMarkupFile {
 
     public get currentTime(): number {
+        if (!existsSync(this.file)) {
+            return -1;
+        }
         return statSync(this.file).mtime.getTime();
     }
 
