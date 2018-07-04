@@ -90,6 +90,7 @@ class ComponentGenerator {
             if (file.currentTime !== file.lastTime) {
                 if (!fs.existsSync(file.file)) {
                     deletedFiles.push(file);
+                    continue;
                 }
                 // console.log(`Generating ${file.file}`);
                 file.compile();

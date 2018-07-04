@@ -125,6 +125,7 @@ export class ComponentGenerator {
 
 				if (!fs.existsSync(file.file)) {
 					deletedFiles.push(file);
+					continue;
 				}
 
 				// console.log(`Generating ${file.file}`);
