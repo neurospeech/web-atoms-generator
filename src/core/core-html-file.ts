@@ -157,6 +157,20 @@ export class WAElement extends WANode {
                         continue;
                     }
 
+                    if (key === "atom-properties") {
+                        // tslint:disable-next-line:no-eval
+                        const propertyList = (item as string)
+                            .split(/(\,|\;)/)
+                            .map((s) => {
+                                const sv = s.split(":");
+                                const k = sv[0];
+                                const v = sv[1] || null;
+                                return { key: k, value: v };
+                            });
+                        ((this as any) as WAComponent).properties = propertyList;
+                        continue;
+                    }
+
                     this.setAttribute(key, item);
                 }
             }
@@ -271,6 +285,8 @@ export class WAComponent extends WAElement {
 
     public export: boolean = false;
 
+    public properties: Array<{ key: string, value: string }> = [];
+
     public get templates() {
         return this.mTemplates || (this.mTemplates = []);
     }
@@ -316,6 +332,10 @@ export class WAComponent extends WAElement {
         if (this.name) {
             return `
     ${this.export ? "export" : ""} class ${this.name} extends ${this.baseType} {
+
+        ${this.properties.map( (s) => `
+        public ${s.key}: any = ${s.value};
+        ` )}
 
         public create(): void {
             super.create();
