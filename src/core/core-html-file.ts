@@ -285,7 +285,7 @@ export class WAComponent extends WAElement {
 
     public export: boolean = false;
 
-    public properties: Array<{ key: string, value: string }> = [];
+    public properties: Array<{ key: string, value: string }>;
 
     public get templates() {
         return this.mTemplates || (this.mTemplates = []);
@@ -331,6 +331,7 @@ export class WAComponent extends WAElement {
 
         if (this.name) {
 
+            this.properties = this.properties || [];
             const propList = this.properties.map( (s) => `
             public ${s.key}: any = ${s.value};
             ` );
