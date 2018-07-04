@@ -334,7 +334,7 @@ export class WAComponent extends WAElement {
             this.properties = this.properties || [];
             const propList = this.properties.map( (s) => `
             public ${s.key}: any = ${s.value};
-            ` );
+            ` ).join("");
 
             return `
     ${this.export ? "export" : ""} class ${this.name} extends ${this.baseType} {
