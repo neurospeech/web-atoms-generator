@@ -160,7 +160,7 @@ export class WAElement extends WANode {
                     if (key === "atom-properties") {
                         // tslint:disable-next-line:no-eval
                         const propertyList = (item as string)
-                            .split(/(\,|\;)/)
+                            .split(",")
                             .map((s) => {
                                 const sv = s.split(":");
                                 const k = sv[0];
