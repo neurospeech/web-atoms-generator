@@ -330,12 +330,15 @@ export class WAComponent extends WAElement {
     public toString(): string {
 
         if (this.name) {
+
+            const propList = this.properties.map( (s) => `
+            public ${s.key}: any = ${s.value};
+            ` );
+
             return `
     ${this.export ? "export" : ""} class ${this.name} extends ${this.baseType} {
 
-        ${this.properties.map( (s) => `
-        public ${s.key}: any = ${s.value};
-        ` )}
+        ${propList}
 
         public create(): void {
             super.create();
