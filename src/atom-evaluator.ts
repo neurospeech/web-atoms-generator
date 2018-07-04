@@ -49,7 +49,15 @@ export class AtomEvaluator {
 						match = match.substr(1);
 					}
 				}
-
+				if (match.indexOf("$this.") === 0) {
+					match = match.substr(6);
+				} else {
+					if (match.indexOf("this.") === 0) {
+						match = match.substr(5);
+					} else {
+						match = match.substr(1);
+					}
+				}
 				var matches:string[] = match.split(".");
 
 				var trail:string = "";
