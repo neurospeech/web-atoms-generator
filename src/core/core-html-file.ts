@@ -149,6 +149,12 @@ export class WAElement extends WANode {
                         continue;
                     }
 
+                    if (key === "atom-component") {
+                        // tslint:disable-next-line:no-console
+                        console.warn(`atom-component is no longer needed, it will be ignored`);
+                        continue;
+                    }
+
                     if (key === "atom-presenter") {
                         this.presenterParent = {
                             name: item,
@@ -333,6 +339,7 @@ export class WAComponent extends WAElement {
 
             this.properties = this.properties || [];
             const propList = this.properties.map( (s) => `
+            @BindableProperty
             public ${s.key}: any = ${s.value};
             ` ).join("");
 
@@ -501,7 +508,10 @@ export class CoreHtmlComponent implements IMarkupComponent {
     private index: number = 1;
 
     constructor(private file: CoreHtmlFile) {
-
+        this.file.imports.BindableProperty = {
+            name: "BindableProperty",
+            import: "web-atoms-core/bin/core/BindableProperty"
+        };
     }
 
     public resolve(name: string): string {
