@@ -340,8 +340,12 @@ export class WAComponent extends WAElement {
             this.properties = this.properties || [];
             const propList = this.properties.map( (s) => `
             @BindableProperty
-            public ${s.key}: any = ${s.value};
+            public ${s.key}: any;
             ` ).join("");
+
+            const initList = this.properties.map( (s) => `
+                this.${s.key} = ${s.value};
+            `).join(";");
 
             return `
     ${this.export ? "export" : ""} class ${this.name} extends ${this.baseType} {
@@ -350,6 +354,8 @@ export class WAComponent extends WAElement {
 
         public create(): void {
             super.create();
+
+            ${initList}
 
             this.element = document.createElement("${this.element.name}");
             ${this.presenterToString}
