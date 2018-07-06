@@ -63,8 +63,13 @@ export class ImageFile implements IMarkupFile {
 
         export class ${p.name} {
 
+            private static mContentUrl: string = null;
             private static get contentUrl(): string {
-                return ${b.map((str) => JSON.stringify(str)).join("+\r\n\t\t")};
+                if (${p.name}.mContentUrl) {
+                    return ${p.name}.mContentUrl;
+                }
+                return ${p.name}.mContentUrl =
+                    ${b.map((str) => JSON.stringify(str)).join("+\r\n\t\t")};
             }
 
             public static get url(): string {
