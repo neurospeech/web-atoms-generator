@@ -1,4 +1,4 @@
-import { existsSync, readFileSync, statSync, writeFileSync } from "fs";
+import { existsSync, PathLike, readFileSync, statSync, writeFileSync } from "fs";
 import { format, parse, ParsedPath } from "path";
 import { IMarkupComponent, IMarkupFile } from "../imarkup-file";
 
@@ -36,7 +36,7 @@ export class ImageFile implements IMarkupFile {
     }
 
     private createSync(content: Buffer): void {
-        const p = parse(this.file);
+        const p = this.clone(this.path);
         p.name = this.toPascalCase(p.name);
         p.ext = ".ts";
 
@@ -78,7 +78,7 @@ export class ImageFile implements IMarkupFile {
     }
 
     private createAsync(content: Buffer): void {
-        const p = parse(this.file);
+        const p = this.clone(this.path);
         p.name = this.toPascalCase(p.name) + "Async";
         p.ext = ".ts";
 
@@ -108,5 +108,9 @@ export class ImageFile implements IMarkupFile {
 
     private toPascalCase(text: string): string {
         return text.split("-").reduce( (pv, t) => (t[0].toUpperCase() + t.substr(1)), "");
+    }
+
+    private clone(p: ParsedPath): any {
+        return JSON.parse(JSON.stringify(p));
     }
 }
