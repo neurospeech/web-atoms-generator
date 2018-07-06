@@ -36,6 +36,10 @@ export class ImageFile implements IMarkupFile {
     }
 
     private createSync(content: Buffer): void {
+        const p = parse(this.file);
+        p.name = this.toPascalCase(p.name);
+        p.ext = ".ts";
+
         let mimeType: string = "image/jpeg";
         switch (this.path.ext) {
             case ".png":
@@ -56,36 +60,38 @@ export class ImageFile implements IMarkupFile {
 
         declare var SystemJS: any;
 
-        export class ${this.path.name} {
+        export class ${p.name} {
 
             private static get contentUrl(): string {
                 return ${b.join("+\r\n\t\t")};
             }
 
             public static url(): string {
-                return \`data:${mimeType};base64,\${${this.path.name}.contentUrl}\`;
+                return \`data:${mimeType};base64,\${${p.name}.contentUrl}\`;
             }
         }
         `;
-        const p = parse(this.file);
-        p.name = p.name + "Async";
         const fileName = format(p);
         writeFileSync(`${fileName}`, s, "utf8");
     }
 
     private createAsync(content: Buffer): void {
+        const p = parse(this.file);
+        p.name = this.toPascalCase(p.name) + "Async";
+        p.ext = ".ts";
+
         const s = `
 
         declare var SystemJS: any;
 
-        export class ${this.path.name}Async {
+        export class ${p.name}Async {
 
             public static url(): Promise<string> {
                 return new Promise(
                     (resolve, reject) => {
-                        SystemJS.import("${this.path.name}")
+                        SystemJS.import("${p.name}")
                             .then((m) => {
-                                resolve(m[${this.path.name}].url());
+                                resolve(m[${p.name}].url());
                             }).catch((r) => {
                                 reject(r);
                             });
@@ -94,9 +100,11 @@ export class ImageFile implements IMarkupFile {
             }
         }
         `;
-        const p = parse(this.file);
-        p.name = p.name + "Async";
         const fileName = format(p);
         writeFileSync(`${fileName}`, s, "utf8");
+    }
+
+    private toPascalCase(text: string): string {
+        return text.split("-").reduce( (pv, t) => (t[0].toUpperCase() + t.substr(1)), "");
     }
 }
