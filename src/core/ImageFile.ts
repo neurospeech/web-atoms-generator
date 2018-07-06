@@ -36,9 +36,10 @@ export class ImageFile implements IMarkupFile {
     }
 
     private createSync(content: Buffer): void {
-        const p = this.clone(this.path);
+        const p = parse(this.file);
         p.name = this.toPascalCase(p.name);
         p.ext = ".ts";
+        p.base = p.name + p.ext;
 
         let mimeType: string = "image/jpeg";
         switch (this.path.ext) {
@@ -78,9 +79,8 @@ export class ImageFile implements IMarkupFile {
     }
 
     private createAsync(content: Buffer): void {
-        const p = this.clone(this.path);
-        p.name = this.toPascalCase(p.name) + "Async";
-        p.ext = ".ts";
+        const p = parse(this.file);
+        p.name = this.toPascalCase(p.name);
 
         const s = `
 
@@ -102,15 +102,15 @@ export class ImageFile implements IMarkupFile {
             }
         }
         `;
+
+        p.name = p.name + "Async";
+        p.ext = ".ts";
+        p.base = p.name + p.ext;
         const fileName = format(p);
         writeFileSync(`${fileName}`, s, "utf8");
     }
 
     private toPascalCase(text: string): string {
         return text.split("-").reduce( (pv, t) => (t[0].toUpperCase() + t.substr(1)), "");
-    }
-
-    private clone(p: ParsedPath): any {
-        return JSON.parse(JSON.stringify(p));
     }
 }
