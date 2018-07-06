@@ -50,7 +50,7 @@ export class ImageFile implements IMarkupFile {
                 mimeType = "image/gif";
                 break;
                 case ".svg":
-                mimeType = "image/svg";
+                mimeType = "image/svg+xml";
                 break;
         }
 
