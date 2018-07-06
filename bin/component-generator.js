@@ -40,7 +40,7 @@ class ComponentGenerator {
                 this.loadFiles(fullName);
             }
             else {
-                if (this.mode === types_1.Mode.Core) {
+                if (/core/i.test(this.mode)) {
                     if (/\.(jpg|png|gif)$/.test(fullName)) {
                         if (this.files.findIndex(x => x.file === fullName) !== -1) {
                             continue;
