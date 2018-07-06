@@ -94,7 +94,7 @@ export class WAAttribute extends WANode {
         }
 
         if (this.value.startsWith("^[") && this.value.endsWith("]")) {
-            const v = HtmlContent.processTwoWayBinding(this.value, `"change,keyup,keydown,blur"`);
+            const v = HtmlContent.processTwoWayBinding(this.value, `["change", "keyup", "keydown", "blur"]`);
             const startsWithThis = v.pathList.findIndex( (p) => p[0] === "this" ) !== -1 ? ",null, this" : "";
             return `
             ${this.atomParent.id}.bind(${this.parent.eid}, "${name}", ${v.expression} ${startsWithThis});`;
