@@ -61,6 +61,7 @@ export class WAAttribute extends WANode {
         if (this.template) {
             return `
         ${this.atomParent.id}.${name} = ${this.template};
+        ${this.template}.__creator = this;
             `;
         }
 
@@ -83,19 +84,21 @@ export class WAAttribute extends WANode {
         if (this.value.startsWith("[") && this.value.endsWith("]")) {
             const v = HtmlContent.processOneWayBinding(this.value);
             return `
-            ${this.atomParent.id}.bind(${this.parent.eid}, "${name}", ${v});`;
+            ${this.atomParent.id}.bind(${this.parent.eid}, "${name}", ${v.expression}, __creator);`;
         }
 
         if (this.value.startsWith("$[") && this.value.endsWith("]")) {
-            const v = HtmlContent.processTwoWayBinding(this.value);
+            const v = HtmlContent.processTwoWayBinding(this.value, "true");
+            const startsWithThis = v.pathList.findIndex( (p) => p[0] === "this" ) !== -1 ? ",null, __creator" : "";
             return `
-            ${this.atomParent.id}.bind(${this.parent.eid}, "${name}", ${v});`;
+            ${this.atomParent.id}.bind(${this.parent.eid}, "${name}", ${v.expression} ${startsWithThis});`;
         }
 
         if (this.value.startsWith("^[") && this.value.endsWith("]")) {
-            const v = HtmlContent.processTwoWayBinding(this.value);
+            const v = HtmlContent.processTwoWayBinding(this.value, `["change", "keyup", "keydown", "blur"]`);
+            const startsWithThis = v.pathList.findIndex( (p) => p[0] === "this" ) !== -1 ? ",null, __creator" : "";
             return `
-            ${this.atomParent.id}.bind(${this.parent.eid}, "${name}", ${v});`;
+            ${this.atomParent.id}.bind(${this.parent.eid}, "${name}", ${v.expression} ${startsWithThis});`;
         }
 
         /**
@@ -352,8 +355,12 @@ export class WAComponent extends WAElement {
 
         ${propList}
 
+        ${this.export ? "" : "public static __creator: any;"}
+
         public create(): void {
             super.create();
+
+            ${this.export ? "const __creator = this" : `const __creator = ${this.name}.__creator`};
 
             ${initList}
 
@@ -562,10 +569,16 @@ export class CoreHtmlComponent implements IMarkupComponent {
     }
 
 }
+type PathList = string[];
+
+interface ICompiledPath {
+    expression: string;
+    pathList: PathList[];
+}
 
 class HtmlContent {
 
-    public static processTwoWayBinding(v: string): string {
+    public static processTwoWayBinding(v: string, events: string): ICompiledPath {
         v = v.substr(2, v.length - 3);
 
         if (v.startsWith("$")) {
@@ -574,9 +587,12 @@ class HtmlContent {
 
         const plist = v.split(".");
 
-        v = ` [${JSON.stringify(plist)}], true `;
+        v = ` [${JSON.stringify(plist)}], ${events} `;
 
-        return v;
+        return {
+            expression: v,
+            pathList: [plist]
+        };
     }
 
     public static escapeLambda(v: string): string {
@@ -595,7 +611,7 @@ class HtmlContent {
         return v;
     }
 
-    public static processOneWayBinding(v: string): string {
+    public static processOneWayBinding(v: string): ICompiledPath {
         v = v.substr(1, v.length - 2);
 
         v = HtmlContent.escapeLambda(v);
@@ -608,7 +624,10 @@ class HtmlContent {
 
         v += ` ${JSON.stringify(vx.path)}, false , (${plist}) => ${vx.original}`;
 
-        return v;
+        return {
+            expression: v,
+            pathList: vx.path
+        };
     }
 
     public static processOneTimeBinding(v: string): string {
