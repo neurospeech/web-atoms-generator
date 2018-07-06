@@ -6,6 +6,7 @@ import { HtmlFile } from "./http-file";
 import { IMarkupComponent, IMarkupFile } from "./imarkup-file";
 import { IWAConfig, Mode } from "./types";
 import { XamlFile } from "./xaml/xaml-file";
+import { ImageFile } from "./core/ImageFile";
 
 
 
@@ -26,6 +27,17 @@ export class ComponentGenerator {
 			if (s.isDirectory()) {
 				this.loadFiles(fullName);
 			} else {
+
+				if (this.mode === Mode.Core) {
+					if(/\.(jpg|png|gif)$/.test(fullName)) {
+						if (this.files.findIndex(x => x.file === fullName) !== -1) {
+							continue;
+						}
+						this.files.push(new ImageFile(fullName));
+						continue;
+					}
+				}
+
 				const isHtml = /\.html$/i.test(fullName);
 				const isXml = /\.(xml|xaml)$/i.test(fullName);
 				if (isHtml || isXml) {

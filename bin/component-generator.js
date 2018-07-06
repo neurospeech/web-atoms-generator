@@ -7,6 +7,7 @@ const core_html_file_1 = require("./core/core-html-file");
 const http_file_1 = require("./http-file");
 const types_1 = require("./types");
 const xaml_file_1 = require("./xaml/xaml-file");
+const ImageFile_1 = require("./core/ImageFile");
 class ComponentGenerator {
     constructor(config) {
         this.config = config;
@@ -39,6 +40,15 @@ class ComponentGenerator {
                 this.loadFiles(fullName);
             }
             else {
+                if (this.mode === types_1.Mode.Core) {
+                    if (/\.(jpg|png|gif)$/.test(fullName)) {
+                        if (this.files.findIndex(x => x.file === fullName) !== -1) {
+                            continue;
+                        }
+                        this.files.push(new ImageFile_1.ImageFile(fullName));
+                        continue;
+                    }
+                }
                 const isHtml = /\.html$/i.test(fullName);
                 const isXml = /\.(xml|xaml)$/i.test(fullName);
                 if (isHtml || isXml) {
