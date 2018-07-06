@@ -67,7 +67,7 @@ export class ImageFile implements IMarkupFile {
                 return ${b.map((str) => JSON.stringify(str)).join("+\r\n\t\t")};
             }
 
-            public static url(): string {
+            public static get url(): string {
                 return \`data:${mimeType};base64,\${${p.name}.contentUrl}\`;
             }
         }
