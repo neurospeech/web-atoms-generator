@@ -32,9 +32,10 @@ class AtomEvaluator {
                     match = match.substr(1);
                 }
             }
-            if (match.indexOf("$this.") === 0) {
-                match = match.substr(6);
-            }
+            // let this be there...
+            // if (match.indexOf("$this.") === 0) {
+            // 	match = match.substr(6);
+            // }
             var matches = match.split(".");
             var trail = "";
             matches = matches.filter(m => {
