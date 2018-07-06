@@ -57,7 +57,7 @@ export class ImageFile implements IMarkupFile {
         const b64 = content.toString("base64");
 
         const b: string[] = b64.match(/(.{1,80})/g);
-        const s = `
+        const s = `// tslint:disable
 
         declare var SystemJS: any;
 
@@ -82,7 +82,7 @@ export class ImageFile implements IMarkupFile {
         const p = parse(this.file);
         p.name = this.toPascalCase(p.name);
 
-        const s = `
+        const s = `// tslint:disable
 
         declare var SystemJS: any;
 
