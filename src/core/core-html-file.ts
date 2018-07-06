@@ -61,6 +61,7 @@ export class WAAttribute extends WANode {
         if (this.template) {
             return `
         ${this.atomParent.id}.${name} = ${this.template};
+        ${this.template}.__creator = this;
             `;
         }
 
@@ -83,19 +84,19 @@ export class WAAttribute extends WANode {
         if (this.value.startsWith("[") && this.value.endsWith("]")) {
             const v = HtmlContent.processOneWayBinding(this.value);
             return `
-            ${this.atomParent.id}.bind(${this.parent.eid}, "${name}", ${v.expression}, this);`;
+            ${this.atomParent.id}.bind(${this.parent.eid}, "${name}", ${v.expression}, __creator);`;
         }
 
         if (this.value.startsWith("$[") && this.value.endsWith("]")) {
             const v = HtmlContent.processTwoWayBinding(this.value, "true");
-            const startsWithThis = v.pathList.findIndex( (p) => p[0] === "this" ) !== -1 ? ",null, this" : "";
+            const startsWithThis = v.pathList.findIndex( (p) => p[0] === "this" ) !== -1 ? ",null, __creator" : "";
             return `
             ${this.atomParent.id}.bind(${this.parent.eid}, "${name}", ${v.expression} ${startsWithThis});`;
         }
 
         if (this.value.startsWith("^[") && this.value.endsWith("]")) {
             const v = HtmlContent.processTwoWayBinding(this.value, `["change", "keyup", "keydown", "blur"]`);
-            const startsWithThis = v.pathList.findIndex( (p) => p[0] === "this" ) !== -1 ? ",null, this" : "";
+            const startsWithThis = v.pathList.findIndex( (p) => p[0] === "this" ) !== -1 ? ",null, __creator" : "";
             return `
             ${this.atomParent.id}.bind(${this.parent.eid}, "${name}", ${v.expression} ${startsWithThis});`;
         }
@@ -354,8 +355,12 @@ export class WAComponent extends WAElement {
 
         ${propList}
 
+        ${this.export ? "" : "public static __creator: any;"}
+
         public create(): void {
             super.create();
+
+            ${this.export ? "const __creator = this" : `const __creator = ${this.name}.__creator`};
 
             ${initList}
 
