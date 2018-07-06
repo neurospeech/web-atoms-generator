@@ -64,7 +64,7 @@ export class ImageFile implements IMarkupFile {
         export class ${p.name} {
 
             private static get contentUrl(): string {
-                return ${b.join("+\r\n\t\t")};
+                return ${b.map((str) => JSON.stringify(str)).join("+\r\n\t\t")};
             }
 
             public static url(): string {
@@ -93,7 +93,7 @@ export class ImageFile implements IMarkupFile {
                     (resolve, reject) => {
                         SystemJS.import("${p.name}")
                             .then((m) => {
-                                resolve(m[${p.name}].url());
+                                resolve(m["${p.name}"].url());
                             }).catch((r) => {
                                 reject(r);
                             });
