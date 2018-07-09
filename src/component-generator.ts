@@ -168,7 +168,7 @@ export class ComponentGenerator {
 			const content = `// tslint:disable
 			declare var UMD: any;
 			UMD = UMD || { resolvePath: (v) => v };
-			export const ModuleFiles = {
+			export const ModuleFiles =
 				${this.writeNames(this.files, packageContent.name)}
 `;
 
