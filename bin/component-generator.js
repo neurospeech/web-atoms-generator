@@ -221,7 +221,7 @@ ${nsStart}['${ns}'] = {};
         const bin = root["bin"];
         if (bin) {
             delete root["bin"];
-            this.merge(root, bin);
+            this.merge(bin, root);
         }
         const content = JSON.stringify(root, undefined, 2);
         return content.replace("\"~(", "UMD.resolvePath(\"").replace(")~\"", "\")");
