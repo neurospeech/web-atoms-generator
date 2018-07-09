@@ -128,8 +128,7 @@ class ComponentGenerator {
 			declare var UMD: any;
 			UMD = UMD || { resolvePath: (v) => v };
 			export const ModuleFiles = {
-				files: ${this.writeNames(this.files, packageContent.name)}
-			}
+				${this.writeNames(this.files, packageContent.name)}
 `;
             fs.writeFileSync(this.folder + "/ModuleFiles.ts", content, "utf8");
             console.log(`Modules written to ${this.folder}/ModuleFiles.ts`);
