@@ -157,6 +157,8 @@ export class ComponentGenerator {
 
 			fs.writeFileSync(this.folder + "/ModuleFiles.ts", content, "utf8");
 
+			console.log(`Modules written to ${this.folder}/ModuleFiles.ts`);
+
 			return;
 		}
 
