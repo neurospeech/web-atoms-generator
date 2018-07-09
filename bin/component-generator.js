@@ -110,6 +110,14 @@ class ComponentGenerator {
             }
         }
         if (/core/i.test(this.mode)) {
+            // write ModuleFiles
+            const content = `
+			export class ModuleFiles {
+				public readonly files: ${this.writeNames(this.files)}
+			}
+			`;
+            fs.writeFileSync(this.folder + "/ModuleFiles.ts", content, "utf8");
+            console.log(`Modules written to ${this.folder}/ModuleFiles.ts`);
             return;
         }
         // sort by baseType...
@@ -155,6 +163,22 @@ ${nsStart}['${ns}'] = {};
             fs.writeFileSync(`${this.outFile}.d.ts`, declarations);
             fs.writeFileSync(`${this.outFile}.mock.js`, mock);
         }
+    }
+    writeNames(f) {
+        const fileNames = f.map((fx) => fx.file.toString().split("/"));
+        const root = {};
+        for (const iterator of fileNames) {
+            let start = root;
+            let parent = root;
+            let last = "";
+            for (const segment of iterator) {
+                parent = start;
+                last = segment;
+                start = start[segment] = (start[segment] || {});
+            }
+            parent[last] = iterator.join("/");
+        }
+        return JSON.stringify(root, undefined, 2);
     }
     createDirectories(fn) {
         var dirName = path.dirname(fn);
