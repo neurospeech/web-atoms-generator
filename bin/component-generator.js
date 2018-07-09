@@ -114,7 +114,7 @@ class ComponentGenerator {
             const content = `
 			// ts-lint:disable
 			export class ModuleFiles {
-				public readonly files: ${this.writeNames(this.files)};
+				public static readonly files: ${this.writeNames(this.files)};
 			}
 `;
             fs.writeFileSync(this.folder + "/ModuleFiles.ts", content, "utf8");
@@ -172,14 +172,18 @@ ${nsStart}['${ns}'] = {};
             let start = root;
             let parent = root;
             let last = "";
+            iterator[0] = "bin";
             for (const segment of iterator) {
                 parent = start;
                 last = segment;
                 start = start[segment] = (start[segment] || {});
             }
+            delete parent[last];
+            const pp = path.parse(last);
+            last = pp.name;
             parent[last] = iterator.join("/");
         }
-        return JSON.stringify(root, undefined, 2);
+        return JSON.stringify(root["src"], undefined, 2);
     }
     createDirectories(fn) {
         var dirName = path.dirname(fn);
