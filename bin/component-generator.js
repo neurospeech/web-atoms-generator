@@ -199,6 +199,22 @@ ${nsStart}['${ns}'] = {};
             last = pp.name;
             const fileName = parent[last] = packageName + "/" + iterator.join("/");
         }
+        // merge all platforms...
+        for (const key in root) {
+            if (root.hasOwnProperty(key)) {
+                const element = root[key];
+                if (/^(web|xf|wpf)$/i.test(key)) {
+                    // merge values back in root...
+                    for (const pkey in element) {
+                        if (element.hasOwnProperty(pkey)) {
+                            const pvalue = element[pkey];
+                            root[pkey] = pvalue;
+                        }
+                    }
+                    delete root[key];
+                }
+            }
+        }
         return JSON.stringify(root["bin"], undefined, 2);
     }
     toSafeName(name) {
