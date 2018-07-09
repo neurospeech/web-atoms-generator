@@ -16,6 +16,7 @@ export declare class ComponentGenerator {
     compile(): void;
     replacePlatformName(name: string[]): string[];
     writeNames(f: IMarkupFile[], packageName: string): string;
+    merge(src: any, dest: any): void;
     toSafeName(name: string): string;
     createDirectories(fn: string): void;
     watcher: fs.FSWatcher;

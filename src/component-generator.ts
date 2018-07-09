@@ -1,7 +1,7 @@
 // tslint:disable
 import * as fs from "fs";
 import * as path from "path";
-import { CoreHtmlFile } from "./core/core-html-file";
+import { CoreHtmlFile, Binding } from './core/core-html-file';
 import { HtmlFile } from "./http-file";
 import { IMarkupComponent, IMarkupFile } from "./imarkup-file";
 import { IWAConfig, Mode } from "./types";
@@ -279,8 +279,31 @@ ${nsStart}['${ns}'] = {};
 			}
 		}
 
-		const content = JSON.stringify(root["bin"], undefined, 2);
+		// move "bin" to root...
+		const bin = root["bin"];
+		if (bin) {
+			delete root["bin"];
+			this.merge(root, bin);
+		}
+
+
+		const content = JSON.stringify(root, undefined, 2);
 		return content.replace("\"~(", "UMD.resolvePath(\"").replace(")~\"", "\")");
+	}
+
+	merge(src: any, dest: any): void {
+		for (const key in src) {
+			if (src.hasOwnProperty(key)) {
+				const element = src[key];
+				if (typeof element === "object") {
+					const dchild = dest[key] || (dest[key] = {});
+					this.merge(element,dchild);
+				} else {
+					dest[key] = element;
+				}
+			}
+		}
+
 	}
 
 	toSafeName(name: string): string {

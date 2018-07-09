@@ -217,8 +217,28 @@ ${nsStart}['${ns}'] = {};
                 parent[last] = "~(" + fileName + ")~";
             }
         }
-        const content = JSON.stringify(root["bin"], undefined, 2);
+        // move "bin" to root...
+        const bin = root["bin"];
+        if (bin) {
+            delete root["bin"];
+            this.merge(root, bin);
+        }
+        const content = JSON.stringify(root, undefined, 2);
         return content.replace("\"~(", "UMD.resolvePath(\"").replace(")~\"", "\")");
+    }
+    merge(src, dest) {
+        for (const key in src) {
+            if (src.hasOwnProperty(key)) {
+                const element = src[key];
+                if (typeof element === "object") {
+                    const dchild = dest[key] || (dest[key] = {});
+                    this.merge(element, dchild);
+                }
+                else {
+                    dest[key] = element;
+                }
+            }
+        }
     }
     toSafeName(name) {
         return html_content_1.HtmlContent.camelCase(name.replace(".", "_"));
