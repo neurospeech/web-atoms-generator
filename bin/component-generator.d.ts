@@ -14,6 +14,7 @@ export declare class ComponentGenerator {
     files: Array<IMarkupFile>;
     constructor(config: IWAConfig);
     compile(): void;
+    replacePlatformName(name: string[]): string[];
     writeNames(f: IMarkupFile[], packageName: string): string;
     toSafeName(name: string): string;
     createDirectories(fn: string): void;

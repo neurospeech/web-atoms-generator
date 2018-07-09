@@ -177,43 +177,40 @@ ${nsStart}['${ns}'] = {};
             fs.writeFileSync(`${this.outFile}.mock.js`, mock);
         }
     }
+    replacePlatformName(name) {
+        name[0] = "bin";
+        const last = name[name.length - 1];
+        if (!/\.(xml|xaml|html|htm)$/i.test(last)) {
+            return name;
+        }
+        const platformFolder = name[1];
+        if (/^(web|xf|wpf)$/i.test(platformFolder)) {
+            name[1] = "{platform}";
+        }
+        const pp = path.parse(last);
+        name[name.length - 1] = pp.name;
+        return name;
+    }
     writeNames(f, packageName) {
-        const fileNames = f.map((fx) => fx.file.toString().split(path.sep));
+        const fileNames = f.map((fx) => this.replacePlatformName(fx.file.toString().split(path.sep)));
         const root = {};
         for (const iterator of fileNames) {
             let start = root;
             let parent = root;
             let last = "";
-            iterator[0] = "bin";
             for (const segment of iterator) {
                 const name = this.toSafeName(segment);
                 parent = start;
                 last = segment;
-                start = start[name] = (start[name] || {});
-            }
-            delete parent[last];
-            const pp = path.parse(last);
-            if (/\.(xml|xaml|html|htm)$/i.test(last)) {
-                iterator[iterator.length - 1] = pp.name;
-            }
-            last = pp.name;
-            const fileName = parent[last] = packageName + "/" + iterator.join("/");
-        }
-        // merge all platforms...
-        for (const key in root) {
-            if (root.hasOwnProperty(key)) {
-                const element = root[key];
-                if (/^(web|xf|wpf)$/i.test(key)) {
-                    // merge values back in root...
-                    for (const pkey in element) {
-                        if (element.hasOwnProperty(pkey)) {
-                            const pvalue = element[pkey];
-                            root[pkey] = pvalue;
-                        }
-                    }
-                    delete root[key];
+                if (name === "{platform}") {
+                    start = parent;
+                }
+                else {
+                    start = start[name] = (start[name] || {});
                 }
             }
+            delete parent[last];
+            parent[last] = packageName + "/" + iterator.join("/");
         }
         return JSON.stringify(root["bin"], undefined, 2);
     }
