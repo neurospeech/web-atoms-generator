@@ -8,6 +8,7 @@ const http_file_1 = require("./http-file");
 const types_1 = require("./types");
 const xaml_file_1 = require("./xaml/xaml-file");
 const ImageFile_1 = require("./core/ImageFile");
+const html_content_1 = require("./html-content");
 class ComponentGenerator {
     constructor(config) {
         this.config = config;
@@ -123,10 +124,9 @@ class ComponentGenerator {
                 flag: "r"
             }));
             // write ModuleFiles
-            const content = `
-			// ts-lint:disable
-			export class ModuleFiles {
-				public static readonly files: ${this.writeNames(this.files, packageContent.name)};
+            const content = `// tslint:disable
+			export const ModuleFiles {
+				files: ${this.writeNames(this.files, packageContent.name)};
 			}
 `;
             fs.writeFileSync(this.folder + "/ModuleFiles.ts", content, "utf8");
@@ -186,9 +186,10 @@ ${nsStart}['${ns}'] = {};
             let last = "";
             iterator[0] = "bin";
             for (const segment of iterator) {
+                const name = this.toSafeName(segment);
                 parent = start;
                 last = segment;
-                start = start[segment] = (start[segment] || {});
+                start = start[name] = (start[name] || {});
             }
             delete parent[last];
             const pp = path.parse(last);
@@ -196,6 +197,9 @@ ${nsStart}['${ns}'] = {};
             parent[last] = packageName + "/" + iterator.join("/");
         }
         return JSON.stringify(root["bin"], undefined, 2);
+    }
+    toSafeName(name) {
+        return html_content_1.HtmlContent.camelCase(name);
     }
     createDirectories(fn) {
         var dirName = path.dirname(fn);

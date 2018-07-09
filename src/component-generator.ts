@@ -7,6 +7,7 @@ import { IMarkupComponent, IMarkupFile } from "./imarkup-file";
 import { IWAConfig, Mode } from "./types";
 import { XamlFile } from "./xaml/xaml-file";
 import { ImageFile } from "./core/ImageFile";
+import { HtmlContent } from "./html-content";
 
 export class ComponentGenerator {
 
@@ -164,10 +165,9 @@ export class ComponentGenerator {
 			}));
 
 			// write ModuleFiles
-			const content = `
-			// ts-lint:disable
-			export class ModuleFiles {
-				public static readonly files: ${this.writeNames(this.files, packageContent.name)};
+			const content = `// tslint:disable
+			export const ModuleFiles {
+				files: ${this.writeNames(this.files, packageContent.name)};
 			}
 `;
 
@@ -245,9 +245,10 @@ ${nsStart}['${ns}'] = {};
 			let last: string = "";
 			iterator[0] = "bin";
 			for (const segment of iterator) {
+				const name = this.toSafeName(segment);
 				parent = start;
 				last = segment;
-				start = start[segment] = (start[segment] || {});
+				start = start[name] = (start[name] || {});
 			}
 			delete parent[last];
 			const pp = path.parse(last);
@@ -255,6 +256,10 @@ ${nsStart}['${ns}'] = {};
 			parent[last] = packageName + "/" + iterator.join("/");
 		}
 		return JSON.stringify(root["bin"], undefined, 2);
+	}
+
+	toSafeName(name: string): string {
+		return HtmlContent.camelCase(name) ;
 	}
 
 	createDirectories(fn: string): void {
