@@ -150,10 +150,11 @@ export class ComponentGenerator {
 
 			// write ModuleFiles
 			const content = `
+			// ts-lint:disable
 			export class ModuleFiles {
-				public readonly files: ${this.writeNames(this.files)}
+				public readonly files: ${this.writeNames(this.files)};
 			}
-			`;
+`;
 
 			fs.writeFileSync(this.folder + "/ModuleFiles.ts", content, "utf8");
 
@@ -221,7 +222,7 @@ ${nsStart}['${ns}'] = {};
 	}
 
 	writeNames(f: IMarkupFile[]): string {
-		const fileNames = f.map( (fx) => fx.file.toString().split("/") );
+		const fileNames = f.map( (fx) => fx.file.toString().split(path.sep) );
 		const root = {};
 		for (const iterator of fileNames) {
 			let start = root;

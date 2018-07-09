@@ -79,7 +79,6 @@ export class ImageFile implements IMarkupFile {
         `;
         const fileName = format(p);
         // tslint:disable-next-line:no-console
-        console.log(`Writing ${fileName}`);
         writeFileSync(`${fileName}`, s, "utf8");
     }
 
