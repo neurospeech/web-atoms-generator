@@ -351,7 +351,7 @@ export class WAComponent extends WAElement {
             `).join(";");
 
             return `
-    ${this.export ? "export" : ""} class ${this.name} extends ${this.baseType} {
+    ${this.export ? "export default " : ""} class ${this.name} extends ${this.baseType} {
 
         ${propList}
 
