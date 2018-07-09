@@ -166,7 +166,7 @@ export class ComponentGenerator {
 
 			// write ModuleFiles
 			const content = `// tslint:disable
-			export const ModuleFiles {
+			export const ModuleFiles = {
 				files: ${this.writeNames(this.files, packageContent.name)}
 			}
 `;
@@ -252,8 +252,11 @@ ${nsStart}['${ns}'] = {};
 			}
 			delete parent[last];
 			const pp = path.parse(last);
+			if (/\.(xml|xaml|html|htm)$/i.test(last)) {
+				iterator[iterator.length-1] = pp.name;
+			}
 			last = pp.name;
-			parent[last] = packageName + "/" + iterator.join("/");
+			const fileName = parent[last] = packageName + "/" + iterator.join("/");
 		}
 		return JSON.stringify(root["bin"], undefined, 2);
 	}
