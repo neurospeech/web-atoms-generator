@@ -83,8 +83,9 @@ export class WAAttribute extends WANode {
 
         if (this.value.startsWith("[") && this.value.endsWith("]")) {
             const v = HtmlContent.processOneWayBinding(this.value);
+            const startsWithThis = v.pathList.findIndex( (p) => p[0] === "this" ) !== -1 ? ", __creator" : "";
             return `
-            ${this.atomParent.id}.bind(${this.parent.eid}, "${name}", ${v.expression}, __creator);`;
+            ${this.atomParent.id}.bind(${this.parent.eid}, "${name}", ${v.expression} ${startsWithThis});`;
         }
 
         if (this.value.startsWith("$[") && this.value.endsWith("]")) {
