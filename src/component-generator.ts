@@ -148,11 +148,26 @@ export class ComponentGenerator {
 
 		if(/core/i.test(this.mode)) {
 
+			let packageFolder = this.folder;
+
+			while(true) {
+				if (fs.existsSync(path.join(packageFolder, "package.json"))) {
+					break;
+				}
+				packageFolder = path.dirname(packageFolder);
+				continue;
+			}
+
+			const packageContent = JSON.parse(fs.readFileSync(path.join(packageFolder, "package.json"), {
+				encoding: "utf8",
+				flag: "r"
+			}));
+
 			// write ModuleFiles
 			const content = `
 			// ts-lint:disable
 			export class ModuleFiles {
-				public static readonly files: ${this.writeNames(this.files)};
+				public static readonly files: ${this.writeNames(this.files, packageContent.name)};
 			}
 `;
 
@@ -221,7 +236,7 @@ ${nsStart}['${ns}'] = {};
 		}
 	}
 
-	writeNames(f: IMarkupFile[]): string {
+	writeNames(f: IMarkupFile[], packageName: string ): string {
 		const fileNames = f.map( (fx) => fx.file.toString().split(path.sep) );
 		const root = {};
 		for (const iterator of fileNames) {
@@ -237,9 +252,9 @@ ${nsStart}['${ns}'] = {};
 			delete parent[last];
 			const pp = path.parse(last);
 			last = pp.name;
-			parent[last] = iterator.join("/");
+			parent[last] = packageName + "/" + iterator.join("/");
 		}
-		return JSON.stringify(root["src"], undefined, 2);
+		return JSON.stringify(root["bin"], undefined, 2);
 	}
 
 	createDirectories(fn: string): void {
