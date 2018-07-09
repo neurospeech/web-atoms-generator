@@ -166,6 +166,8 @@ export class ComponentGenerator {
 
 			// write ModuleFiles
 			const content = `// tslint:disable
+			declare var UMD: any;
+			UMD = UMD || { resolvePath: (v) => v };
 			export const ModuleFiles = {
 				files: ${this.writeNames(this.files, packageContent.name)}
 			}
@@ -270,14 +272,19 @@ ${nsStart}['${ns}'] = {};
 				}
 			}
 			delete parent[last];
-			parent[last] = packageName + "/" + iterator.join("/");
+			const fileName = parent[last] = packageName + "/" + iterator.join("/");
+
+			if (/^(\.(jpg|gif|jpeg|svg|png))$/.test(fileName)) {
+				parent[last] = "~(" + fileName + ")~";
+			}
 		}
 
-		return JSON.stringify(root["bin"], undefined, 2);
+		const content = JSON.stringify(root["bin"], undefined, 2);
+		return content.replace("\"~(", "UMD.resolvePath(\"").replace(")~\"", "\")");
 	}
 
 	toSafeName(name: string): string {
-		return HtmlContent.camelCase(name) ;
+		return HtmlContent.camelCase(name.replace(".","_")) ;
 	}
 
 	createDirectories(fn: string): void {

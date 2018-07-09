@@ -25,10 +25,10 @@ export class ImageFile implements IMarkupFile {
 
     public compile(): void {
         try {
-            const content = readFileSync(this.file);
+            // const content = readFileSync(this.file);
             this.lastTime = this.currentTime;
-            this.createSync(content);
-            this.createAsync(content);
+            // this.createSync(content);
+            // this.createAsync(content);
         } catch (error) {
             // tslint:disable-next-line:no-console
             console.error(error);
