@@ -167,7 +167,7 @@ export class ComponentGenerator {
 			// write ModuleFiles
 			const content = `// tslint:disable
 			export const ModuleFiles {
-				files: ${this.writeNames(this.files, packageContent.name)};
+				files: ${this.writeNames(this.files, packageContent.name)}
 			}
 `;
 
