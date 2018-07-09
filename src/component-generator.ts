@@ -8,8 +8,6 @@ import { IWAConfig, Mode } from "./types";
 import { XamlFile } from "./xaml/xaml-file";
 import { ImageFile } from "./core/ImageFile";
 
-
-
 export class ComponentGenerator {
 
 	nsNamesapce: string;
@@ -149,6 +147,16 @@ export class ComponentGenerator {
 		}
 
 		if(/core/i.test(this.mode)) {
+
+			// write ModuleFiles
+			const content = `
+			export class ModuleFiles {
+				public readonly files: ${this.writeNames(this.files)}
+			}
+			`;
+
+			fs.writeFileSync(this.folder + "/ModuleFiles.ts", content, "utf8");
+
 			return;
 		}
 
@@ -208,6 +216,23 @@ ${nsStart}['${ns}'] = {};
 			fs.writeFileSync(`${this.outFile}.d.ts`, declarations);
 			fs.writeFileSync(`${this.outFile}.mock.js`, mock);
 		}
+	}
+
+	writeNames(f: IMarkupFile[]): string {
+		const fileNames = f.map( (fx) => fx.file.toString().split("/") );
+		const root = {};
+		for (const iterator of fileNames) {
+			let start = root;
+			let parent = root;
+			let last: string = "";
+			for (const segment of iterator) {
+				parent = start;
+				last = segment;
+				start = start[segment] = (start[segment] || {});
+			}
+			parent[last] = iterator.join("/");
+		}
+		return JSON.stringify(root, undefined, 2);
 	}
 
 	createDirectories(fn: string): void {
