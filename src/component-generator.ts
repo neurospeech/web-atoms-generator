@@ -239,11 +239,11 @@ ${nsStart}['${ns}'] = {};
 	}
 
 	replacePlatformName(name: string[]): string[] {
-		name[0] = "bin";
 		const last = name[name.length-1];
 		if( !/\.(xml|xaml|html|htm)$/i.test(last)) {
 			return name;
 		}
+		name[0] = "bin";
 		const platformFolder = name[1];
 		if (/^(web|xf|wpf)$/i.test(platformFolder)) {
 			name[1] = "{platform}";
