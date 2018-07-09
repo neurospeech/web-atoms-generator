@@ -263,7 +263,7 @@ ${nsStart}['${ns}'] = {};
 			for (const segment of iterator) {
 				const name = this.toSafeName(segment);
 				parent = start;
-				last = segment;
+				last = name;
 
 				if (name === "{platform}") {
 					start = parent;
@@ -274,7 +274,7 @@ ${nsStart}['${ns}'] = {};
 			delete parent[last];
 			const fileName = parent[last] = packageName + "/" + iterator.join("/");
 
-			if (/^(\.(jpg|gif|jpeg|svg|png))$/.test(fileName)) {
+			if (/(\.(jpg|gif|jpeg|svg|png))$/.test(fileName)) {
 				parent[last] = "~(" + fileName + ")~";
 			}
 		}
