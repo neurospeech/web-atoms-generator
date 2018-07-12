@@ -287,7 +287,7 @@ ${nsStart}['${ns}'] = {};
 
 
 		const content = JSON.stringify(root, undefined, 2);
-		return content.replace(/\"\~\(/, "UMD.resolvePath(\"").replace(/\)\~\"/, "\")");
+		return content.replace(/\"\~\(/g, "UMD.resolvePath(\"").replace(/\)\~\"/g, "\")");
 	}
 
 	merge(src: any, dest: any): void {
