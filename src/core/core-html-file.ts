@@ -60,8 +60,7 @@ export class WAAttribute extends WANode {
 
         if (this.template) {
             return `
-        ${this.atomParent.id}.${name} = ${this.template};
-        ${this.template}.__creator = this;
+        ${this.atomParent.id}.${name} = ${this.template}Creator(this);
             `;
         }
 
@@ -351,30 +350,35 @@ export class WAComponent extends WAElement {
                 this.${s.key} = ${s.value};
             `).join(";");
 
-            return `
-    ${this.export ? "export default " : ""} class ${this.name} extends ${this.baseType} {
+            const classContent = ` class ${this.name} extends ${this.baseType} {
 
-        ${propList}
+                ${propList}
 
-        ${this.export ? "" : "public static __creator: any;"}
+                public create(): void {
+                    super.create();
 
-        public create(): void {
-            super.create();
+                    ${this.export ? "const __creator = this" : ` `};
 
-            ${this.export ? "const __creator = this" : `const __creator = ${this.name}.__creator`};
+                    ${initList}
 
-            ${initList}
+                    this.element = document.createElement("${this.element.name}");
+                    ${this.presenterToString}
+                    ${this.children.join("\r\n")}
+                    ${this.attributes.join("\r\n")}
+                }
+            }
 
-            this.element = document.createElement("${this.element.name}");
-            ${this.presenterToString}
-            ${this.children.join("\r\n")}
-            ${this.attributes.join("\r\n")}
-        }
-    }
-
-    ${this.templates.join("\r\n")}
+            ${this.templates.join("\r\n")}
 
             `;
+
+            if (this.export) {
+                return `export default ${classContent}`;
+            }
+
+            return `function ${this.name}Creator(__creator){
+                return ${classContent}
+            }`;
         } else {
             return `
             const ${this.id} = new ${this.baseType}(this.app, document.createElement("${this.element.name}"));
