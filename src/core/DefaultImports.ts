@@ -8,5 +8,6 @@ export const DefaultImports = [
     "AtomDockPanel",
     "AtomComboBox",
     "AtomGridView",
-    "AtomGridSplitter"
+    "AtomGridSplitter",
+    "AtomTabbedPage"
 ];
