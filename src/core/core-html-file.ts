@@ -248,7 +248,7 @@ export class WAElement extends WANode {
             return;
         }
 
-        const name = e.tag;
+        const name = e.name || e.tag;
         if (name.charAt(0).toUpperCase() === name.charAt(0)) {
             // since first character is upper case, it is a component...
             const tokens = name.split(".");
