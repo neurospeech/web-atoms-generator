@@ -2,12 +2,13 @@ export const DefaultImports = [
     "AtomControl",
     "AtomItemsControl",
     "AtomListBox",
-    "AtomPageView",
+    "AtomFrame",
     "AtomToggleButtonBar",
     "AtomWindow",
     "AtomDockPanel",
     "AtomComboBox",
     "AtomGridView",
     "AtomGridSplitter",
-    "AtomTabbedPage"
+    "AtomTabbedPage",
+    "AtomPage"
 ];
