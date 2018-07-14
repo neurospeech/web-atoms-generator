@@ -13,19 +13,19 @@ export class TestCase extends TestItem {
         });
 
         chf.compileContent(`
-        <div>
+        <AtomControl.div>
 
             <span atom-text="Text"></span>
 
             <span atom-text="{\` \${$viewModel.firstName} \${$viewModel.lastName} \`}"></span>
 
-            <div atom-type="atom:AtomItemsControl" atom-items="[$viewModel.items]">
-                <div atom-presenter="itemsPresenter">
-                    <span atom-template="itemTemplate" atom-text="a">
+            <AtomItemsControl.div items="[$viewModel.items]">
+                <div presenter="itemsPresenter">
+                    <span template="itemTemplate" text="a">
                     </span>
                 </div>
-            </div>
-        </div>
+            </AtomItemsControl.div>
+        </AtomControl.div>
         `);
 
         // tslint:disable-next-line:no-console

@@ -262,7 +262,7 @@ export class WAElement extends WANode {
     }
 
     public processTagName(e: IHtmlNode): void {
-        const name = e.name || e.tag;
+        const name = e.name;
         if (name && name.charAt(0).toUpperCase() === name.charAt(0)) {
             // since first character is upper case, it is a component...
             const tokens = name.split(".");
@@ -495,7 +495,9 @@ export class CoreHtmlFile implements IMarkupFile {
             }
         }, { withStartIndices: true });
 
-        const parser = new Parser(handler);
+        const parser = new Parser(handler, {
+            lowerCaseTags: false
+        });
         parser.write(content);
         parser.end();
 
