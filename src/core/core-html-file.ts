@@ -381,7 +381,9 @@ export class WAComponent extends WAElement {
 
                     ${initList}
 
-                    this.element = document.createElement("${this.element.name}");
+                    ${this.element.name === "null" ?
+                        "" :
+                        `this.element = document.createElement("${this.element.name}");`}
                     ${this.presenterToString}
                     ${this.children.join("\r\n")}
                     ${this.attributes.join("\r\n")}
