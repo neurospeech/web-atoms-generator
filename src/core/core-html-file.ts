@@ -154,7 +154,7 @@ export class WAElement extends WANode {
                 if (this.element.attribs.hasOwnProperty(key)) {
                     const item = this.element.attribs[key];
 
-                    if (key === "atom-type" || key === "atom-template") {
+                    if (/(atom\-type|(atom-)?template)/i.test(key)) {
                         continue;
                     }
 
@@ -164,7 +164,7 @@ export class WAElement extends WANode {
                         continue;
                     }
 
-                    if (key === "atom-presenter") {
+                    if (key === "atom-presenter" || key === "presenter") {
                         this.presenterParent = {
                             name: item,
                             parent: this.atomParent
@@ -172,7 +172,7 @@ export class WAElement extends WANode {
                         continue;
                     }
 
-                    if (key === "atom-properties") {
+                    if (key === "atom-properties" || key === "properties") {
                         // tslint:disable-next-line:no-eval
                         const propertyList = (item as string)
                             .split(",")
@@ -246,6 +246,14 @@ export class WAElement extends WANode {
 
             ap.setAttribute(tt, null, tn);
             return;
+        }
+
+        const name = e.name;
+        if (name.charAt(0).toUpperCase() === name.charAt(0)) {
+            // since first character is upper case, it is a component...
+            const tokens = name.split(".");
+            e.attribs["atom-type"] = tokens[0];
+            e.name = tokens[1] || "null";
         }
 
         const at = e.attribs ? e.attribs["atom-type"] : null;
@@ -386,8 +394,11 @@ export class WAComponent extends WAElement {
                 return ${classContent}
             }`;
         } else {
+
+            const elementName = this.element.name === "null" ? "" : `, document.createElement("${this.element.name}")`;
+
             return `
-            const ${this.id} = new ${this.baseType}(this.app, document.createElement("${this.element.name}"));
+            const ${this.id} = new ${this.baseType}(this.app${elementName});
             ${this.presenterToString}
             ${this.children.join("\r\n")}
             ${this.attributes.join("\r\n")}
