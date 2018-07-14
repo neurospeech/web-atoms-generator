@@ -150,6 +150,8 @@ export class WAElement extends WANode {
 
         try {
 
+            this.processTagName(element);
+
             for (const key in this.element.attribs) {
                 if (this.element.attribs.hasOwnProperty(key)) {
                     const item = this.element.attribs[key];
@@ -248,13 +250,7 @@ export class WAElement extends WANode {
             return;
         }
 
-        const name = e.name || e.tag;
-        if (name.charAt(0).toUpperCase() === name.charAt(0)) {
-            // since first character is upper case, it is a component...
-            const tokens = name.split(".");
-            e.attribs["atom-type"] = tokens[0];
-            e.name = tokens[1] || "null";
-        }
+        this.processTagName(e);
 
         const at = e.attribs ? e.attribs["atom-type"] : null;
         if (at) {
@@ -262,6 +258,16 @@ export class WAElement extends WANode {
             this.addChild(ac);
         } else {
             this.addChild(new WAElement(this, e));
+        }
+    }
+
+    public processTagName(e: IHtmlNode): void {
+        const name = e.name || e.tag;
+        if (name && name.charAt(0).toUpperCase() === name.charAt(0)) {
+            // since first character is upper case, it is a component...
+            const tokens = name.split(".");
+            e.attribs["atom-type"] = tokens[0];
+            e.name = (tokens[1] || "null").toLowerCase();
         }
     }
 
