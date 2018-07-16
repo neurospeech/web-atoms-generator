@@ -3,12 +3,12 @@ Object.defineProperty(exports, "__esModule", { value: true });
 // tslint:disable
 const fs = require("fs");
 const path = require("path");
-const core_html_file_1 = require("./core/core-html-file");
 const http_file_1 = require("./http-file");
 const types_1 = require("./types");
 const xaml_file_1 = require("./xaml/xaml-file");
 const ImageFile_1 = require("./core/ImageFile");
 const html_content_1 = require("./html-content");
+const CoreHtmlFile_1 = require("./core/CoreHtmlFile");
 class ComponentGenerator {
     constructor(config) {
         this.config = config;
@@ -65,7 +65,7 @@ class ComponentGenerator {
                             this.files.push(new xaml_file_1.XamlFile(fullName, this.config));
                         }
                         else {
-                            this.files.push(new core_html_file_1.CoreHtmlFile(fullName, this.config));
+                            this.files.push(new CoreHtmlFile_1.CoreHtmlFile(fullName, this.config));
                         }
                     }
                 }
