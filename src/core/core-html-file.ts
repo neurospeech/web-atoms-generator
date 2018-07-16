@@ -152,7 +152,6 @@ export class WAElement extends WANode {
 
             this.processTagName(element);
 
-
             if (element.attribs) {
                 const defaultStyle = element.attribs["default-style"] || element.attribs.defaultStyle;
                 if (defaultStyle) {
@@ -393,8 +392,8 @@ export class WAComponent extends WAElement {
                         "" :
                         `this.element = document.createElement("${this.element.name}");`}
                     ${this.presenterToString}
-                    ${this.children.join("\r\n")}
                     ${this.attributes.join("\r\n")}
+                    ${this.children.join("\r\n")}
                 }
             }
 
