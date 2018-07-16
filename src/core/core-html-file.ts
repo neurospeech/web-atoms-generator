@@ -152,9 +152,12 @@ export class WAElement extends WANode {
 
             this.processTagName(element);
 
-            const defaultStyle = element.attribs["default-style"] || element.attribs.defaultStyle;
-            if (defaultStyle) {
-                this.setAttribute("defaultStyle", defaultStyle);
+
+            if (element.attribs) {
+                const defaultStyle = element.attribs["default-style"] || element.attribs.defaultStyle;
+                if (defaultStyle) {
+                    this.setAttribute("defaultStyle", defaultStyle);
+                }
             }
 
             for (const key in this.element.attribs) {
