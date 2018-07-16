@@ -1,19 +1,16 @@
+import { CoreHtmlComponent } from "./CoreHtmlComponent";
+
 import { existsSync, PathLike, readFileSync, statSync, writeFileSync } from "fs";
 import { DomHandler, Parser } from "htmlparser2";
 import { dirname, parse, sep } from "path";
-import { AtomEvaluator, CompiledMethod } from "../atom-evaluator";
+import { CompiledMethod } from "../atom-evaluator";
 import { GeneratorContext } from "../generator-context";
 import { IHtmlNode } from "../html-node";
 import { IMarkupComponent, IMarkupFile } from "../imarkup-file";
 import { IWAConfig } from "../types";
-import { DefaultImports } from "./DefaultImports";
-
-export enum Binding {
-    None,
-    OneTime,
-    OneWay,
-    TwoWay
-}
+import { Binding } from "./Binding";
+import { HtmlContent } from "./HtmlContent";
+import { IImportDefinitions } from "./IImportDefinitions";
 
 export class WANode {
 
@@ -424,16 +421,6 @@ export class WAComponent extends WAElement {
     }
 }
 
-export interface IImportDefinition {
-    prefix?: string;
-    name?: string;
-    import?: string ;
-}
-
-export interface IImportDefinitions {
-    [key: string]: IImportDefinition;
-}
-
 export class CoreHtmlFile implements IMarkupFile {
 
     public get currentTime(): number {
@@ -545,160 +532,4 @@ export class CoreHtmlFile implements IMarkupFile {
         }
     }
 
-}
-
-export class CoreHtmlComponent implements IMarkupComponent {
-
-    public baseType: string;
-    public name: string;
-    public nsNamespace: string;
-    public generated: string = "// tslint:disable\r\n";
-    public config: IWAConfig;
-
-    public root: WAComponent;
-
-    private index: number = 1;
-
-    constructor(private file: CoreHtmlFile) {
-        this.file.imports.BindableProperty = {
-            name: "BindableProperty",
-            import: "web-atoms-core/bin/core/BindableProperty"
-        };
-    }
-
-    public resolve(name: string): string {
-
-        if (DefaultImports.indexOf(name) !== -1) {
-            if (!this.file.imports[name]) {
-                this.file.imports[name] = { name, import: `web-atoms-core/bin/web/controls/${name}` };
-            }
-        }
-
-        // const tokens = name.split(":");
-        // if (tokens.length === 1) {
-        //     return name;
-        // }
-        // const prefix = tokens[0];
-        // name = tokens[1];
-
-        // const p = `i${this.file.importNameIndex++}`;
-
-        // const im = this.file.imports[name] || (this.file.imports[name] = { prefix: `${p}`, name: `${p}_${name}` });
-        // if (!im.import) {
-        //     im.import = this.config.imports[prefix];
-        //     if (!im.import.endsWith("/")) {
-        //         im.import += "/";
-        //     }
-        //     im.import += name;
-        // }
-        return name;
-    }
-
-    public generateCode(): void {
-
-        // let us resolve all names...
-        this.root.resolveNames(this);
-
-        this.generated = this.root.toString();
-
-    }
-
-    public writeLine(line?: string): void {
-        this.generated += (line || "") + "\r\n";
-    }
-
-}
-type PathList = string[];
-
-interface ICompiledPath {
-    expression: string;
-    pathList: PathList[];
-}
-
-class HtmlContent {
-
-    public static processTwoWayBinding(v: string, events: string): ICompiledPath {
-        v = v.substr(2, v.length - 3);
-
-        if (v.startsWith("$")) {
-            v = v.substr(1);
-        }
-
-        const plist = v.split(".");
-
-        v = ` [${JSON.stringify(plist)}], ${events} `;
-
-        return {
-            expression: v,
-            pathList: [plist]
-        };
-    }
-
-    public static escapeLambda(v: string): string {
-
-        v = v.trim();
-
-//         if (v.startsWith("()=>") || v.startsWith("() =>") || v.startsWith("=>")) {
-//             v = v.replace("()=>", "");
-//             v = v.replace("() =>", "");
-//             v = v.replace("=>", "");
-//             return `function(){
-//     return ${v};
-// }`;
-//         }
-
-        return v;
-    }
-
-    public static processOneWayBinding(v: string): ICompiledPath {
-        v = v.substr(1, v.length - 2);
-
-        v = HtmlContent.escapeLambda(v);
-
-        const vx = AtomEvaluator.instance.parse(v);
-
-        v = "";
-
-        const plist: string = vx.path.map((p, i) => `v${i + 1}`).join(",");
-
-        v += ` ${JSON.stringify(vx.path)}, false , (${plist}) => ${vx.original}`;
-
-        return {
-            expression: v,
-            pathList: vx.path
-        };
-    }
-
-    public static processOneTimeBinding(v: string): string {
-        let original = v;
-        v = v.substr(1, v.length - 2);
-
-        v = HtmlContent.escapeLambda(v);
-
-        const vx = AtomEvaluator.instance.parse(v);
-
-        v = vx.original;
-
-        for (let i: number = 0; i < vx.path.length; i++) {
-            const p: string[] = vx.path[i];
-            const start: string = "this";
-            v = v.replace(`v${i + 1}`, `this.${p.join(".")}`);
-            original = null;
-        }
-
-        return original || v;
-    }
-
-    public static camelCase(text: string): string {
-        if (text.startsWith("atom-")) {
-            text = text.substr(5);
-        }
-
-        return text.split("-").map((v, i) => {
-            if (i) {
-                v = v.charAt(0).toUpperCase() + v.substr(1);
-            }
-            return v;
-        }).join("");
-    }
 }

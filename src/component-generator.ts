@@ -1,13 +1,14 @@
 // tslint:disable
 import * as fs from "fs";
 import * as path from "path";
-import { CoreHtmlFile, Binding } from './core/core-html-file';
+import { Binding } from "./core/Binding";
 import { HtmlFile } from "./http-file";
 import { IMarkupComponent, IMarkupFile } from "./imarkup-file";
 import { IWAConfig, Mode } from "./types";
 import { XamlFile } from "./xaml/xaml-file";
 import { ImageFile } from "./core/ImageFile";
 import { HtmlContent } from "./html-content";
+import { CoreHtmlFile } from "./core/core-html-file";
 
 export class ComponentGenerator {
 
