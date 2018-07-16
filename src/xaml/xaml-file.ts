@@ -2,6 +2,7 @@ import { PathLike, readFileSync, statSync } from "fs";
 import { XmlDocument, XmlElement } from "xmldoc";
 import { IMarkupComponent, IMarkupFile } from "../imarkup-file";
 import { IWAConfig } from "../types";
+import { WAXComponent } from "./WAXComponent";
 
 export class XamlComponent implements IMarkupComponent {
     public baseType: string;
@@ -44,5 +45,17 @@ export class XamlFile implements IMarkupFile {
                 }
             }
         }
+
+        // remove all bindings...
+        const wa = new WAXComponent(doc, "Root", []);
+
+        // tslint:disable-next-line:no-console
+        console.log(wa.toString());
+
+        for (const iterator of wa.children) {
+            // tslint:disable-next-line:no-console
+            console.log(iterator.toString());
+        }
     }
+
 }

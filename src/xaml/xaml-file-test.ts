@@ -8,8 +8,7 @@ export class TestCase extends TestItem {
     public test(): void {
         const f = new XamlFile("", { imports: {} });
 
-        f.compileContent(`<atom:AtomPage xmlns:atom="http://web-atoms.org/xaml" xmlns="clr-namespace:Xamarin.Forms">
-            <Grid>
+        f.compileContent(`<Grid xmlns="clr-namespace:Xamarin.Forms">
                 <Grid.RowDefinitions>
                     <RowDefinition/>
                     <RowDefinition/>
@@ -23,12 +22,21 @@ export class TestCase extends TestItem {
                 </Grid.ColumnDefinitions>
 
                 <Label
-                    Grid.Row="1"
+                    Grid.Row="0"
                     Grid.Column="1"
-                    Text="{ \`\${$viewModel.firstName}\` }"
+                    Text="@{ \`\${$viewModel.firstName}\` }"
                 />
-            </Grid>
-        </atom:AtomPage>`);
+
+                <ListView ItemsSource="[ $viewModel.items ]">
+                    <ListView.ItemTemplate>
+                        <DataTemplate>
+                            <Label
+                                Text="@{$data.label}"
+                                />
+                        </DataTemplate>
+                    </ListView.ItemTemplate>
+                </ListView>
+            </Grid>`);
     }
 
 }

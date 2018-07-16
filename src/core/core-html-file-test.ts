@@ -29,6 +29,6 @@ export class TestCase extends TestItem {
         `);
 
         // tslint:disable-next-line:no-console
-        console.log(chf.nodes[0].generated);
+        // console.log(chf.nodes[0].generated);
     }
 }
