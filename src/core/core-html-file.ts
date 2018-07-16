@@ -51,7 +51,7 @@ export class WAAttribute extends WANode {
 
         let name = this.name;
 
-        if (/atom\-/i.test(name)) {
+        if (/^atom\-/i.test(name)) {
             name = name.substring(5);
         }
 
@@ -152,11 +152,16 @@ export class WAElement extends WANode {
 
             this.processTagName(element);
 
+            const defaultStyle = element.attribs["default-style"] || element.attribs.defaultStyle;
+            if (defaultStyle) {
+                this.setAttribute("defaultStyle", defaultStyle);
+            }
+
             for (const key in this.element.attribs) {
                 if (this.element.attribs.hasOwnProperty(key)) {
                     const item = this.element.attribs[key];
 
-                    if (/(atom\-type|(atom-)?template)/i.test(key)) {
+                    if (/^((atom\-type)|((atom-)?template)|(default\-style)|(defaultStyle))/i.test(key)) {
                         continue;
                     }
 
@@ -234,7 +239,7 @@ export class WAElement extends WANode {
             return;
         }
 
-        const tt = e.attribs ? e.attribs["atom-template"] : null;
+        const tt = e.attribs ? (e.attribs.template || e.attribs["atom-template"]) : null;
 
         if (tt) {
 
