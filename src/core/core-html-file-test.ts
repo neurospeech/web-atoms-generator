@@ -1,5 +1,5 @@
 import { Category, Test, TestItem } from "web-atoms-core/bin/unit/base-test";
-import { CoreHtmlFile } from "./core-html-file";
+import { CoreHtmlFile } from "./CoreHtmlFile";
 
 @Category("Core Html")
 export class TestCase extends TestItem {

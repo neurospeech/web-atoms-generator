@@ -1,7 +1,8 @@
 import { IMarkupComponent } from "../imarkup-file";
 import { IWAConfig } from "../types";
-import { CoreHtmlFile, WAComponent } from "./core-html-file";
+import { CoreHtmlFile } from "./CoreHtmlFile";
 import { DefaultImports } from "./DefaultImports";
+import { WAComponent } from "./WAComponents";
 
 export class CoreHtmlComponent implements IMarkupComponent {
     public baseType: string;

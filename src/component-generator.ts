@@ -8,7 +8,8 @@ import { IWAConfig, Mode } from "./types";
 import { XamlFile } from "./xaml/xaml-file";
 import { ImageFile } from "./core/ImageFile";
 import { HtmlContent } from "./html-content";
-import { CoreHtmlFile } from "./core/core-html-file";
+import { CoreHtmlFile } from "./core/CoreHtmlFile";
+
 
 export class ComponentGenerator {
 
