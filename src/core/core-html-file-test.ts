@@ -13,7 +13,7 @@ export class TestCase extends TestItem {
         });
 
         chf.compileContent(`
-        <AtomControl.div>
+        <AtomListBox.div>
 
             <span atom-text="Text"></span>
 
@@ -25,7 +25,7 @@ export class TestCase extends TestItem {
                     </span>
                 </div>
             </AtomItemsControl.div>
-        </AtomControl.div>
+        </AtomListBox.div>
         `);
 
         // tslint:disable-next-line:no-console
