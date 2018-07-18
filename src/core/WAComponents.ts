@@ -263,6 +263,7 @@ export class WAElement extends WANode {
         if (name && name.charAt(0).toUpperCase() === name.charAt(0)) {
             // since first character is upper case, it is a component...
             const tokens = name.split(".");
+            e.attribs = e.attribs || {};
             e.attribs["atom-type"] = tokens[0];
             e.name = (tokens[1] || "null").toLowerCase();
         }

@@ -105,7 +105,6 @@ export class CoreHtmlFile implements IMarkupFile {
 
         const root = new CoreHtmlComponent(this);
         root.root = new WAComponent(null, roots[0], name, "AtomControl") ;
-        root.name = name;
         root.root.export = true;
 
         this.nodes.push(root);
