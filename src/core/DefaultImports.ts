@@ -10,5 +10,7 @@ export const DefaultImports = [
     "AtomGridView",
     "AtomGridSplitter",
     "AtomTabbedPage",
-    "AtomPage"
+    "AtomPage",
+    "AtomViewPager",
+    "AtomViewStack"
 ];
