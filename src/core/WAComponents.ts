@@ -345,6 +345,8 @@ export class WAComponent extends WAElement {
             }
         }
 
+        // // tslint:disable-next-line:no-debugger
+        // debugger;
         if (this.baseType) {
             this.baseType = e.resolve(this.baseType);
         }
