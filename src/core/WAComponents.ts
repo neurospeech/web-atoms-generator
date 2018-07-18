@@ -344,9 +344,9 @@ export class WAComponent extends WAElement {
             }
         }
 
-        if (this.baseType) {
-            this.baseType = e.resolve(this.baseType);
-        }
+        // if (this.baseType) {
+        this.baseType = e.resolve(this.baseType);
+        // }
 
         for (const item of this.templates) {
             item.resolveNames(e);
