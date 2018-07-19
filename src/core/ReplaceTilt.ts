@@ -8,9 +8,6 @@ export class ReplaceTilt {
 
         return content.replace(regex, (m: string) => {
 
-            // tslint:disable-next-line:no-console
-            console.log(`Replacing ${m} to ${filePath}`);
-
             m = m.substr(2, m.length - 3);
             if (m.startsWith("/")) {
                 m = m.substr(1);
