@@ -6,6 +6,7 @@ import { IMarkupComponent, IMarkupFile } from "../imarkup-file";
 import { IWAConfig } from "../types";
 import { CoreHtmlComponent } from "./CoreHtmlComponent";
 import { IImportDefinitions } from "./IImportDefinitions";
+import { ReplaceTilt } from "./ReplaceTilt";
 import { WAComponent } from "./WAComponents";
 
 export class CoreHtmlFile implements IMarkupFile {
@@ -59,10 +60,14 @@ export class CoreHtmlFile implements IMarkupFile {
 
             const fname = p.dir + sep + root.name + ".ts";
 
+            let generatedText: string = importStatement + root.generated;
+
+            generatedText = ReplaceTilt.replace(generatedText, this.file.toString());
+
             // if (existsSync(fname)) {
 
             // }
-            writeFileSync(fname, importStatement + root.generated );
+            writeFileSync(fname, generatedText );
         } catch (error) {
             // tslint:disable-next-line:no-console
             console.error(error);

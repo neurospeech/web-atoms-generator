@@ -1,4 +1,4 @@
-interface IKeyValues<T> {
+export interface IKeyValues<T> {
     key: T;
     values: T[];
 }

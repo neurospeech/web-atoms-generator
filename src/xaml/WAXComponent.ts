@@ -144,7 +144,7 @@ function ${this.name}_Creator(__creator: any): any {
     }
 }
 
-class WAXAttribute {
+export class WAXAttribute {
 
     constructor(
         public parentName: string,
