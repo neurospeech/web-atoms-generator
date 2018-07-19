@@ -4,7 +4,7 @@ import * as path from "path";
 export class ReplaceTilt {
 
     public static replace(content: string, filePath: string): string {
-        const regex = /^\"\~([^\"]+)\"$/gi;
+        const regex = /\"\~([^\"]+)\"/gi;
 
         return content.replace(regex, (m: string) => {
 
