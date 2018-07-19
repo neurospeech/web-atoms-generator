@@ -62,7 +62,7 @@ export class CoreHtmlFile implements IMarkupFile {
 
             let generatedText: string = importStatement + root.generated;
 
-            generatedText = ReplaceTilt.replace(generatedText, this.file.toString());
+            generatedText = ReplaceTilt.replace(generatedText, p.dir);
 
             // if (existsSync(fname)) {
 
