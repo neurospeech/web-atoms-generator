@@ -15,13 +15,13 @@ export class CoreHtmlComponent implements IMarkupComponent {
     constructor(private file: CoreHtmlFile) {
         this.file.imports.BindableProperty = {
             name: "BindableProperty",
-            import: "web-atoms-core/bin/core/BindableProperty"
+            import: "web-atoms-core/dist/core/BindableProperty"
         };
     }
     public resolve(name: string): string {
         if (DefaultImports.indexOf(name) !== -1) {
             if (!this.file.imports[name]) {
-                this.file.imports[name] = { name, import: `web-atoms-core/bin/web/controls/${name}` };
+                this.file.imports[name] = { name, import: `web-atoms-core/dist/web/controls/${name}` };
             }
         }
         // const tokens = name.split(":");
