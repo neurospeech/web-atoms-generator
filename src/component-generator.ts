@@ -30,7 +30,7 @@ export class ComponentGenerator {
 			} else {
 
 				if (/core/i.test(this.mode)) {
-					if(/\.(jpg|png|gif|svg)$/.test(fullName)) {
+					if(/\.(jpg|png|gif|svg|json)$/.test(fullName)) {
 						if (this.files.findIndex(x => x.file === fullName) !== -1) {
 							continue;
 						}
