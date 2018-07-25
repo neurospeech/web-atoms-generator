@@ -16,6 +16,9 @@ export class ReplaceTilt {
             if (path.sep === "\\") {
                 r = r.replace(/\\/g, (s) => "/");
             }
+            if (! /\./) {
+                r = `./${r}`;
+            }
             return `"${r}"`;
         });
     }
