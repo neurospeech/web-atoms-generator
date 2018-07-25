@@ -1,6 +1,6 @@
 {
   "name": "web-atoms-generator",
-  "version": "1.0.149",
+  "version": "1.0.150",
   "description": "Web Atoms MVVM Component Generator",
   "main": "index.js",
   "scripts": {
