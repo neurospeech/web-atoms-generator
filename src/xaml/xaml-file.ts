@@ -13,7 +13,7 @@ export class XamlComponent implements IMarkupComponent {
 
 export class XamlFile implements IMarkupFile {
 
-    public nodes: XamlComponent[];
+    public nodes: IMarkupComponent[] = [];
     public get currentTime(): number {
         if (!existsSync(this.file)) {
             return -1;
