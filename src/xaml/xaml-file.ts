@@ -13,7 +13,6 @@ export class XamlComponent implements IMarkupComponent {
 
 export class XamlFile implements IMarkupFile {
 
-    public file: PathLike;
     public nodes: XamlComponent[];
     public get currentTime(): number {
         if (!existsSync(this.file)) {
@@ -26,7 +25,7 @@ export class XamlFile implements IMarkupFile {
 
     public nsMap: {[key: string]: string} = {};
 
-    constructor(private fileName: string, private config: IWAConfig) {
+    constructor(public file: PathLike, private config: IWAConfig) {
 
     }
     public compile(): void {
