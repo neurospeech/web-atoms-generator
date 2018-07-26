@@ -183,7 +183,7 @@ ${nsStart}['${ns}'] = {};
         if (!/\.(xml|xaml|html|htm)$/i.test(last)) {
             return name;
         }
-        name[0] = "bin";
+        name[0] = "dist";
         const platformFolder = name[1];
         if (/^(web|xf|wpf)$/i.test(platformFolder)) {
             name[1] = "{platform}";
@@ -216,10 +216,10 @@ ${nsStart}['${ns}'] = {};
                 parent[last] = "~(" + fileName + ")~";
             }
         }
-        // move "bin" to root...
-        const bin = root["bin"];
+        // move "dist" to root...
+        const bin = root["dist"];
         if (bin) {
-            delete root["bin"];
+            delete root["dist"];
             this.merge(bin, root);
         }
         const content = JSON.stringify(root, undefined, 2);
