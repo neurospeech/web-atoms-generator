@@ -50,7 +50,7 @@ export class WAAttribute extends WANode {
 
         if (name === "defaultStyle") {
             return `
-            ${this.atomParent.id}.defaultControlStyle = ${this.value};
+            ${this.atomParent.id}.defaultControlStyle = ${ HtmlContent.removeBrackets(this.value)};
             `;
         }
 
@@ -67,7 +67,7 @@ export class WAAttribute extends WANode {
                 return `
                 ${this.atomParent.id}.setPrimitiveValue(${this.parent.eid}, "${name}", ${sv});`;
             }
-            if (/^(viewmodel|localviewmodel)$/i.test(name)) {
+            if (/^(viewmodel|localviewmodel|controlstyle)$/i.test(name)) {
                 return `
                 ${this.atomParent.id}.${name} = ${v};`;
                 }

@@ -2,6 +2,16 @@ import { AtomEvaluator } from "../atom-evaluator";
 import { ICompiledPath } from "./ICompiledPath";
 
 export class HtmlContent {
+    public static removeBrackets(text: string): string {
+        text = text.trim();
+        if (text.startsWith("{") || text.startsWith("[")) {
+            text = text.substr(1);
+        }
+        if (text.endsWith("]") || text.endsWith("}")) {
+            text = text.substr(0, text.length - 1);
+        }
+        return text;
+    }
     public static processTwoWayBinding(v: string, events: string): ICompiledPath {
         v = v.substr(2, v.length - 3);
         if (v.startsWith("$")) {
