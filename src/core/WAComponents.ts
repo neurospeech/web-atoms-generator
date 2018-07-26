@@ -62,15 +62,15 @@ export class WAAttribute extends WANode {
 
         if (this.value.startsWith("{") && this.value.endsWith("}")) {
             const v = HtmlContent.processOneTimeBinding(this.value);
+            if (/^(viewmodel|localviewmodel|controlstyle)$/i.test(name)) {
+                return `
+                ${this.atomParent.id}.${name} = ${v};`;
+                }
             if (v === this.value) {
                 const sv = v.substr(1, v.length - 2);
                 return `
                 ${this.atomParent.id}.setPrimitiveValue(${this.parent.eid}, "${name}", ${sv});`;
             }
-            if (/^(viewmodel|localviewmodel|controlstyle)$/i.test(name)) {
-                return `
-                ${this.atomParent.id}.${name} = ${v};`;
-                }
             return `
             ${this.atomParent.id}.runAfterInit( () =>
             ${this.atomParent.id}.setLocalValue(${this.parent.eid}, "${name}", ${v}) );`;
