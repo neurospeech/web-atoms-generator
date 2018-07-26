@@ -64,7 +64,7 @@ export class WAAttribute extends WANode {
             const v = HtmlContent.processOneTimeBinding(this.value);
             if (/^(viewmodel|localviewmodel|controlstyle)$/i.test(name)) {
                 return `
-                ${this.atomParent.id}.${name} = ${v};`;
+                ${this.atomParent.id}.${name} = ${HtmlContent.removeBrackets(v)};`;
                 }
             if (v === this.value) {
                 const sv = v.substr(1, v.length - 2);
