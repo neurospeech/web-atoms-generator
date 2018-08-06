@@ -409,7 +409,8 @@ export class WAComponent extends WAElement {
             ${this.presenterToString}
             ${this.children.join("\r\n")}
             ${this.attributes.join("\r\n")}
-            ${this.parent.atomParent.id}.append(${this.id});
+            ${ this.parent instanceof WAComponent ?
+                `${this.parent.id}.append(${this.id})` : `${this.parent.eid}.appendChild(${this.id})` };
 `;
         }
 
