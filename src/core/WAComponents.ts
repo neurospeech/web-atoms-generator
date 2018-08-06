@@ -410,7 +410,7 @@ export class WAComponent extends WAElement {
             ${this.children.join("\r\n")}
             ${this.attributes.join("\r\n")}
             ${ this.parent instanceof WAComponent ?
-                `${this.parent.id}.append(${this.id})` : `${this.parent.eid}.appendChild(${this.id})` };
+                `${this.parent.id}.append(${this.id})` : `${this.parent.eid}.appendChild(${this.eid})` };
 `;
         }
 
