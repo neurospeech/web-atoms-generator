@@ -131,6 +131,8 @@ export class WAXComponent {
                     ${attributeGroups.join("\r\n")}
                 }
             }
+
+            ${this.children.join("\r\n")}
         `;
 
         if (this.template) {

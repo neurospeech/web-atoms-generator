@@ -1,4 +1,5 @@
-import { existsSync, PathLike, readFileSync, statSync } from "fs";
+import { existsSync, PathLike, readFileSync, statSync, writeFileSync } from "fs";
+import { parse, sep } from "path";
 import { XmlDocument, XmlElement } from "xmldoc";
 import { IMarkupComponent, IMarkupFile } from "../imarkup-file";
 import { IWAConfig } from "../types";
@@ -52,13 +53,18 @@ export class XamlFile implements IMarkupFile {
         // remove all bindings...
         const wa = new WAXComponent(doc, "Root", []);
 
-        // tslint:disable-next-line:no-console
-        console.log(wa.toString());
+        // // tslint:disable-next-line:no-console
+        // console.log(wa.toString());
 
-        for (const iterator of wa.children) {
-            // tslint:disable-next-line:no-console
-            console.log(iterator.toString());
-        }
+        // for (const iterator of wa.children) {
+        //     // tslint:disable-next-line:no-console
+        //     console.log(iterator.toString());
+        // }
+        const p = parse(this.file.toString());
+
+        const fname = p.dir + sep + p.name + ".ts";
+
+        writeFileSync(fname, wa.toString() );
     }
 
 }
