@@ -121,7 +121,7 @@ export class WAXComponent {
             ${a.values.join(";\r\n")}
 `);
 
-        const classContent = `class ${this.name} extends AtomXControl {
+        const classContent = `class ${this.name} extends AtomXFControl {
 
                 protected create(): void {
                     super.create();

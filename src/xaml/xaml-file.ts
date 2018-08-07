@@ -65,6 +65,7 @@ export class XamlFile implements IMarkupFile {
         const fname = p.dir + sep + p.name + ".ts";
 
         writeFileSync(fname, `// tslint:disable
+        import { AtomXFControl } from "web-atoms-core/dist/xf/controls/AtomXFControl";
             ${wa.toString()}`);
     }
 
