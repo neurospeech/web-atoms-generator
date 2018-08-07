@@ -64,8 +64,8 @@ export class XamlFile implements IMarkupFile {
 
         const fname = p.dir + sep + p.name + ".ts";
 
-        writeFileSync(`// tslint:disable
-            ${fname}`, wa.toString() );
+        writeFileSync(fname, `// tslint:disable
+            ${wa.toString()}`);
     }
 
 }
