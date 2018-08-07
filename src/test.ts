@@ -1,9 +1,10 @@
 // tslint:disable:ordered-imports no-console
 import { TestRunner } from "web-atoms-core/bin/unit/base-test";
 
-// import "./xaml/xaml-file-test";
+// import "./xaml/group-by-test";
+import "./xaml/xaml-file-test";
 // import "./core/core-html-file-test";
-import "./tests/ReplaceTiltTest";
+// import "./tests/ReplaceTiltTest";
 
 const instance: TestRunner = TestRunner.instance;
 

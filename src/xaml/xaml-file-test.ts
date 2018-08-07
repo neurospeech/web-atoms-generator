@@ -8,7 +8,7 @@ export class TestCase extends TestItem {
     public test(): void {
         const f = new XamlFile("", { imports: {} });
 
-        f.compileContent(`<Grid xmlns="clr-namespace:Xamarin.Forms">
+        const text = f.compileContent(`<Grid xmlns="clr-namespace:Xamarin.Forms">
                 <Grid.RowDefinitions>
                     <RowDefinition/>
                     <RowDefinition/>
@@ -37,6 +37,9 @@ export class TestCase extends TestItem {
                     </ListView.ItemTemplate>
                 </ListView>
             </Grid>`);
+
+        // tslint:disable-next-line:no-console
+        console.log(text);
     }
 
 }

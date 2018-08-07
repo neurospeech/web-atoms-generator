@@ -32,12 +32,20 @@ export class XamlFile implements IMarkupFile {
     public compile(): void {
         const content = readFileSync(this.file, { encoding: "utf-8" });
 
-        this.compileContent(content);
+        const generated = this.compileContent(content);
+
+        const p = parse(this.file.toString());
+
+        const fname = p.dir + sep + p.name + ".ts";
+
+        writeFileSync(fname, `// tslint:disable
+        import { AtomXFControl } from "web-atoms-core/dist/xf/controls/AtomXFControl";
+            ${generated}`);
 
         this.lastTime = this.currentTime;
     }
 
-    public compileContent(content: string): void {
+    public compileContent(content: string): string {
         const doc = new XmlDocument(content);
 
         for (const key in doc.attr) {
@@ -60,13 +68,8 @@ export class XamlFile implements IMarkupFile {
         //     // tslint:disable-next-line:no-console
         //     console.log(iterator.toString());
         // }
-        const p = parse(this.file.toString());
 
-        const fname = p.dir + sep + p.name + ".ts";
-
-        writeFileSync(fname, `// tslint:disable
-        import { AtomXFControl } from "web-atoms-core/dist/xf/controls/AtomXFControl";
-            ${wa.toString()}`);
+        return wa.toString();
     }
 
 }
