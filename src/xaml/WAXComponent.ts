@@ -62,21 +62,6 @@ export class WAXComponent {
     }
 
     public process(e: XmlElement): void {
-        if (e.attr) {
-            const deleteAttributes: string[] = [];
-            for (const key in e.attr) {
-                if (e.attr.hasOwnProperty(key)) {
-                    const element = e.attr[key];
-                    if (element.startsWith("@{") && element.endsWith("}")) {
-                        // one time binding...
-                        deleteAttributes.push(key);
-                    }
-                }
-            }
-            for (const iterator of deleteAttributes) {
-                delete e.attr[iterator];
-            }
-        }
 
         const removeChildren: Array<{ parent: XmlElement, child: XmlElement }> = [];
         for (const iterator of e.children) {
