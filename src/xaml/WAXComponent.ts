@@ -64,7 +64,7 @@ export class WAXComponent {
                         iterator.attr.Type = name;
                         this.element.attr = this.element.attr || {};
                         this.element.attr["xmlns:atom"] = "clr-namespace:WebAtoms;assembly=WebAtoms";
-                        if (this.controlImports.find((s) => s === name)) {
+                        if (!this.controlImports.find((s) => s === name)) {
                             this.controlImports.push(name);
                         }
                     }
