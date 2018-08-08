@@ -9,8 +9,6 @@ export class WAXComponent {
     public lastId: number = 1;
 
     public imports: {[key: string]: string} = {};
-    public importDefPrefix: string = "import-def";
-    public importPrefix: string = "import";
 
     constructor(
         public element: XmlElement,
@@ -30,26 +28,13 @@ export class WAXComponent {
                 const value = attrs[key];
                 if (/^xmlns\:/i.test(key)) {
                     removeAttributes.push(key);
-                    const prefix = key.split(":")[1];
-                    if (value === "http://schema.neurospeech.com/web-atoms-core/js-import-def") {
-                        this.importDefPrefix = prefix;
-                        continue;
-                    }
-                    if (value === "http://schema.neurospeech.com/web-atoms-core/js-import") {
-                        this.importPrefix = prefix;
-                        continue;
+                    const ns = key.substr(6);
+                    if (value.startsWith("js-import-def:")) {
+                        this.imports[ns] = value.split(":")[1];
+                    } else if (value.startsWith("js-import:")) {
+                        this.imports[ns] = `{${value.split(":")[1]}}`;
                     }
                     continue;
-                }
-
-                if (key.startsWith(this.importDefPrefix + ":")) {
-                    removeAttributes.push(key);
-                    this.imports[key.substr(this.importDefPrefix.length + 1)] = value;
-                }
-
-                if (key.startsWith(this.importPrefix + ":")) {
-                    removeAttributes.push(key);
-                    this.imports[`{${key.substr(this.importPrefix.length + 1)}}`] = value;
                 }
             }
         }
