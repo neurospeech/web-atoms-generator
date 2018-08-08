@@ -51,6 +51,21 @@ export class WAXComponent {
         const removeChildren: Array<{ parent: XmlElement, child: XmlElement }> = [];
         for (const iterator of e.children) {
             if (iterator.type === "element") {
+
+                if (iterator.name.includes(":")) {
+
+                    const name = iterator.name.split(":")[0];
+                    const ns = this.imports[name];
+                    if (ns) {
+                        iterator.name = "atom:JSObjectCreator";
+                        iterator.attr = iterator.attr || {};
+                        iterator.attr.Type = name;
+                        this.element.attr = this.element.attr || {};
+                        this.element.attr["xmlns:atom"] = "clr-namespace:WebAtoms;assembly=WebAtoms";
+                    }
+
+                }
+
                 if (iterator.name.includes(".")) {
                     const first = this.getFirstElement(iterator);
                     if (first) {
