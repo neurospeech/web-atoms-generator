@@ -54,6 +54,10 @@ export class WAXComponent {
             }
         }
 
+        for (const iterator of removeAttributes) {
+            delete attrs[iterator];
+        }
+
         this.process(element);
     }
 
