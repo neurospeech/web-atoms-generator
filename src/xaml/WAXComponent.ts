@@ -31,7 +31,7 @@ export class WAXComponent {
             if (attrs.hasOwnProperty(key)) {
                 const value = attrs[key];
                 if (/^xmlns\:/i.test(key) || key === "xmlns") {
-                    const ns = key.length === 5 ? "__default" : key.substr(6);
+                    const ns = key.includes(":") ? key.split(":")[1] :  "__default";
                     if (value.startsWith("js-import-def:")) {
                         removeAttributes.push(key);
                         this.imports[ns] = value.split(":")[1];
@@ -168,6 +168,12 @@ export class WAXComponent {
         }
 
         ns = this.xmlNS[ns];
+
+        if (!ns) {
+            // tslint:disable-next-line:no-console
+            console.error(`Failed to resolve ${name} with ${JSON.stringify(this.xmlNS, undefined, 2)}`);
+            return name;
+        }
 
         if (ns === "http://xamarin.com/schemas/2014/forms") {
             return `Xamarin.Forms.${name}`;
