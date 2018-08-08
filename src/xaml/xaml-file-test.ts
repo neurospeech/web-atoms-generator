@@ -24,14 +24,14 @@ export class TestCase extends TestItem {
                 <Label
                     Grid.Row="0"
                     Grid.Column="1"
-                    Text="@{ \`\${$viewModel.firstName}\` }"
+                    Text="\${ \`\${$viewModel.firstName}\` }"
                 />
 
                 <ListView ItemsSource="[ $viewModel.items ]">
                     <ListView.ItemTemplate>
                         <DataTemplate>
                             <Label
-                                Text="@{$data.label}"
+                                Text="\${$data.label}"
                                 />
                         </DataTemplate>
                     </ListView.ItemTemplate>
