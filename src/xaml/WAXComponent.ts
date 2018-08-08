@@ -18,7 +18,8 @@ export class WAXComponent {
         public element: XmlElement,
         public name: string,
         public children: WAXComponent[],
-        public template: boolean = false
+        public template: boolean = false,
+        public parent: WAXComponent = null
     ) {
         this.attributes = [];
         this.children = [];
@@ -92,7 +93,7 @@ export class WAXComponent {
                                 `() => new (${className}_Creator(this))(this.app)`,
                                 true);
                             const child = new WAXComponent(
-                                this.getFirstElement(first), className, this.children, true);
+                                this.getFirstElement(first), className, this.children, true, this);
                             this.children.push(child);
                             continue;
                         }
@@ -158,6 +159,9 @@ export class WAXComponent {
     }
 
     public resolveName(name: string): string {
+        if (this.parent) {
+            return this.parent.resolveName(name);
+        }
         let ns: string = null;
         if (name.includes(":")) {
             const tokens = name.split(":");
