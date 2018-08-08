@@ -10,6 +10,8 @@ export class WAXComponent {
 
     public imports: {[key: string]: string} = {};
 
+    public xmlNS: {[key: string]: string} = {};
+
     public controlImports: string[] = [];
 
     constructor(
@@ -28,14 +30,19 @@ export class WAXComponent {
         for (const key in attrs) {
             if (attrs.hasOwnProperty(key)) {
                 const value = attrs[key];
-                if (/^xmlns\:/i.test(key)) {
-                    removeAttributes.push(key);
-                    const ns = key.substr(6);
+                if (/^xmlns\:/i.test(key) || key === "xmlns") {
+                    const ns = key.length === 5 ? "__default" : key.substr(6);
                     if (value.startsWith("js-import-def:")) {
+                        removeAttributes.push(key);
                         this.imports[ns] = value.split(":")[1];
-                    } else if (value.startsWith("js-import:")) {
-                        this.imports[`{${ns}}`] = value.split(":")[1];
+                        continue;
                     }
+                    if (value.startsWith("js-import:")) {
+                        removeAttributes.push(key);
+                        this.imports[`{${ns}}`] = value.split(":")[1];
+                        continue;
+                    }
+                    this.xmlNS[ns] = value;
                     continue;
                 }
             }
@@ -106,6 +113,9 @@ export class WAXComponent {
 
         const removeAttributes: string[] = [];
         for (const key in e.attr) {
+            if (/^xmlns\:/.test(key) || key === "xmlns") {
+                continue;
+            }
             if (e.attr.hasOwnProperty(key)) {
                 const element = (e.attr[key] || "").trim();
                 if (((element.startsWith("${")
@@ -147,6 +157,26 @@ export class WAXComponent {
         return name;
     }
 
+    public resolveName(name: string): string {
+        let ns: string = null;
+        if (name.includes(":")) {
+            const tokens = name.split(":");
+            ns = tokens[0];
+            name = tokens[1];
+        } else {
+            ns = "__default";
+        }
+
+        ns = this.xmlNS[ns];
+
+        if (ns === "http://xamarin.com/schemas/2014/forms") {
+            return `Xamarin.Forms.${name}`;
+        }
+        ns = ns.split(":")[1];
+        ns = ns.split(";")[0];
+        return `${ns}.${name}`;
+    }
+
     public setAttribute(parentName: string, name: string, value: string, template?: boolean): void {
         this.attributes.push(new WAXAttribute(parentName, name, value, template));
     }
@@ -166,6 +196,8 @@ export class WAXComponent {
 
                 protected create(): void {
                     super.create();
+
+                    this.element = this.createControl("${this.resolveName(this.element.name)}");
 
                     ${this.controlImports.map((s) =>
                         `this.setImport(this.element,"${s}",() => new ${s}(this.app));`).join("\r\n")}
