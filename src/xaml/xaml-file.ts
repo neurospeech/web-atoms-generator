@@ -1,6 +1,7 @@
 import { existsSync, PathLike, readFileSync, statSync, writeFileSync } from "fs";
 import { parse, sep } from "path";
 import { XmlDocument, XmlElement } from "xmldoc";
+import { ReplaceTilt } from "../core/ReplaceTilt";
 import { IMarkupComponent, IMarkupFile } from "../imarkup-file";
 import { IWAConfig } from "../types";
 import { WAXComponent } from "./WAXComponent";
@@ -32,11 +33,13 @@ export class XamlFile implements IMarkupFile {
     public compile(): void {
         const content = readFileSync(this.file, { encoding: "utf-8" });
 
-        const generated = this.compileContent(content);
+        let generated = this.compileContent(content);
 
         const p = parse(this.file.toString());
 
         const fname = p.dir + sep + p.name + ".ts";
+
+        generated = ReplaceTilt.replace(generated, p.dir)
 
         writeFileSync(fname, `// tslint:disable
         import { AtomXFControl } from "web-atoms-core/dist/xf/controls/AtomXFControl";
