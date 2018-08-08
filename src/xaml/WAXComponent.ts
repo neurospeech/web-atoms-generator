@@ -8,6 +8,10 @@ export class WAXComponent {
 
     public lastId: number = 1;
 
+    public imports: {[key: string]: string} = {};
+    public importDefPrefix: string = "import-def";
+    public importPrefix: string = "import";
+
     constructor(
         public element: XmlElement,
         public name: string,
@@ -16,6 +20,40 @@ export class WAXComponent {
     ) {
         this.attributes = [];
         this.children = [];
+
+        const removeAttributes: string[] = [];
+
+        // process namespaces...
+        const attrs = element.attr;
+        for (const key in attrs) {
+            if (attrs.hasOwnProperty(key)) {
+                const value = attrs[key];
+                if (/^xmlns\:/i.test(key)) {
+                    removeAttributes.push(key);
+                    const prefix = key.split(":")[1];
+                    if (value === "http://schema.neurospeech.com/web-atoms-core/js-import-def") {
+                        this.importDefPrefix = prefix;
+                        continue;
+                    }
+                    if (value === "http://schema.neurospeech.com/web-atoms-core/js-import") {
+                        this.importPrefix = prefix;
+                        continue;
+                    }
+                    continue;
+                }
+
+                if (key.startsWith(this.importDefPrefix + ":")) {
+                    removeAttributes.push(key);
+                    this.imports[key.substr(this.importDefPrefix.length + 1)] = value;
+                }
+
+                if (key.startsWith(this.importPrefix + ":")) {
+                    removeAttributes.push(key);
+                    this.imports[`{${key.substr(this.importPrefix.length + 1)}}`] = value;
+                }
+            }
+        }
+
         this.process(element);
     }
 
@@ -151,7 +189,20 @@ function ${this.name}_Creator(__creator: any): any {
     return ${classContent};
 }`;
         }
-        return "export default " + classContent;
+
+        const imports: string[] = [];
+        for (const key in this.imports) {
+            if (this.imports.hasOwnProperty(key)) {
+                const element = this.imports[key];
+                imports.push(`import ${key} from \"${element}\";`);
+            }
+        }
+
+        return `
+
+        ${imports.join("\r\n")}
+
+        export default ${classContent}`;
     }
 }
 
