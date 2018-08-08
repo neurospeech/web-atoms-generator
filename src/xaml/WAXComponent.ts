@@ -10,6 +10,8 @@ export class WAXComponent {
 
     public imports: {[key: string]: string} = {};
 
+    public controlImports: string[] = [];
+
     constructor(
         public element: XmlElement,
         public name: string,
@@ -32,7 +34,7 @@ export class WAXComponent {
                     if (value.startsWith("js-import-def:")) {
                         this.imports[ns] = value.split(":")[1];
                     } else if (value.startsWith("js-import:")) {
-                        this.imports[ns] = `{${value.split(":")[1]}}`;
+                        this.imports[`{${ns}}`] = value.split(":")[1];
                     }
                     continue;
                 }
@@ -62,6 +64,9 @@ export class WAXComponent {
                         iterator.attr.Type = name;
                         this.element.attr = this.element.attr || {};
                         this.element.attr["xmlns:atom"] = "clr-namespace:WebAtoms;assembly=WebAtoms";
+                        if (this.controlImports.find((s) => s === name)) {
+                            this.controlImports.push(name);
+                        }
                     }
 
                 }
@@ -161,6 +166,9 @@ export class WAXComponent {
 
                 protected create(): void {
                     super.create();
+
+                    ${this.controlImports.map((s) =>
+                        `this.setImport(this.element,"${s}",() => new ${s}(this.app));`).join("\r\n")}
 
                     this.loadXaml(\`${this.element.toStringWithIndent("\t")}\`);
 
