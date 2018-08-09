@@ -26,6 +26,19 @@ export class WAXComponent {
 
         const removeAttributes: string[] = [];
 
+        if (this.parent != null) {
+            const pa = this.parent.element.attr;
+            const ea = this.element.attr || (this.element.attr = {});
+            for (const key in pa) {
+                if (pa.hasOwnProperty(key)) {
+                    const value = pa[key];
+                    if (key.startsWith("xmlns:") || key === "xmlns") {
+                        ea[key] = value;
+                    }
+                }
+            }
+        }
+
         // process namespaces...
         const attrs = element.attr;
         for (const key in attrs) {
