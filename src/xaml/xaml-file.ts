@@ -31,19 +31,25 @@ export class XamlFile implements IMarkupFile {
 
     }
     public compile(): void {
-        const content = readFileSync(this.file, { encoding: "utf-8" });
+        try {
+            const content = readFileSync(this.file, { encoding: "utf-8" });
 
-        let generated = this.compileContent(content);
+            let generated = this.compileContent(content);
 
-        const p = parse(this.file.toString());
+            const p = parse(this.file.toString());
 
-        const fname = p.dir + sep + p.name + ".ts";
+            const fname = p.dir + sep + p.name + ".ts";
 
-        generated = ReplaceTilt.replace(generated, p.dir);
+            generated = ReplaceTilt.replace(generated, p.dir);
 
-        writeFileSync(fname, `// tslint:disable
-        import { AtomXFControl } from "web-atoms-core/dist/xf/controls/AtomXFControl";
-            ${generated}`);
+            writeFileSync(fname, `// tslint:disable
+            import { AtomXFControl } from "web-atoms-core/dist/xf/controls/AtomXFControl";
+                ${generated}`);
+
+        } catch (e) {
+            // tslint:disable-next-line:no-console
+            console.error(`File ${this.file} failed to compile\r\n${e}`);
+        }
 
         this.lastTime = this.currentTime;
     }
