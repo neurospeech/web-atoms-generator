@@ -80,7 +80,7 @@ export class WAXComponent {
                     const name = iterator.name.split(":")[0];
                     const ns = this.imports[name];
                     if (ns) {
-                        iterator.name = "atom:JSObjectCreator";
+                        iterator.name = "atom:AtomObjectCreator";
                         iterator.attr = iterator.attr || {};
                         iterator.attr.Type = name;
                         this.element.attr = this.element.attr || {};
