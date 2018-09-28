@@ -111,6 +111,8 @@ export class WAAttribute extends WANode {
 
 export class WAElement extends WANode {
 
+    public static tid: number = 1;
+
     public attributes: WAAttribute[] = [];
 
     public children: WAElement[] = [];
@@ -238,7 +240,7 @@ export class WAElement extends WANode {
             const np = this.namedParent;
             const ap = this.atomParent;
 
-            const tn = `${np.name}_${tt}_${ap.templates.length + 1}`;
+            const tn = `${np.name}_${tt}_${ap.templates.length + 1}_${WAElement.tid++}`;
 
             const tc = new WAComponent(this, e, tn);
             np.templates.push(tc);
