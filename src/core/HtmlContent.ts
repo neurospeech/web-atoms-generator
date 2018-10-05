@@ -57,7 +57,15 @@ export class HtmlContent {
         for (let i: number = 0; i < vx.path.length; i++) {
             const p: string[] = vx.path[i];
             const start: string = "this";
-            v = v.replace(`v${i + 1}`, `this.${p.join(".")}`);
+            const pr = p.reduce((pv, x) =>
+                (!pv.v.length) ?
+                { v: [`this.${x}`], t: `this.${x}` } :
+                {
+                    v: `${pv.v.join(".")}.${x}`.split("."), t:
+                    `(${pv.t}) ? ${pv.v.join(".")}.${x} : undefined`
+                } , { v: [], t: "" });
+            // const pr = p.map( (x) => `${}` ).join(".");
+            v = v.replace(`v${i + 1}`, `${pr.t}`);
             original = null;
         }
         return original || v;

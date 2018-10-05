@@ -2,9 +2,11 @@
 import { TestRunner } from "web-atoms-core/bin/unit/base-test";
 
 // import "./xaml/group-by-test";
-import "./xaml/xaml-file-test";
+// import "./xaml/xaml-file-test";
 // import "./core/core-html-file-test";
 // import "./tests/ReplaceTiltTest";
+
+import "./tests/NullCascadeTest";
 
 const instance: TestRunner = TestRunner.instance;
 
