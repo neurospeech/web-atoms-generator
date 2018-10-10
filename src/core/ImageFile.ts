@@ -82,7 +82,7 @@ export default new WebImage(\`data:${mimeType};base64,\${base64}\`);
 
         const s = `// tslint:disable
 import WebImage from "web-atoms-core/dist/core/WebImage";
-declare UMD: any;
+declare var UMD: any;
 export default new WebImage(UMD.resolvePath("${this.packageContent.name}/${n.join("/")}"));
                 `;
 
