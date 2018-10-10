@@ -25,10 +25,10 @@ export class ImageFile implements IMarkupFile {
 
     public compile(): void {
         try {
-            // const content = readFileSync(this.file);
+            const content = readFileSync(this.file);
             this.lastTime = this.currentTime;
-            // this.createSync(content);
-            // this.createAsync(content);
+            this.createSync(content);
+            this.createAsync(content);
         } catch (error) {
             // tslint:disable-next-line:no-console
             console.error(error);
@@ -37,7 +37,7 @@ export class ImageFile implements IMarkupFile {
 
     private createSync(content: Buffer): void {
         const p = parse(this.file);
-        p.name = this.toPascalCase(p.name);
+        p.name = this.toPascalCase(p.name) + "DataUrl";
         p.ext = ".ts";
         p.base = p.name + p.ext;
 
@@ -58,25 +58,12 @@ export class ImageFile implements IMarkupFile {
 
         const b: string[] = b64.match(/(.{1,80})/g);
         const s = `// tslint:disable
+import Image from "web-atoms-core/dist/core/Image";
 
-        declare var SystemJS: any;
+const base64 = ${b.map((str) => JSON.stringify(str)).join("+\r\n\t\t")};
 
-        export class ${p.name} {
-
-            private static mContentUrl: string = null;
-            private static get contentUrl(): string {
-                if (${p.name}.mContentUrl) {
-                    return ${p.name}.mContentUrl;
-                }
-                return ${p.name}.mContentUrl =
-                    ${b.map((str) => JSON.stringify(str)).join("+\r\n\t\t")};
-            }
-
-            public static get url(): string {
-                return \`data:${mimeType};base64,\${${p.name}.contentUrl}\`;
-            }
-        }
-        `;
+export default new Image(\`data:${mimeType};base64,\${base64}\`);
+`;
         const fileName = format(p);
         // tslint:disable-next-line:no-console
         writeFileSync(`${fileName}`, s, "utf8");
@@ -87,27 +74,12 @@ export class ImageFile implements IMarkupFile {
         p.name = this.toPascalCase(p.name);
 
         const s = `// tslint:disable
+import Image from "web-atoms-core/dist/core/Image";
 
-        declare var SystemJS: any;
+export default new Image("${this.file}");
+                `;
 
-        export class ${p.name}Async {
-
-            public static url(): Promise<string> {
-                return new Promise(
-                    (resolve, reject) => {
-                        SystemJS.import("${p.name}")
-                            .then((m) => {
-                                resolve(m["${p.name}"].url());
-                            }).catch((r) => {
-                                reject(r);
-                            });
-                    }
-                );
-            }
-        }
-        `;
-
-        p.name = p.name + "Async";
+        p.name = p.name;
         p.ext = ".ts";
         p.base = p.name + p.ext;
         const fileName = format(p);
