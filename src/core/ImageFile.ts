@@ -94,6 +94,6 @@ export default new WebImage(UMD.resolvePath("${this.packageContent.name}/${n.joi
     }
 
     private toPascalCase(text: string): string {
-        return text.split("-").reduce( (pv, t) => (t[0].toUpperCase() + t.substr(1)), "");
+        return text.split("-").reduce( (pv, t) => pv + (t[0].toUpperCase() + t.substr(1)), "");
     }
 }
