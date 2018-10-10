@@ -13,6 +13,7 @@ export class ImageFile implements IMarkupFile {
         return statSync(this.file).mtime.getTime();
     }
 
+    public packageContent: any;
     public lastTime: number;
     private path: ParsedPath;
 
@@ -23,8 +24,9 @@ export class ImageFile implements IMarkupFile {
         this.path = parse(file);
     }
 
-    public compile(): void {
+    public compile(packageContent: any): void {
         try {
+            this.packageContent = packageContent;
             const content = readFileSync(this.file);
             this.lastTime = this.currentTime;
             this.createSync(content);
@@ -73,10 +75,15 @@ export default new Image(\`data:${mimeType};base64,\${base64}\`);
         const p = parse(this.file);
         p.name = this.toPascalCase(p.name);
 
-        const s = `// tslint:disable
-import Image from "web-atoms-core/dist/core/Image";
+        const n = this.file.split("\\").join("/").split("/");
+        if (n[0] === "src") {
+            n[0] = "dist";
+        }
 
-export default new Image("${this.file}");
+        const s = `// tslint:disable
+import WebImage from "web-atoms-core/dist/core/WebImage";
+
+export default new WebImage(UMD.resolvePath("${this.packageContent.name}/${n.join("/")}"));
                 `;
 
         p.name = p.name;

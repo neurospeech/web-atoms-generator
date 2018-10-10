@@ -7,7 +7,7 @@ export interface IMarkupFile {
 
     nodes: IMarkupComponent[];
 
-    compile(): void;
+    compile(packageContent: any): void;
 
 }
 

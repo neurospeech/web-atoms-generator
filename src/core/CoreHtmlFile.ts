@@ -29,7 +29,7 @@ export class CoreHtmlFile implements IMarkupFile {
 
     }
 
-    public compile(): void {
+    public compile(packageContent: any): void {
 
         try {
 

@@ -133,24 +133,9 @@ export class ComponentGenerator {
 
 		var nodes: Array<IMarkupComponent> = [];
 
-		for (var file of this.files) {
-			if (file.currentTime !== file.lastTime) {
-
-				if (!fs.existsSync(file.file)) {
-					deletedFiles.push(file);
-					continue;
-				}
-
-				// console.log(`Generating ${file.file}`);
-				file.compile();
-			}
-			for (var n of file.nodes) {
-				nodes.push(n);
-			}
-		}
+		let packageContent: any = null;
 
 		if(/core/i.test(this.mode)) {
-
 			let packageFolder = this.folder;
 
 			while(true) {
@@ -161,10 +146,29 @@ export class ComponentGenerator {
 				continue;
 			}
 
-			const packageContent = JSON.parse(fs.readFileSync(path.join(packageFolder, "package.json"), {
+			packageContent = JSON.parse(fs.readFileSync(path.join(packageFolder, "package.json"), {
 				encoding: "utf8",
 				flag: "r"
 			}));
+		}
+
+		for (var file of this.files) {
+			if (file.currentTime !== file.lastTime) {
+
+				if (!fs.existsSync(file.file)) {
+					deletedFiles.push(file);
+					continue;
+				}
+
+				// console.log(`Generating ${file.file}`);
+				file.compile(packageContent);
+			}
+			for (var n of file.nodes) {
+				nodes.push(n);
+			}
+		}
+
+		if(/core/i.test(this.mode)) {
 
 			// write ModuleFiles
 			const content = `// tslint:disable
