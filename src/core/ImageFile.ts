@@ -60,11 +60,11 @@ export class ImageFile implements IMarkupFile {
 
         const b: string[] = b64.match(/(.{1,80})/g);
         const s = `// tslint:disable
-import Image from "web-atoms-core/dist/core/Image";
+import WebImage from "web-atoms-core/dist/core/WebImage";
 
 const base64 = ${b.map((str) => JSON.stringify(str)).join("+\r\n\t\t")};
 
-export default new Image(\`data:${mimeType};base64,\${base64}\`);
+export default new WebImage(\`data:${mimeType};base64,\${base64}\`);
 `;
         const fileName = format(p);
         // tslint:disable-next-line:no-console
