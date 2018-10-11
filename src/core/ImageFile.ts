@@ -64,7 +64,7 @@ import WebImage from "web-atoms-core/dist/core/WebImage";
 
 const base64 = [${b.map((str) => JSON.stringify(str)).join(",\r\n\t\t")}];
 
-export default new WebImage(\`data:${mimeType};base64,\${base64.join()}\`);
+export default new WebImage(\`data:${mimeType};base64,\${base64.join("")}\`);
 `;
         const fileName = format(p);
         // tslint:disable-next-line:no-console
