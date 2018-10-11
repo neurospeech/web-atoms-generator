@@ -1,10 +1,12 @@
-import { Category, Test, TestItem } from "web-atoms-core/bin/unit/base-test";
+import { Category } from "web-atoms-core/dist/unit/Category";
+import { Test } from "web-atoms-core/dist/unit/Test";
+import { TestItem } from "web-atoms-core/dist/unit/TestItem";
 import { CoreHtmlFile } from "./CoreHtmlFile";
 
 @Category("Core Html")
 export class TestCase extends TestItem {
 
-    @Test()
+    @Test
     public test(): void {
         const chf = new CoreHtmlFile("stripe-control", {
             imports: {

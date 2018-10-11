@@ -1,10 +1,13 @@
-import { Assert, Category, Test, TestItem } from "web-atoms-core/bin/unit/base-test";
+import { Assert } from "web-atoms-core/dist/unit/Assert";
+import { Category } from "web-atoms-core/dist/unit/Category";
+import { Test } from "web-atoms-core/dist/unit/Test";
+import { TestItem } from "web-atoms-core/dist/unit/TestItem";
 import { HtmlContent } from "../core/HtmlContent";
 
 @Category("Null Cascade")
 export class TestCase extends TestItem {
 
-    @Test("")
+    @Test
     public test(): void {
         const s = HtmlContent.processOneTimeBinding("{ $viewModel.item.data.x }");
         Assert.equals(
