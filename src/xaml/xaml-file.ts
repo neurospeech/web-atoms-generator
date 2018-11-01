@@ -1,7 +1,8 @@
-import { existsSync, PathLike, readFileSync, statSync, writeFileSync } from "fs";
+import { existsSync, PathLike, readFileSync, statSync } from "fs";
 import { parse, sep } from "path";
 import { XmlDocument, XmlElement } from "xmldoc";
 import { ReplaceTilt } from "../core/ReplaceTilt";
+import FileApi from "../FileApi";
 import { IMarkupComponent, IMarkupFile } from "../imarkup-file";
 import { IWAConfig } from "../types";
 import { WAXComponent } from "./WAXComponent";
@@ -42,7 +43,7 @@ export class XamlFile implements IMarkupFile {
 
             generated = ReplaceTilt.replace(generated, p.dir);
 
-            writeFileSync(fname, `// tslint:disable
+            FileApi.writeSync(fname, `// tslint:disable
             import { AtomXFControl } from "web-atoms-core/dist/xf/controls/AtomXFControl";
                 ${generated}`);
 

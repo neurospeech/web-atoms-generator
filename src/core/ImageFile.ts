@@ -1,5 +1,6 @@
-import { existsSync, PathLike, readFileSync, statSync, writeFileSync } from "fs";
+import { existsSync, PathLike, readFileSync, statSync } from "fs";
 import { format, parse, ParsedPath } from "path";
+import FileApi from "../FileApi";
 import { IMarkupComponent, IMarkupFile } from "../imarkup-file";
 
 export class ImageFile implements IMarkupFile {
@@ -67,8 +68,7 @@ const base64 = [${b.map((str) => JSON.stringify(str)).join(",\r\n\t\t")}];
 export default new WebImage(\`data:${mimeType};base64,\${base64.join("")}\`);
 `;
         const fileName = format(p);
-        // tslint:disable-next-line:no-console
-        writeFileSync(`${fileName}`, s, "utf8");
+        FileApi.writeSync(`${fileName}`, s);
     }
 
     private createAsync(content: Buffer): void {
@@ -90,7 +90,7 @@ export default new WebImage(UMD.resolvePath("${this.packageContent.name}/${n.joi
         p.ext = ".ts";
         p.base = p.name + p.ext;
         const fileName = format(p);
-        writeFileSync(`${fileName}`, s, "utf8");
+        FileApi.writeSync(`${fileName}`, s);
     }
 
     private toPascalCase(text: string): string {

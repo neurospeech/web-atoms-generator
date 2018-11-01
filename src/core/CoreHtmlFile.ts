@@ -1,6 +1,7 @@
-import { existsSync, PathLike, readFileSync, statSync, writeFileSync } from "fs";
+import { existsSync, PathLike, readFileSync, statSync} from "fs";
 import { DomHandler, Parser } from "htmlparser2";
 import { parse, sep } from "path";
+import FileApi from "../FileApi";
 import { IHtmlNode } from "../html-node";
 import { IMarkupComponent, IMarkupFile } from "../imarkup-file";
 import { IWAConfig } from "../types";
@@ -64,10 +65,7 @@ export class CoreHtmlFile implements IMarkupFile {
 
             generatedText = ReplaceTilt.replace(generatedText, p.dir);
 
-            // if (existsSync(fname)) {
-
-            // }
-            writeFileSync(fname, generatedText );
+            FileApi.writeSync(fname, generatedText);
         } catch (error) {
             // tslint:disable-next-line:no-console
             console.error(error);
