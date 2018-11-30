@@ -68,6 +68,13 @@ export class WAAttribute extends WANode {
                 }
             if (v === this.value) {
                 const sv = v.substr(1, v.length - 2);
+                if (name === "styleClass" && v.includes(".controlStyle.")) {
+                    return `
+                    this.runAfterInit(() => {
+                        ${this.atomParent.id}.setPrimitiveValue(${this.parent.eid}, "styleClass", ${sv});
+                    });
+                    `;
+                }
                 return `
                 ${this.atomParent.id}.setPrimitiveValue(${this.parent.eid}, "${name}", ${sv});`;
             }

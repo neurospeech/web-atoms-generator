@@ -24,21 +24,9 @@ export class HtmlContent {
             pathList: [plist]
         };
     }
-    public static escapeLambda(v: string): string {
-        v = v.trim();
-        //         if (v.startsWith("()=>") || v.startsWith("() =>") || v.startsWith("=>")) {
-        //             v = v.replace("()=>", "");
-        //             v = v.replace("() =>", "");
-        //             v = v.replace("=>", "");
-        //             return `function(){
-        //     return ${v};
-        // }`;
-        //         }
-        return v;
-    }
+
     public static processOneWayBinding(v: string): ICompiledPath {
         v = v.substr(1, v.length - 2);
-        v = HtmlContent.escapeLambda(v);
         const vx = AtomEvaluator.instance.parse(v);
         v = "";
         const plist: string = vx.path.map((p, i) => `v${i + 1}`).join(",");
@@ -51,7 +39,6 @@ export class HtmlContent {
     public static processOneTimeBinding(v: string): string {
         let original = v;
         v = v.substr(1, v.length - 2);
-        v = HtmlContent.escapeLambda(v);
         const vx = AtomEvaluator.instance.parse(v);
         v = vx.original;
         for (let i: number = 0; i < vx.path.length; i++) {
