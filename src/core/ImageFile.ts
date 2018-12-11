@@ -1,5 +1,5 @@
-import { existsSync, PathLike, readFileSync, statSync } from "fs";
-import { format, parse, ParsedPath } from "path";
+import { copyFileSync, existsSync, PathLike, readFileSync, statSync } from "fs";
+import { format, parse, ParsedPath, sep } from "path";
 import FileApi from "../FileApi";
 import { IMarkupComponent, IMarkupFile } from "../imarkup-file";
 
@@ -32,6 +32,16 @@ export class ImageFile implements IMarkupFile {
             this.lastTime = this.currentTime;
             this.createSync(content);
             this.createAsync(content);
+
+            // copy image to dist folder.. in case if we wish to hide src folder...
+            const dir = this.path.dir.split(sep);
+            if (dir[0] === "src") {
+                dir[0] = "dist";
+            }
+
+            const outFile = format({ ... this.path, dir: dir.join(sep) });
+
+            copyFileSync(this.file, outFile);
         } catch (error) {
             // tslint:disable-next-line:no-console
             console.error(error);
