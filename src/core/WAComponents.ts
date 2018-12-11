@@ -235,6 +235,11 @@ export class WAElement extends WANode {
 
     public parseNode(e: IHtmlNode): void {
 
+        if (e.type === "comment") {
+            this.addChild(new WAComment(this, e));
+            return;
+        }
+
         if (e.type === "text") {
             this.addChild(new WATextElement(this, e));
             return;
@@ -311,6 +316,18 @@ export class WATextElement extends WAElement {
         const ${this.id} = document.createTextNode(${JSON.stringify(this.element.data)});
         ${this.presenterToString}
         ${this.parent.eid}.appendChild(${this.id});`;
+    }
+}
+
+export class WAComment extends WAElement {
+    public toString(): string {
+        const comment = (this.element.data || "")
+            .toString()
+            .split("\n")
+            .map((s) => `// ${s}`)
+            .join("\n");
+
+        return `// ${this.id}\r\n${comment}`;
     }
 }
 
