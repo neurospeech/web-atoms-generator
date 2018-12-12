@@ -33,20 +33,20 @@ export class ImageFile implements IMarkupFile {
             this.createSync(content);
             this.createAsync(content);
 
-            // copy image to dist folder.. in case if we wish to hide src folder...
-            const dir = this.path.dir.split(sep);
-            if (dir[0] === "src") {
-                dir[0] = "dist";
-            }
+            // // copy image to dist folder.. in case if we wish to hide src folder...
+            // const dir = this.path.dir.split(sep);
+            // if (dir[0] === "src") {
+            //     dir[0] = "dist";
+            // }
 
-            const outFile = format({ ... this.path, dir: dir.join(sep) });
+            // const outFile = format({ ... this.path, dir: dir.join(sep) });
 
-            const parentDir = dirname(outFile);
-            if (!existsSync(parentDir)) {
-                mkdirSync(parentDir);
-            }
+            // const parentDir = dirname(outFile);
+            // if (!existsSync(parentDir)) {
+            //     mkdirSync(parentDir);
+            // }
 
-            copyFileSync(this.file, outFile);
+            // copyFileSync(this.file, outFile);
         } catch (error) {
             // tslint:disable-next-line:no-console
             console.error(error);
@@ -91,9 +91,9 @@ export default new WebImage(\`data:${mimeType};base64,\${base64.join("")}\`);
         p.name = this.toPascalCase(p.name);
 
         const n = this.file.split("\\").join("/").split("/");
-        if (n[0] === "src") {
-            n[0] = "dist";
-        }
+        // if (n[0] === "src") {
+        //     n[0] = "dist";
+        // }
 
         const s = `// tslint:disable
 import WebImage from "web-atoms-core/dist/core/WebImage";
