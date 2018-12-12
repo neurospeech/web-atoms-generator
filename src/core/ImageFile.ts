@@ -1,5 +1,5 @@
-import { copyFileSync, existsSync, PathLike, readFileSync, statSync } from "fs";
-import { format, parse, ParsedPath, sep } from "path";
+import { copyFileSync, existsSync, mkdirSync, PathLike, readFileSync, statSync } from "fs";
+import { dirname, format, parse, ParsedPath, sep } from "path";
 import FileApi from "../FileApi";
 import { IMarkupComponent, IMarkupFile } from "../imarkup-file";
 
@@ -40,6 +40,11 @@ export class ImageFile implements IMarkupFile {
             }
 
             const outFile = format({ ... this.path, dir: dir.join(sep) });
+
+            const parentDir = dirname(outFile);
+            if (!existsSync(parentDir)) {
+                mkdirSync(parentDir);
+            }
 
             copyFileSync(this.file, outFile);
         } catch (error) {
