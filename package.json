@@ -18,7 +18,6 @@
     "url": "https://github.com/neurospeech/web-atoms-generator/issues"
   },
   "dependencies": {
-    "deasync": "^0.1.14",
     "htmlparser2": "^3.10.0",
     "manakin": "^0.5.2",
     "systemjs": "^0.20.18",

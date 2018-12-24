@@ -1,5 +1,4 @@
-import * as less from "less";
-import * as deasync from "deasync";
+// tslint:disable
 import { HtmlNode, HtmlContent } from "./html-content";
 import { GeneratorContext } from "./generator-context";
 import { IMarkupComponent } from "./imarkup-file";
@@ -329,15 +328,15 @@ export class HtmlComponent implements IMarkupComponent {
 	compileLess(): void {
 		try {
 		var finished:boolean = false;
-		var lessSync:any = deasync((r) => {
-			less.render(this.generatedStyle, (e,o) => {
-				this.generatedStyle = o.css;
-				finished = true;
-				r();
-			});
-		});
+		// var lessSync:any = deasync((r) => {
+		// 	less.render(this.generatedStyle, (e,o) => {
+		// 		this.generatedStyle = o.css;
+		// 		finished = true;
+		// 		r();
+		// 	});
+		// });
 
-		lessSync();
+		// lessSync();
 		} catch(er) {
 			console.error(er);
 		}
