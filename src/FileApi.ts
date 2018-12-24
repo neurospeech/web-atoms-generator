@@ -8,7 +8,17 @@ export default class FileApi {
             if (existing === content) {
                 return;
             }
+            if (this.flat(existing) === this.flat(content)) {
+                return;
+            }
         }
         writeFileSync(path, content, "utf8");
+    }
+
+    private static flat(content: string): string {
+        return content
+            .split("\n")
+            .map((s) => s.trimRight())
+            .join("\n");
     }
 }
