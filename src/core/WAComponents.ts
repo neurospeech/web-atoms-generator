@@ -241,7 +241,14 @@ export class WAElement extends WANode {
         }
 
         if (e.type === "text") {
-            this.addChild(new WATextElement(this, e));
+
+            // remove empty lines...
+            const text = (e.data || "")
+                .split("\n")
+                .filter((s) => s.trim());
+            if (text.length) {
+                this.addChild(new WATextElement(this, e));
+            }
             return;
         }
 
