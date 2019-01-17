@@ -460,7 +460,7 @@ export class WAComponent extends WAElement {
 
             if (hasIf) {
                 return `
-    if (${hasIf.toString()}) {
+    if (${ HtmlContent.removeBrackets(hasIf.value)}) {
         ${text}
     }`;
             }
