@@ -1,10 +1,13 @@
+import { IHtmlNode } from "../html-node";
 import { IMarkupComponent } from "../imarkup-file";
 import { IWAConfig } from "../types";
 import { CoreHtmlFile } from "./CoreHtmlFile";
 import { DefaultImports } from "./DefaultImports";
-import { WAComponent } from "./WAComponents";
+import { WAComponent, WAElement } from "./WAComponents";
 
-export class CoreHtmlComponent implements IMarkupComponent {
+export class CoreHtmlComponent
+    extends WAComponent
+    implements IMarkupComponent {
     public baseType: string;
     public name: string;
     public nsNamespace: string;
@@ -12,11 +15,13 @@ export class CoreHtmlComponent implements IMarkupComponent {
     public config: IWAConfig;
     public root: WAComponent;
     private index: number = 1;
-    constructor(private file: CoreHtmlFile) {
-        this.file.imports.BindableProperty = {
-            name: "BindableProperty",
-            import: "web-atoms-core/dist/core/BindableProperty"
-        };
+    constructor(
+        private file: CoreHtmlFile,
+        element: IHtmlNode,
+        name: string,
+        baseType: string) {
+        super(null, element, name, baseType);
+        this.root = this.children[0] as WAComponent;
     }
     public resolve(name: string): string {
         if (DefaultImports.indexOf(name) !== -1) {

@@ -26,6 +26,22 @@ export class CoreHtmlFile implements IMarkupFile {
     public imports: IImportDefinitions = {};
     public importNameIndex = 1;
 
+    public content: string;
+
+    private mFileLines: number[] = null;
+    public get fileLines(): number [] {
+        if (!this.mFileLines) {
+            let last: number = 0;
+            const nl = this.content.split("\n").map((x) => {
+                const n = last;
+                last += x.length + 1;
+                return n;
+            });
+            this.mFileLines = nl;
+        }
+        return this.mFileLines;
+    }
+
     constructor(public file: PathLike, private config: IWAConfig) {
 
     }
@@ -37,6 +53,8 @@ export class CoreHtmlFile implements IMarkupFile {
             this.nodes.length = 0;
 
             const content = readFileSync(this.file, { encoding: "utf-8" });
+
+            this.content = content;
 
             this.compileContent(content);
             this.lastTime = this.currentTime;
@@ -106,8 +124,13 @@ export class CoreHtmlFile implements IMarkupFile {
 
         const name = pname.name.split("-").map( (s) => s.charAt(0).toUpperCase() + s.substr(1)).join("");
 
-        const root = new CoreHtmlComponent(this);
-        root.root = new WAComponent(null, roots[0], name, "AtomControl") ;
+        this.imports.BindableProperty = {
+            name: "BindableProperty",
+            import: "web-atoms-core/dist/core/BindableProperty"
+        };
+
+        const root = new CoreHtmlComponent(this, roots[0], name, "AtomControl");
+        // root.root = new WAComponent(this, roots[0], name, "AtomControl") ;
         root.name = name;
         root.root.export = true;
 

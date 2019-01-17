@@ -1,3 +1,4 @@
+// tslint:disable
 import {DomHandler,Parser} from "htmlparser2";
 import * as fs from "fs";
 import * as path from "path";

@@ -3,6 +3,7 @@ import { CoreHtmlComponent } from "./CoreHtmlComponent";
 import { GeneratorContext } from "../generator-context";
 import { IHtmlNode } from "../html-node";
 import { Binding } from "./Binding";
+import { CoreHtmlFile } from "./CoreHtmlFile";
 import { HtmlContent } from "./HtmlContent";
 
 export class WANode {
@@ -27,6 +28,10 @@ export class WANode {
     constructor(public parent: WAElement, public name?: string) {
     }
 
+    public get coreHtmlFile(): CoreHtmlFile {
+        return (this.parent instanceof CoreHtmlFile) ? this.parent : this.parent.coreHtmlFile;
+    }
+
 }
 
 export class WAAttribute extends WANode {
@@ -48,7 +53,7 @@ export class WAAttribute extends WANode {
         name = name.split("-").map(
             (a, i) => (i ? a.charAt(0).toUpperCase() : a.charAt(0).toLowerCase())  + a.substr(1) ).join("");
 
-        if (name === "defaultStyle") {
+        if (name === "defaultStyle" || name === "defaultControlStyle") {
             return `
             ${this.atomParent.id}.defaultControlStyle = ${ HtmlContent.removeBrackets(this.value)};
             `;
@@ -209,12 +214,13 @@ export class WAElement extends WANode {
         } catch (er) {
             const en = element.startIndex || 0;
             let cn = 0;
-            const ln = GeneratorContext.instance.fileLines.findIndex( (x) => en < x );
-            const sln = GeneratorContext.instance.fileLines[ln - 1];
+            const lines = this.coreHtmlFile.fileLines;
+            const ln = lines.findIndex( (x) => en < x );
+            const sln = lines[ln - 1];
             cn = en - sln;
             const errorText = `${er.message}`.split("\n").join(" ").split("\r").join("");
             // tslint:disable-next-line:no-console
-            console.error(`${GeneratorContext.instance.fileName}(${ln},${cn}): error TS0001: ${errorText}.`);
+            console.error(`${this.coreHtmlFile.file}(${ln},${cn}): error TS0001: ${errorText}.`);
         }
 
     }
