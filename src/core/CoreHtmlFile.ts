@@ -99,7 +99,7 @@ export class CoreHtmlFile implements IMarkupFile {
 
         const roots = nodes.filter( (x) => x.type && x.type === "tag");
         if (roots.length > 1) {
-            throw new Error("Only single top level root allowed");
+            throw new Error(`Error: Only single top level root allowed - ${this.file}`);
         }
 
         const pname = parse(this.file.toString());

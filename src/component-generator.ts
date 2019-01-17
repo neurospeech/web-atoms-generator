@@ -9,6 +9,7 @@ import { XamlFile } from "./xaml/xaml-file";
 import { ImageFile } from "./core/ImageFile";
 import { HtmlContent } from "./html-content";
 import { CoreHtmlFile } from "./core/CoreHtmlFile";
+import FileApi from "./FileApi";
 
 
 export class ComponentGenerator {
@@ -178,7 +179,7 @@ export class ComponentGenerator {
 				${this.writeNames(this.files, packageContent.name)}
 `;
 
-			fs.writeFileSync(this.folder + "/ModuleFiles.ts", content, "utf8");
+			FileApi.writeSync(this.folder + "/ModuleFiles.ts", content);
 
 			console.log(`Modules written to ${this.folder}/ModuleFiles.ts`);
 
