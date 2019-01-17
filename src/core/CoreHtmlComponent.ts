@@ -13,7 +13,7 @@ export class CoreHtmlComponent
     public nsNamespace: string;
     public generated: string = "// tslint:disable\r\n";
     public config: IWAConfig;
-    public root: WAComponent;
+    // public root: WAComponent;
     private index: number = 1;
     constructor(
         private file: CoreHtmlFile,
@@ -21,7 +21,7 @@ export class CoreHtmlComponent
         name: string,
         baseType: string) {
         super(null, element, name, baseType);
-        this.root = this.children[0] as WAComponent;
+        // this.root = this.children[0] as WAComponent;
     }
     public resolve(name: string): string {
         if (DefaultImports.indexOf(name) !== -1) {
@@ -48,8 +48,8 @@ export class CoreHtmlComponent
     }
     public generateCode(): void {
         // let us resolve all names...
-        this.root.resolveNames(this);
-        this.generated = this.root.toString();
+        this.resolveNames(this);
+        this.generated = this.toString();
     }
     public writeLine(line?: string): void {
         this.generated += (line || "") + "\r\n";
