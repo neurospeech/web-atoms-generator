@@ -16,7 +16,7 @@ export class CoreHtmlComponent
     // public root: WAComponent;
     private index: number = 1;
     constructor(
-        private file: CoreHtmlFile,
+        public readonly file: CoreHtmlFile,
         element: IHtmlNode,
         name: string,
         baseType: string) {
