@@ -444,7 +444,12 @@ export class WAComponent extends WAElement {
 
             const elementName = this.element.name === "null" ? "" : `, document.createElement("${this.element.name}")`;
 
-            return `
+            const hasIf = this.attributes.find((x) => x.name === "$if");
+            if (hasIf) {
+                this.attributes = this.attributes.filter( (x) => x.name !== hasIf.name);
+            }
+
+            const text = `
             const ${this.id} = new ${this.baseType}(this.app${elementName});
             ${this.presenterToString}
             ${this.children.join("\r\n")}
@@ -452,6 +457,15 @@ export class WAComponent extends WAElement {
             ${ this.parent instanceof WAComponent ?
                 `${this.parent.id}.append(${this.id})` : `${this.parent.eid}.appendChild(${this.eid})` };
 `;
+
+            if (hasIf) {
+                return `
+    if (${hasIf.toString()}) {
+        ${text}
+    }`;
+            }
+
+            return text;
         }
     } catch (e) {
         this.coreHtmlFile.reportError(this.element, e);
