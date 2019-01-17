@@ -54,8 +54,9 @@ export class CoreHtmlFile implements IMarkupFile {
         const sln = lines[ln - 1];
         cn = en - sln;
         const errorText = `${er.message}`.split("\n").join(" ").split("\r").join("");
+        const fn = this.file.toString().split("\\").join("/");
         // tslint:disable-next-line:no-console
-        console.error(`${this.file}(${ln},${cn}): error TS0001: ${errorText}.`);
+        console.error(`${fn}(${ln},${cn}): error TS0001: ${errorText}.`);
     }
 
     public compile(packageContent: any): void {
