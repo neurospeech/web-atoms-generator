@@ -46,6 +46,18 @@ export class CoreHtmlFile implements IMarkupFile {
 
     }
 
+    public reportError(element: IHtmlNode, er: Error): void {
+        const en = element.startIndex || 0;
+        let cn = 0;
+        const lines = this.fileLines;
+        const ln = lines.findIndex( (x) => en < x );
+        const sln = lines[ln - 1];
+        cn = en - sln;
+        const errorText = `${er.message}`.split("\n").join(" ").split("\r").join("");
+        // tslint:disable-next-line:no-console
+        console.error(`${this.file}(${ln},${cn}): error TS0001: ${errorText}.`);
+    }
+
     public compile(packageContent: any): void {
 
         try {

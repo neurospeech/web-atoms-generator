@@ -212,15 +212,7 @@ export class WAElement extends WANode {
                 }
             }
         } catch (er) {
-            const en = element.startIndex || 0;
-            let cn = 0;
-            const lines = this.coreHtmlFile.fileLines;
-            const ln = lines.findIndex( (x) => en < x );
-            const sln = lines[ln - 1];
-            cn = en - sln;
-            const errorText = `${er.message}`.split("\n").join(" ").split("\r").join("");
-            // tslint:disable-next-line:no-console
-            console.error(`${this.coreHtmlFile.file}(${ln},${cn}): error TS0001: ${errorText}.`);
+            this.coreHtmlFile.reportError(this.element, er);
         }
 
     }
@@ -308,13 +300,17 @@ export class WAElement extends WANode {
 
     public toString(): string {
 
-        return `
-        const ${this.id} = document.createElement("${this.element.name}");
-        ${this.presenterToString}
-        ${ this.parent instanceof WAComponent ?
-            `${this.parent.id}.append(${this.id})` : `${this.parent.eid}.appendChild(${this.id})` };
-        ${this.attributes.join("\r\n")}
-        ${this.children.join("\r\n")}`;
+        try {
+            return `
+            const ${this.id} = document.createElement("${this.element.name}");
+            ${this.presenterToString}
+            ${ this.parent instanceof WAComponent ?
+                `${this.parent.id}.append(${this.id})` : `${this.parent.eid}.appendChild(${this.id})` };
+            ${this.attributes.join("\r\n")}
+            ${this.children.join("\r\n")}`;
+        } catch (e) {
+            this.coreHtmlFile.reportError(this.element, e);
+        }
 
     }
 }
@@ -396,6 +392,8 @@ export class WAComponent extends WAElement {
 
     public toString(): string {
 
+        try {
+
         if (this.name) {
 
             this.properties = this.properties || [];
@@ -452,6 +450,9 @@ export class WAComponent extends WAElement {
                 `${this.parent.id}.append(${this.id})` : `${this.parent.eid}.appendChild(${this.eid})` };
 `;
         }
+    } catch (e) {
+        this.coreHtmlFile.reportError(this.element, e);
+    }
 
     }
 }
