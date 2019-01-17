@@ -29,7 +29,10 @@ export class WANode {
     }
 
     public get coreHtmlFile(): CoreHtmlFile {
-        return (this.parent instanceof CoreHtmlFile) ? this.parent : this.parent.coreHtmlFile;
+        if (this instanceof CoreHtmlFile) {
+            return this;
+        }
+        return this.parent.coreHtmlFile;
     }
 
 }
