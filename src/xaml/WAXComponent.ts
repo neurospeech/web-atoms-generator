@@ -220,11 +220,11 @@ export class WAXComponent {
 
     public toString(): string {
 
-        const attributes = this.attributes.filter( (x) => !x.e.attr.Name ).sort(
+        const attributes = this.attributes.sort(
             (l, r) => l.parentName.localeCompare(r.parentName));
 
         const attributeGroups = ArrayHelper.groupBy(attributes, (a) => a.parentName)
-            .map((a) => `
+            .map((a) => a.key.e.attr.Name ? a.values.join("\r\n") : `
             const ${a.key} = this.find("${a.key}");
             ${a.values.join("\r\n")}
 `);
