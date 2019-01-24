@@ -84,7 +84,7 @@ export class WAXComponent {
                             const name = this.setName(e);
                             const className = `${this.name}_${name}`;
                             const tokens = iterator.name.split(".");
-                            this.setAttribute(e,
+                            this.setAttribute(null,
                                 name,
                                 tokens[1],
                                 `() => new (${className}_Creator(this))(this.app)`,
