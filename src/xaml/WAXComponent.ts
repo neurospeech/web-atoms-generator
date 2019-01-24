@@ -14,6 +14,8 @@ export class WAXComponent {
 
     public controlImports: string[] = [];
 
+    public properties: string[] = [];
+
     constructor(
         public element: XmlElement,
         public name: string,
@@ -74,24 +76,6 @@ export class WAXComponent {
         const removeChildren: Array<{ parent: XmlElement, child: XmlElement }> = [];
         for (const iterator of e.children) {
             if (iterator.type === "element") {
-
-                if (iterator.name.includes(":")) {
-
-                    const name = iterator.name.split(":")[0];
-                    const ns = this.imports[name];
-                    if (ns) {
-                        iterator.name = "atom:AtomObjectCreator";
-                        iterator.attr = iterator.attr || {};
-                        iterator.attr.Type = name;
-                        this.element.attr = this.element.attr || {};
-                        this.element.attr["xmlns:atom"] = "clr-namespace:WebAtoms;assembly=WebAtoms";
-                        if (!this.controlImports.find((s) => s === name)) {
-                            this.controlImports.push(name);
-                        }
-                    }
-
-                }
-
                 if (iterator.name.includes(".")) {
                     const first = this.getFirstElement(iterator);
                     if (first) {
@@ -112,6 +96,24 @@ export class WAXComponent {
                         }
                     }
                 }
+
+                if (iterator.name.includes(":")) {
+
+                    const name = iterator.name.split(":")[0];
+                    const ns = this.imports[name];
+                    if (ns) {
+                        iterator.name = "atom:AtomObjectCreator";
+                        iterator.attr = iterator.attr || {};
+                        iterator.attr.Type = name;
+                        this.element.attr = this.element.attr || {};
+                        this.element.attr["xmlns:atom"] = "clr-namespace:WebAtoms;assembly=WebAtoms";
+                        if (!this.controlImports.find((s) => s === name)) {
+                            this.controlImports.push(name);
+                        }
+                    }
+
+                }
+
                 this.process(iterator);
             }
         }
@@ -216,6 +218,8 @@ export class WAXComponent {
 `);
 
         const classContent = `class ${this.name} extends AtomXFControl {
+
+                ${this.properties.join("\r\n")}
 
                 protected create(): void {
                     super.create();
