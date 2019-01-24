@@ -163,13 +163,17 @@ export class WAXComponent {
     }
 
     public setName(e: XmlElement): string {
-        let name: string = e.attr ? e.attr.name || e.attr["x:Name"] : null;
+        let name: string = e.attr ? e.attr.name || e.attr.Name || e.attr["x:Name"] : null;
         if (name) {
             return name;
         }
         name = `e${this.lastId++}`;
         e.attr = e.attr || {};
-        e.attr["x:Name"] = name;
+        if (e.name === "atom:AtomObjectCreator") {
+            e.attr.Name = name;
+        } else {
+            e.attr["x:Name"] = name;
+        }
         return name;
     }
 
