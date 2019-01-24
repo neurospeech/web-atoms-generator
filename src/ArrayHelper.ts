@@ -1,5 +1,5 @@
-export interface IKeyValues<T> {
-    key: T;
+export interface IKeyValues<K, T> {
+    key: K;
     values: T[];
 }
 
@@ -11,10 +11,10 @@ export class ArrayHelper {
      * @param a input array
      * @param keySelector key selector
      */
-    public static groupBy<T>(a: T[], keySelector: (item: T) => any): Array<IKeyValues<T>> {
-        const r: Array<IKeyValues<T>> = [];
+    public static groupBy<K, T>(a: T[], keySelector: (item: T) => K): Array<IKeyValues<K, T>> {
+        const r: Array<IKeyValues<K, T>> = [];
         let lastKey: any;
-        let lastKeyStore: IKeyValues<T>;
+        let lastKeyStore: IKeyValues<K, T>;
         for (const iterator of a) {
             const key = keySelector(iterator);
             // tslint:disable-next-line:triple-equals

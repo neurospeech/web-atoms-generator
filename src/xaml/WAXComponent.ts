@@ -225,8 +225,8 @@ export class WAXComponent {
 
         const attributeGroups = ArrayHelper
             .groupBy(attributes, (a) => a.parentName)
-            .map((a) => (a.key.e && a.key.e.attr.Name) ? a.values.join("\r\n") : `
-            const ${a.key.name} = this.find("${a.key.name}");
+            .map((a) => (a.values[0].e && a.values[0].e.attr.Name) ? a.values.join("\r\n") : `
+            const ${a.key} = this.find("${a.key}");
             ${a.values.join("\r\n")}
 `);
 
