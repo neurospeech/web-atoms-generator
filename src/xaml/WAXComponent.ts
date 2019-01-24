@@ -207,7 +207,8 @@ export class WAXComponent {
     }
 
     public setAttribute(parentName: string, name: string, value: string, template?: boolean): void {
-        this.attributes.push(new WAXAttribute(parentName, name, value, template));
+        this.attributes.push(new WAXAttribute( this.parent === null ? "this" : this.name,
+            parentName, name, value, template));
     }
 
     public toString(): string {
@@ -269,6 +270,7 @@ function ${this.name}_Creator(__creator: any): any {
 export class WAXAttribute {
 
     constructor(
+        public id: string,
         public parentName: string,
         public name: string,
         public value: string,
@@ -281,7 +283,7 @@ export class WAXAttribute {
 
         if (this.template) {
             return `
-            this.setTemplate(${this.parentName}, "${this.name}", ${this.value});
+            ${this.id}.setTemplate(${this.parentName}, "${this.name}", ${this.value});
             `;
         }
 
@@ -293,30 +295,30 @@ export class WAXAttribute {
             const v = HtmlContent.processOneTimeBinding(this.value);
             if (/^(viewmodel|localviewmodel)$/i.test(name)) {
                 return `
-                this.setLocalValue(${this.parentName}, "${name}", ${HtmlContent.removeBrackets(v)});`;
+                ${this.id}.setLocalValue(${this.parentName}, "${name}", ${HtmlContent.removeBrackets(v)});`;
                 }
             if (v === this.value) {
                 const sv = v.substr(1, v.length - 2);
                 return `
-                this.setPrimitiveValue(${this.parentName}, "${name}", ${sv});`;
+                ${this.id}.setPrimitiveValue(${this.parentName}, "${name}", ${sv});`;
             }
             return `
-            this.runAfterInit( () =>
-            this.setLocalValue(${this.parentName}, "${name}", ${v}) );`;
+            ${this.id}.runAfterInit( () =>
+            ${this.id}.setLocalValue(${this.parentName}, "${name}", ${v}) );`;
         }
 
         if (this.value.startsWith("[") && this.value.endsWith("]")) {
             const v = HtmlContent.processOneWayBinding(this.value);
             const startsWithThis = v.pathList.findIndex( (p) => p[0] === "this" ) !== -1 ? ", __creator" : "";
             return `
-            this.bind(${this.parentName}, "${name}", ${v.expression} ${startsWithThis});`;
+            ${this.id}.bind(${this.parentName}, "${name}", ${v.expression} ${startsWithThis});`;
         }
 
         if (this.value.startsWith("$[") && this.value.endsWith("]")) {
             const v = HtmlContent.processTwoWayBinding(this.value, "true");
             const startsWithThis = v.pathList.findIndex( (p) => p[0] === "this" ) !== -1 ? ",null, __creator" : "";
             return `
-            this.bind(${this.parentName}, "${name}", ${v.expression} ${startsWithThis});`;
+            ${this.id}.bind(${this.parentName}, "${name}", ${v.expression} ${startsWithThis});`;
         }
 
         // if (this.value.startsWith("^[") && this.value.endsWith("]")) {
@@ -327,7 +329,7 @@ export class WAXAttribute {
         // }
 
         return `
-        this.setLocalValue(${this.parentName}, "${this.name}", ${this.value});
+        ${this.id}.setLocalValue(${this.parentName}, "${this.name}", ${this.value});
         `;
     }
 }
