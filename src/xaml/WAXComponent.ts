@@ -224,7 +224,7 @@ export class WAXComponent {
             (l, r) => l.parentName.localeCompare(r.parentName));
 
         const attributeGroups = ArrayHelper.groupBy(attributes, (a) => a.parentName)
-            .map((a) => a.key.e.attr.Name ? a.values.join("\r\n") : `
+            .map((a) => a.key.e && a.key.e.attr.Name ? a.values.join("\r\n") : `
             const ${a.key} = this.find("${a.key}");
             ${a.values.join("\r\n")}
 `);
