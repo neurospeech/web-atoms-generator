@@ -84,7 +84,7 @@ export class WAXComponent {
                             const name = this.setName(e);
                             const className = `${this.name}_${name}`;
                             const tokens = iterator.name.split(".");
-                            this.setAttribute(null,
+                            this.setAttribute(e,
                                 name,
                                 tokens[1],
                                 `() => new (${className}_Creator(this))(this.app)`,
@@ -223,9 +223,10 @@ export class WAXComponent {
         const attributes = this.attributes.sort(
             (l, r) => l.parentName.localeCompare(r.parentName));
 
-        const attributeGroups = ArrayHelper.groupBy(attributes, (a) => a.parentName)
+        const attributeGroups = ArrayHelper
+            .groupBy(attributes, (a) => a.parentName)
             .map((a) => (a.key.e && a.key.e.attr.Name) ? a.values.join("\r\n") : `
-            const ${a.key} = this.find("${a.key}");
+            const ${a.key.name} = this.find("${a.key.name}");
             ${a.values.join("\r\n")}
 `);
 
