@@ -12,7 +12,7 @@ export class WAXComponent {
 
     public xmlNS: {[key: string]: string} = {};
 
-    public controlImports: string[] = [];
+    public controlImports: Array<{ type: string, name: string }> = [];
 
     public properties: string[] = [];
 
@@ -102,14 +102,21 @@ export class WAXComponent {
                     const name = iterator.name.split(":")[0];
                     const ns = this.imports[name];
                     if (ns) {
-                        iterator.name = "atom:AtomObjectCreator";
+
+                        const contorlName = this.controlImports.find((s) => s.name === name) ?
+                            name + this.controlImports.length :
+                            name;
+
+                        this.controlImports.push({ type: name, name: contorlName });
+
+                        iterator.name = "atom:AtomObjectInjector";
                         iterator.attr = iterator.attr || {};
-                        iterator.attr.Type = name;
+                        iterator.attr.Name = contorlName;
                         this.element.attr = this.element.attr || {};
                         this.element.attr["xmlns:atom"] = "clr-namespace:WebAtoms;assembly=WebAtoms";
-                        if (!this.controlImports.find((s) => s === name)) {
-                            this.controlImports.push(name);
-                        }
+                        // if (!this.controlImports.find((s) => s === name)) {
+                        //     this.controlImports.push(name);
+                        // }
                     }
 
                 }
@@ -222,7 +229,15 @@ export class WAXComponent {
             ${a.values.join("\r\n")}
 `);
 
+        const controlImports = this.controlImports.map((s) => {
+            return `const ${s.name} = new ${s.type}(this.app);
+            this.${s.name} = ${s.name}.element;
+`;
+        });
+
         const classContent = `class ${this.name} extends AtomXFControl {
+
+                ${this.controlImports.map((s) => `public ${s.type}`).join("\r\n")}
 
                 ${this.properties.join("\r\n")}
 
