@@ -246,8 +246,7 @@ export class WAXComponent {
 
                     this.element = this.createControl("${this.resolveName(this.element.name)}");
 
-                    ${this.controlImports.map((s) =>
-                        `this.setImport(this.element,"${s}",() => new ${s}(this.app));`).join("\r\n")}
+                    ${controlImports}
 
                     this.loadXaml(\`${this.element.toStringWithIndent("\t")}\`);
 
