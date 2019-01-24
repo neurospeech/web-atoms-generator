@@ -88,7 +88,7 @@ export class WAXComponent {
                                 name,
                                 tokens[1],
                                 `() => new (${className}_Creator(this))(this.app)`,
-                                true);
+                                name[0] !== name[0].toLowerCase());
                             const child = new WAXComponent(
                                 this.getFirstElement(first), className, this.children, true, this);
                             this.children.push(child);
