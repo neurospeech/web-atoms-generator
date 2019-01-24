@@ -84,7 +84,7 @@ export class WAXComponent {
                             const name = this.setName(e);
                             const className = `${this.name}_${name}`;
                             const tokens = iterator.name.split(".");
-                            this.setAttribute(
+                            this.setAttribute(e,
                                 name,
                                 tokens[1],
                                 `() => new (${className}_Creator(this))(this.app)`,
@@ -103,9 +103,9 @@ export class WAXComponent {
                     const ns = this.imports[name];
                     if (ns) {
 
-                        const contorlName = this.controlImports.find((s) => s.name === name) ?
+                        const contorlName = "m" + (this.controlImports.find((s) => s.name === name) ?
                             name + this.controlImports.length :
-                            name;
+                            name);
 
                         this.controlImports.push({ type: name, name: contorlName });
 
@@ -148,7 +148,7 @@ export class WAXComponent {
                     || (element.startsWith("$[") && element.endsWith("]"))
                 ) {
                     const name = this.setName(e);
-                    this.setAttribute(name, key, element);
+                    this.setAttribute(e, name, key, element);
                     removeAttributes.push(key);
                 }
             }
@@ -213,14 +213,14 @@ export class WAXComponent {
         return `${ns}.${name}`;
     }
 
-    public setAttribute(parentName: string, name: string, value: string, template?: boolean): void {
-        this.attributes.push(new WAXAttribute("this",
+    public setAttribute(e: XmlElement, parentName: string, name: string, value: string, template?: boolean): void {
+        this.attributes.push(new WAXAttribute(e, e.attr.Name || "this",
             parentName, name, value, template));
     }
 
     public toString(): string {
 
-        const attributes = this.attributes.sort(
+        const attributes = this.attributes.filter( (x) => !x.e.attr.Name ).sort(
             (l, r) => l.parentName.localeCompare(r.parentName));
 
         const attributeGroups = ArrayHelper.groupBy(attributes, (a) => a.parentName)
@@ -237,7 +237,7 @@ export class WAXComponent {
 
         const classContent = `class ${this.name} extends AtomXFControl {
 
-                ${this.controlImports.map((s) => `public ${s.type}`).join("\r\n")}
+                ${this.controlImports.map((s) => `public ${s.name};`).join("\r\n\t\t\t")}
 
                 ${this.properties.join("\r\n")}
 
@@ -284,6 +284,7 @@ function ${this.name}_Creator(__creator: any): any {
 export class WAXAttribute {
 
     constructor(
+        public e: XmlElement,
         public id: string,
         public parentName: string,
         public name: string,
