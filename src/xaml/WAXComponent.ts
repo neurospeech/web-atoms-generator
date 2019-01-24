@@ -207,7 +207,7 @@ export class WAXComponent {
     }
 
     public setAttribute(parentName: string, name: string, value: string, template?: boolean): void {
-        this.attributes.push(new WAXAttribute( this.parent === null ? "this" : this.name,
+        this.attributes.push(new WAXAttribute(this.template ? this.name : "this",
             parentName, name, value, template));
     }
 
