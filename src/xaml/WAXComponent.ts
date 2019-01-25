@@ -215,7 +215,7 @@ export class WAXComponent {
 
     public setAttribute(e: XmlElement, parentName: string, name: string, value: string, template?: boolean): void {
         this.attributes.push(new WAXAttribute(e, (e && e.attr.Name) || "this",
-            parentName, name, value, template));
+            (e && e.attr.Name) ? `this.${parentName}` : parentName, name, value, template));
     }
 
     public toString(): string {
