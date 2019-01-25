@@ -114,9 +114,6 @@ export class WAXComponent {
                         iterator.attr.Name = contorlName;
                         this.element.attr = this.element.attr || {};
                         this.element.attr["xmlns:atom"] = "clr-namespace:WebAtoms;assembly=WebAtoms";
-                        // if (!this.controlImports.find((s) => s === name)) {
-                        //     this.controlImports.push(name);
-                        // }
                     }
 
                 }
@@ -170,17 +167,13 @@ export class WAXComponent {
     }
 
     public setName(e: XmlElement): string {
-        let name: string = e.attr ? e.attr.name || e.attr.Name || e.attr["x:Name"] : null;
+        let name: string = e.attr ? (e.attr.name || e.attr.Name || e.attr["x:Name"]) : null;
         if (name) {
             return name;
         }
         name = `e${this.lastId++}`;
         e.attr = e.attr || {};
-        if (e.name === "atom:AtomObjectCreator") {
-            e.attr.Name = name;
-        } else {
-            e.attr["x:Name"] = name;
-        }
+        e.attr["x:Name"] = name;
         return name;
     }
 
@@ -213,18 +206,28 @@ export class WAXComponent {
         return `${ns}.${name}`;
     }
 
-    public setAttribute(e: XmlElement, parentName: string, name: string, value: string, template?: boolean): void {
-        this.attributes.push(new WAXAttribute(e, (e && e.attr.Name) || "this",
-            (e && e.attr.Name) ? `this.${parentName}` : parentName, name, value, template));
+    public setAttribute(
+        e: XmlElement,
+        elementName: string,
+        attributeName: string,
+        value: string,
+        template?: boolean): void {
+        this.attributes.push(new WAXAttribute(
+            e,
+            (e && e.attr.Name) || "this",
+            (e && e.attr.Name) ? `this.${elementName}` : elementName,
+            attributeName,
+            value,
+            template));
     }
 
     public toString(): string {
 
         const attributes = this.attributes.sort(
-            (l, r) => l.parentName.localeCompare(r.parentName));
+            (l, r) => l.elementName.localeCompare(r.elementName));
 
         const attributeGroups = ArrayHelper
-            .groupBy(attributes, (a) => a.parentName)
+            .groupBy(attributes, (a) => a.elementName)
             .map((a) => (a.values[0].e && a.values[0].e.attr.Name) ? a.values.join("\r\n") : `
             const ${a.key} = this.find("${a.key}");
             ${a.values.join("\r\n")}
@@ -287,8 +290,8 @@ export class WAXAttribute {
     constructor(
         public e: XmlElement,
         public id: string,
-        public parentName: string,
-        public name: string,
+        public elementName: string,
+        public attributeName: string,
         public value: string,
         public template: boolean
     ) {
@@ -299,42 +302,42 @@ export class WAXAttribute {
 
         if (this.template) {
             return `
-            ${this.id}.setTemplate(${this.parentName}, "${this.name}", ${this.value});
+            ${this.id}.setTemplate(${this.elementName}, "${this.attributeName}", ${this.value});
             `;
         }
 
-        const name = this.name;
+        const attributeName = this.attributeName;
 
         // do the bindings...
         if ((this.value.startsWith("{{") ||  this.value.startsWith("${")) && this.value.endsWith("}")) {
             this.value = this.value.substr(1);
             const v = HtmlContent.processOneTimeBinding(this.value);
-            if (/^(viewmodel|localviewmodel)$/i.test(name)) {
+            if (/^(viewmodel|localviewmodel)$/i.test(attributeName)) {
                 return `
-                ${this.id}.setLocalValue(${this.parentName}, "${name}", ${HtmlContent.removeBrackets(v)});`;
+                ${this.id}.setLocalValue(${this.elementName}, "${attributeName}", ${HtmlContent.removeBrackets(v)});`;
                 }
             if (v === this.value) {
                 const sv = v.substr(1, v.length - 2);
                 return `
-                ${this.id}.setPrimitiveValue(${this.parentName}, "${name}", ${sv});`;
+                ${this.id}.setPrimitiveValue(${this.elementName}, "${attributeName}", ${sv});`;
             }
             return `
             ${this.id}.runAfterInit( () =>
-            ${this.id}.setLocalValue(${this.parentName}, "${name}", ${v}) );`;
+            ${this.id}.setLocalValue(${this.elementName}, "${attributeName}", ${v}) );`;
         }
 
         if (this.value.startsWith("[") && this.value.endsWith("]")) {
             const v = HtmlContent.processOneWayBinding(this.value);
             const startsWithThis = v.pathList.findIndex( (p) => p[0] === "this" ) !== -1 ? ", __creator" : "";
             return `
-            ${this.id}.bind(${this.parentName}, "${name}", ${v.expression} ${startsWithThis});`;
+            ${this.id}.bind(${this.elementName}, "${attributeName}", ${v.expression} ${startsWithThis});`;
         }
 
         if (this.value.startsWith("$[") && this.value.endsWith("]")) {
             const v = HtmlContent.processTwoWayBinding(this.value, "true");
             const startsWithThis = v.pathList.findIndex( (p) => p[0] === "this" ) !== -1 ? ",null, __creator" : "";
             return `
-            ${this.id}.bind(${this.parentName}, "${name}", ${v.expression} ${startsWithThis});`;
+            ${this.id}.bind(${this.elementName}, "${attributeName}", ${v.expression} ${startsWithThis});`;
         }
 
         // if (this.value.startsWith("^[") && this.value.endsWith("]")) {
@@ -345,7 +348,7 @@ export class WAXAttribute {
         // }
 
         return `
-        ${this.id}.setLocalValue(${this.parentName}, "${this.name}", ${this.value});
+        ${this.id}.setLocalValue(${this.elementName}, "${this.attributeName}", ${this.value});
         `;
     }
 }
