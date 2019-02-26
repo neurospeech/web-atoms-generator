@@ -452,8 +452,8 @@ export class WAComponent extends WAElement {
             const text = `
             const ${this.id} = new ${this.baseType}(this.app${elementName});
             ${this.presenterToString}
-            ${this.children.join("\r\n")}
             ${this.attributes.join("\r\n")}
+            ${this.children.join("\r\n")}
             ${ this.parent instanceof WAComponent ?
                 `${this.parent.id}.append(${this.id})` : `${this.parent.eid}.appendChild(${this.eid})` };
 `;
