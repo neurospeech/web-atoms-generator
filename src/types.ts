@@ -11,8 +11,6 @@ export interface IWAConfig {
     outFile?: string;
     outFolder?: string;
     mode?: Mode;
-    namespace?: string;
-    emitDeclaration?: boolean;
     imports?: { [name: string]: string };
 
 }

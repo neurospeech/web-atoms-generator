@@ -3,6 +3,7 @@ import { IMarkupComponent } from "../imarkup-file";
 import { IWAConfig } from "../types";
 import { CoreHtmlFile } from "./CoreHtmlFile";
 import { DefaultImports } from "./DefaultImports";
+import IndentedWriter from "./IndentedWriter";
 import { WAComponent, WAElement } from "./WAComponents";
 
 export class CoreHtmlComponent
@@ -49,7 +50,10 @@ export class CoreHtmlComponent
     public generateCode(): void {
         // let us resolve all names...
         this.resolveNames(this);
-        this.generated = this.toString();
+        // this.generated = this.toString();
+        const iw = new IndentedWriter();
+        this.write(iw);
+        this.generated = iw.toString();
     }
     public writeLine(line?: string): void {
         this.generated += (line || "") + "\r\n";

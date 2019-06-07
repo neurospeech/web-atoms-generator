@@ -105,6 +105,7 @@ export class CoreHtmlFile implements IMarkupFile {
     }
 
     public compileContent(content: string): void {
+
         const handler = new DomHandler( (error, dom) => {
             if (error) {
                 // tslint:disable-next-line:no-console

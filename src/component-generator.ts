@@ -2,25 +2,21 @@
 import * as fs from "fs";
 import * as path from "path";
 import { Binding } from "./core/Binding";
-import { HtmlFile } from "./http-file";
+// import { HtmlFile } from "./http-file";
 import { IMarkupComponent, IMarkupFile } from "./imarkup-file";
 import { IWAConfig, Mode } from "./types";
 import { XamlFile } from "./xaml/xaml-file";
 import { ImageFile } from "./core/ImageFile";
-import { HtmlContent } from "./html-content";
 import { CoreHtmlFile } from "./core/CoreHtmlFile";
 import FileApi from "./FileApi";
+import { HtmlContent } from "./core/HtmlContent";
 
 
 export class ComponentGenerator {
 
-	nsNamesapce: string;
-
-	emitDeclaration: boolean;
-
 	mode: Mode = Mode.None;
 
-	loadFiles(folder: string): void {
+	private loadFiles(folder: string): void {
 
 		// scan all html files...
 		for (var file of fs.readdirSync(folder)) {
@@ -50,7 +46,7 @@ export class ComponentGenerator {
 					}
 
 					if (this.mode == Mode.None) {
-						this.files.push(new HtmlFile(fullName, this.nsNamesapce));
+						// this.files.push(new HtmlFile(fullName, this.nsNamesapce));
 					} else {
 						if (isXml) {
 							this.files.push(new XamlFile(fullName, this.config));
@@ -76,17 +72,8 @@ export class ComponentGenerator {
 	constructor(private config: IWAConfig) {
 		this.folder = config.srcFolder;
 		this.outFile = config.outFile;
-		this.nsNamesapce = config.namespace;
 		this.mode = config.mode;
 		this.outFolder = config.outFolder;
-
-		if (config.emitDeclaration !== undefined) {
-			this.emitDeclaration = config.emitDeclaration;
-		} else {
-			if(!/core/i.test(this.mode)) {
-				this.emitDeclaration = true;
-			}
-		}
 
 		this.files = [];
 
@@ -98,37 +85,9 @@ export class ComponentGenerator {
 
 	}
 
-	// compileCore(): void {
-	// 	for(var file of this.files) {
-	// 		if(file.currentTime !== file.lastTime) {
-
-	// 			if(!fs.existsSync(file.file)) {
-	// 				fs.unlinkSync(`${file.file}.generated.ts`);
-	// 			}
-
-	// 			// console.log(`Generating ${file.file}`);
-	// 			file.compile();
-	// 		}
-	// 	}
-
-	// }
-
-	compile(): void {
+	public compile(): void {
 
 		this.loadFiles(this.folder);
-
-		// if (this.outFolder && /core/i.test(this.mode)) {
-		// 	this.createDirectories(this.outFolder);
-		// 	if (!fs.existsSync(this.outFolder)) {
-		// 		fs.mkdirSync(this.outFolder);
-		// 	}
-
-		// }
-		// if(this.mode == Mode.Core){
-		// 	this.compileCore();			
-		// 	return;
-		// }
-
 
 		var deletedFiles: Array<IMarkupFile> = [];
 
@@ -136,22 +95,20 @@ export class ComponentGenerator {
 
 		let packageContent: any = null;
 
-		if(/core/i.test(this.mode)) {
-			let packageFolder = this.folder;
+		let packageFolder = this.folder;
 
-			while(true) {
-				if (fs.existsSync(path.join(packageFolder, "package.json"))) {
-					break;
-				}
-				packageFolder = path.dirname(packageFolder);
-				continue;
+		while(true) {
+			if (fs.existsSync(path.join(packageFolder, "package.json"))) {
+				break;
 			}
-
-			packageContent = JSON.parse(fs.readFileSync(path.join(packageFolder, "package.json"), {
-				encoding: "utf8",
-				flag: "r"
-			}));
+			packageFolder = path.dirname(packageFolder);
+			continue;
 		}
+
+		packageContent = JSON.parse(fs.readFileSync(path.join(packageFolder, "package.json"), {
+			encoding: "utf8",
+			flag: "r"
+		}));
 
 		for (var file of this.files) {
 			if (file.currentTime !== file.lastTime) {
@@ -169,82 +126,22 @@ export class ComponentGenerator {
 			}
 		}
 
-		if(/core/i.test(this.mode)) {
-
-			// write ModuleFiles
-			const content = `// tslint:disable
-			declare var UMD: any;
-			UMD = UMD || { resolvePath: (v) => v };
-			export const ModuleFiles =
-				${this.writeNames(this.files, packageContent.name)}
+		// write ModuleFiles
+		const content = `// tslint:disable
+		declare var UMD: any;
+		UMD = UMD || { resolvePath: (v) => v };
+		export const ModuleFiles =
+			${this.writeNames(this.files, packageContent.name)}
 `;
 
-			FileApi.writeSync(this.folder + "/ModuleFiles.ts", content);
+		FileApi.writeSync(this.folder + "/ModuleFiles.ts", content);
 
-			console.log(`Modules written to ${this.folder}/ModuleFiles.ts`);
+		console.log(`Modules written to ${this.folder}/ModuleFiles.ts`);
 
-			return;
-		}
-
-
-		// sort by baseType...
-		nodes = nodes.sort((a, b) => {
-			if (a.baseType === b.name) {
-				return -1;
-			}
-			return 0;
-		});
-
-		for (var fx of deletedFiles) {
-			this.files = this.files.filter(x => x.file === fx.file);
-		}
-
-
-		var result: string = "";
-
-		var declarations: string = "";
-
-		var mock: string = "";
-
-		for (var node of nodes) {
-
-			if (node.nsNamespace) {
-				var nsStart: string = "window";
-				for (var ns of node.nsNamespace.split(".")) {
-					result += `if(!${nsStart}['${ns}']){
-${nsStart}['${ns}'] = {};
-}`;
-					nsStart += "." + ns;
-				}
-			}
-
-			result += "\r\n";
-			result += node.generated;
-
-			if (node.nsNamespace) {
-				declarations += `declare namespace ${node.nsNamespace}{    class ${node.name} extends WebAtoms.AtomControl { }   }\r\n`;
-				// mock += `namespace ${node.nsNamespace} { export  class ${node.name} {}  }`;
-				mock += ` var ${node.nsNamespace} = ${node.nsNamespace} || {}; `;
-				mock += ` ${node.nsNamespace}.${node.name} = {}; `;
-			} else {
-				declarations += `declare class ${node.name} {  }\r\n`;
-				mock += `var ${node.name} = {}; `;
-			}
-		}
-
-
-		this.createDirectories(this.outFile);
-
-		fs.writeFileSync(this.outFile, result);
-		var now: Date = new Date();
-
-		if (this.emitDeclaration) {
-			fs.writeFileSync(`${this.outFile}.d.ts`, declarations);
-			fs.writeFileSync(`${this.outFile}.mock.js`, mock);
-		}
+		return;
 	}
 
-	replacePlatformName(name: string[]): string[] {
+	private replacePlatformName(name: string[]): string[] {
 		const last = name[name.length-1];
 		if( !/\.(xml|xaml|html|htm)$/i.test(last)) {
 			return name;
@@ -259,7 +156,7 @@ ${nsStart}['${ns}'] = {};
 		return name;
 	}
 
-	writeNames(f: IMarkupFile[], packageName: string ): string {
+	private writeNames(f: IMarkupFile[], packageName: string ): string {
 		const fileNames = f.map( (fx) => this.replacePlatformName(fx.file.toString().split(path.sep)) );
 		const root = {};
 		for (const iterator of fileNames) {
@@ -297,7 +194,7 @@ ${nsStart}['${ns}'] = {};
 		return content.replace(/\"\~\(/g, "UMD.resolvePath(\"").replace(/\)\~\"/g, "\")");
 	}
 
-	merge(src: any, dest: any): void {
+	private merge(src: any, dest: any): void {
 		for (const key in src) {
 			if (src.hasOwnProperty(key)) {
 				const element = src[key];
@@ -312,24 +209,24 @@ ${nsStart}['${ns}'] = {};
 
 	}
 
-	toSafeName(name: string): string {
+	private toSafeName(name: string): string {
 		return HtmlContent.camelCase(name.replace(".","_")) ;
 	}
 
-	createDirectories(fn: string): void {
-		var dirName: string = path.dirname(fn);
-		if (!fs.existsSync(dirName)) {
-			var parent: string = path.dirname(dirName);
-			if (!fs.existsSync(parent)) {
-				this.createDirectories(parent);
-			}
-			fs.mkdirSync(dirName);
-		}
-	}
+	// private createDirectories(fn: string): void {
+	// 	var dirName: string = path.dirname(fn);
+	// 	if (!fs.existsSync(dirName)) {
+	// 		var parent: string = path.dirname(dirName);
+	// 		if (!fs.existsSync(parent)) {
+	// 			this.createDirectories(parent);
+	// 		}
+	// 		fs.mkdirSync(dirName);
+	// 	}
+	// }
 
 	watcher: fs.FSWatcher;
 
-	watch(): void {
+	private watch(): void {
 		this.watcher = fs.watch(this.folder, { recursive: true }, (event, file) => {
 			this.postCompile();
 		});
@@ -337,7 +234,7 @@ ${nsStart}['${ns}'] = {};
 
 	last: any;
 
-	postCompile(): void {
+	private postCompile(): void {
 		if(this.watcher) {
 			this.watcher.close();
 			this.watcher = null;
@@ -378,7 +275,6 @@ function parseFolder(folder: string): void {
 				if(config.outFile) {
 					config.outFile = path.join(folder, config.outFile);
 				}
-				config.namespace = config.namespace || "";
 
 				var cc: ComponentGenerator = new ComponentGenerator(config);
 				return;

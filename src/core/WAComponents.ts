@@ -5,6 +5,7 @@ import { IHtmlNode } from "../html-node";
 import { Binding } from "./Binding";
 import { CoreHtmlFile } from "./CoreHtmlFile";
 import { HtmlContent } from "./HtmlContent";
+import IndentedWriter from "./IndentedWriter";
 
 export class WANode {
 
@@ -35,6 +36,10 @@ export class WANode {
         return this.parent.coreHtmlFile;
     }
 
+    public write(iw: IndentedWriter): void {
+        // do nothing
+    }
+
 }
 
 export class WAAttribute extends WANode {
@@ -45,7 +50,9 @@ export class WAAttribute extends WANode {
 
     public template: string;
 
-    public toString(): string {
+    public write(iw: IndentedWriter): void {
+
+        iw.writeLine("");
 
         let name = this.name;
 
@@ -53,63 +60,68 @@ export class WAAttribute extends WANode {
             name = name.substring(5);
         }
 
+        const aid = this.atomParent.id;
+
         name = name.split("-").map(
             (a, i) => (i ? a.charAt(0).toUpperCase() : a.charAt(0).toLowerCase())  + a.substr(1) ).join("");
 
         if (name === "defaultStyle" || name === "defaultControlStyle") {
-            return `
-            ${this.atomParent.id}.defaultControlStyle = ${ HtmlContent.removeBrackets(this.value)};
-            `;
+            iw.writeLine(`${aid}.defaultControlStyle = ${ HtmlContent.removeBrackets(this.value)};`);
+            return;
         }
 
         if (this.template) {
-            return `
-        ${this.atomParent.id}.${name} = ${this.template}Creator(this);
-            `;
+            iw.writeLine(`${aid}.${name} = ${this.template}Creator(this);`);
+            return;
         }
 
         if (this.value.startsWith("{") && this.value.endsWith("}")) {
+
             const v = HtmlContent.processOneTimeBinding(this.value);
+
             if (/^(viewmodel|localviewmodel|controlstyle)$/i.test(name)) {
-                return `
-                ${this.atomParent.id}.${name} = ${HtmlContent.removeBrackets(v)};`;
-                }
+                iw.writeLine(`${aid}.${name} = ${HtmlContent.removeBrackets(v)};`);
+                return;
+            }
+
             if (v === this.value) {
                 const sv = v.substr(1, v.length - 2);
                 if (name === "styleClass" && v.includes(".controlStyle.")) {
-                    return `
-                    this.runAfterInit(() => {
-                        ${this.atomParent.id}.setPrimitiveValue(${this.parent.eid}, "styleClass", ${sv});
-                    });
-                    `;
+
+                    iw.writeLineDeferred(
+                        `${aid}.setPrimitiveValue(${this.parent.eid}, "styleClass", ${sv});`);
+                    return;
                 }
-                return `
-                ${this.atomParent.id}.setPrimitiveValue(${this.parent.eid}, "${name}", ${sv});`;
+                iw.writeLine(`${aid}.setPrimitiveValue(${this.parent.eid}, "${name}", ${sv});`);
+                return;
             }
-            return `
-            ${this.atomParent.id}.runAfterInit( () =>
-            ${this.atomParent.id}.setLocalValue(${this.parent.eid}, "${name}", ${v}) );`;
+
+            iw.writeLineDeferred(`${aid}.setLocalValue(${this.parent.eid}, "${name}", ${v}) );`);
+            return;
         }
 
         if (this.value.startsWith("[") && this.value.endsWith("]")) {
             const v = HtmlContent.processOneWayBinding(this.value);
             const startsWithThis = v.pathList.findIndex( (p) => p[0] === "this" ) !== -1 ? ", __creator" : "";
-            return `
-            ${this.atomParent.id}.bind(${this.parent.eid}, "${name}", ${v.expression} ${startsWithThis});`;
+            iw.writeLine(
+                `${aid}.bind(${this.parent.eid}, "${name}", ${v.expression} ${startsWithThis});`);
+            return;
         }
 
         if (this.value.startsWith("$[") && this.value.endsWith("]")) {
             const v = HtmlContent.processTwoWayBinding(this.value, "true");
             const startsWithThis = v.pathList.findIndex( (p) => p[0] === "this" ) !== -1 ? ",null, __creator" : "";
-            return `
-            ${this.atomParent.id}.bind(${this.parent.eid}, "${name}", ${v.expression} ${startsWithThis});`;
+            iw.writeLine(
+                `${aid}.bind(${this.parent.eid}, "${name}", ${v.expression} ${startsWithThis});`);
+            return;
         }
 
         if (this.value.startsWith("^[") && this.value.endsWith("]")) {
             const v = HtmlContent.processTwoWayBinding(this.value, `["change", "keyup", "keydown", "blur"]`);
             const startsWithThis = v.pathList.findIndex( (p) => p[0] === "this" ) !== -1 ? ",null, __creator" : "";
-            return `
-            ${this.atomParent.id}.bind(${this.parent.eid}, "${name}", ${v.expression} ${startsWithThis});`;
+            iw.writeLine(
+                `${aid}.bind(${this.parent.eid}, "${name}", ${v.expression} ${startsWithThis});`);
+            return;
         }
 
         /**
@@ -117,9 +129,8 @@ export class WAAttribute extends WANode {
          * it will set element attribute directly, this is done to fill element attributes quickly
          * for attributes such as class, row, column etc
          */
-        return `
-        ${this.atomParent.id}.setPrimitiveValue(${this.parent.eid}, "${name}", ${JSON.stringify(this.value)} );
-        `;
+        iw.writeLine(
+            `${aid}.setPrimitiveValue(${this.parent.eid}, "${name}", ${JSON.stringify(this.value)} );`);
     }
 
 }
@@ -143,16 +154,11 @@ export class WAElement extends WANode {
         return this.id;
     }
 
-    public get presenterToString(): string {
-        if (! this.presenterParent) {
-            return "";
-        }
-
-        return `
-        ${this.presenterParent.parent.id}.${this.presenterParent.name} = ${this.id};`;
-    }
-
-    constructor(p: WAElement, protected element: IHtmlNode, name?: string) {
+    constructor(
+        p: WAElement,
+        protected element: IHtmlNode,
+        name?: string
+    ) {
         super(p, name);
 
         try {
@@ -201,7 +207,6 @@ export class WAElement extends WANode {
                         ((this as any) as WAComponent).properties = propertyList;
                         continue;
                     }
-
                     this.setAttribute(key, item);
                 }
             }
@@ -301,16 +306,53 @@ export class WAElement extends WANode {
         }
     }
 
-    public toString(): string {
+    public writePresenter(iw: IndentedWriter): void {
+        if (! this.presenterParent) {
+            return;
+        }
+
+        iw.writeLine("");
+        iw.writeLine(`${this.presenterParent.parent.id}.${this.presenterParent.name} = ${this.id};`);
+    }
+
+    public writeAttributes(iw: IndentedWriter): void {
+        for (const attribute of this.attributes) {
+            attribute.write(iw);
+        }
+
+        if (iw.pending.length) {
+            iw.writeLine(`${this.atomParent.id}.runAfterInit( () => {`);
+            iw.writeInNewBlock( () => {
+                for (const iterator of iw.pending) {
+                    iw.writeLine(iterator);
+                }
+            });
+            iw.writeLine("}");
+            iw.pending.length = 0;
+        }
+    }
+
+    public write(iw: IndentedWriter): void {
 
         try {
-            return `
-            const ${this.id} = document.createElement("${this.element.name}");
-            ${this.presenterToString}
-            ${ this.parent instanceof WAComponent ?
-                `${this.parent.id}.append(${this.id})` : `${this.parent.eid}.appendChild(${this.id})` };
-            ${this.attributes.join("\r\n")}
-            ${this.children.join("\r\n")}`;
+            iw.writeLine("");
+            iw.writeLine(`const ${this.id} = document.createElement("${this.element.name}"`);
+
+            this.writePresenter(iw);
+
+            iw.writeLine("");
+            if (this.parent instanceof WAComment) {
+                iw.writeLine(`${this.parent.id}.append(${this.id})`);
+            } else {
+                iw.writeLine(`${this.parent.eid}.appendChild(${this.id})`);
+            }
+
+            this.writeAttributes(iw);
+
+            for (const iterator of this.children) {
+                iterator.write(iw);
+            }
+
         } catch (e) {
             this.coreHtmlFile.reportError(this.element, e);
         }
@@ -323,23 +365,25 @@ export class WATextElement extends WAElement {
         super(p, e);
     }
 
-    public toString(): string {
-        return `
-        const ${this.id} = document.createTextNode(${JSON.stringify(this.element.data)});
-        ${this.presenterToString}
-        ${this.parent.eid}.appendChild(${this.id});`;
+    public write(iw: IndentedWriter): void {
+        iw.writeLine("");
+        iw.writeLine(`const ${this.id} = document.createTextNode(${JSON.stringify(this.element.data)});`);
+
+        this.writePresenter(iw);
+
+        iw.writeLine(`${this.parent.eid}.appendChild(${this.id});`);
     }
 }
 
 export class WAComment extends WAElement {
-    public toString(): string {
+    public write(iw: IndentedWriter): void {
         const comment = (this.element.data || "")
             .toString()
             .split("\n")
             .map((s) => `// ${s}`)
             .join("\n");
 
-        return `// ${this.id}\r\n${comment}`;
+        iw.writeLine(`// ${this.id}\r\n${comment}`);
     }
 }
 
@@ -350,6 +394,8 @@ export class WAComponent extends WAElement {
     public export: boolean = false;
 
     public properties: Array<{ key: string, value: string }>;
+
+    public injects: Array<{ key: string, value: string}>;
 
     public get templates() {
         return this.mTemplates || (this.mTemplates = []);
@@ -393,83 +439,111 @@ export class WAComponent extends WAElement {
         }
     }
 
-    public toString(): string {
-
+    public write(iw: IndentedWriter): void {
         try {
+            if (this.name) {
+                if (this.export) {
+                    this.writeNamedComponent(iw);
+                } else {
+                    iw.writeInNewBrackets(`function ${this.name}Creator(__creator)`, () => {
+                        this.writeNamedComponent(iw);
+                    });
+                }
+            } else {
+                this.writeComponent(iw);
+            }
+        } catch (e) {
+            this.coreHtmlFile.reportError(this.element, e);
+        }
+    }
 
-        if (this.name) {
+    public writeNamedComponent(iw: IndentedWriter): void {
 
-            this.properties = this.properties || [];
-            const propList = this.properties.map( (s) => `
-            @BindableProperty
-            public ${s.key}: any;
-            ` ).join("");
+        const e = this.export ? "export default" : "return";
 
-            const initList = this.properties.map( (s) => `
-                this.${s.key} = ${s.value};
-            `).join(";");
+        // write class...
+        iw.writeInNewBrackets( `${e} class ${this.name} extends ${this.baseType}`, () => {
 
-            const classContent = ` class ${this.name} extends ${this.baseType} {
-
-                ${propList}
-
-                public create(): void {
-                    super.create();
-
-                    ${this.export ? "const __creator = this" : ` `};
-
-                    ${initList}
-
-                    ${this.element.name === "null" ?
-                        "" :
-                        `this.element = document.createElement("${this.element.name}");`}
-                    ${this.presenterToString}
-                    ${this.attributes.join("\r\n")}
-                    ${this.children.join("\r\n")}
+            // write injects
+            if (this.injects) {
+                for (const iterator of this.injects) {
+                    iw.writeLine(`private ${iterator.key}: ${iterator.value};`);
+                    iw.writeLine("");
                 }
             }
 
-            ${this.templates.join("\r\n")}
-
-            `;
-
-            if (this.export) {
-                return `export default ${classContent}`;
+            if (this.properties) {
+                for (const iterator of this.properties) {
+                    iw.writeLine(`@BindableProperty`);
+                    iw.writeLine(`public ${iterator.key}: any = ${iterator.value};`);
+                    iw.writeLine("");
+                }
             }
 
-            return `function ${this.name}Creator(__creator){
-                return ${classContent}
-            }`;
-        } else {
+            iw.writeInNewBrackets(`public create(): void`, () => {
 
-            const elementName = this.element.name === "null" ? "" : `, document.createElement("${this.element.name}")`;
+                iw.writeLine(`super.create();`);
 
-            const hasIf = this.attributes.find((x) => x.name === "$if");
-            if (hasIf) {
-                this.attributes = this.attributes.filter( (x) => x.name !== hasIf.name);
-            }
+                if (this.export) {
+                    iw.writeLine("");
+                    iw.writeLine(`const __creator = this;`);
+                }
 
-            const text = `
-            const ${this.id} = new ${this.baseType}(this.app${elementName});
-            ${this.presenterToString}
-            ${this.attributes.join("\r\n")}
-            ${this.children.join("\r\n")}
-            ${ this.parent instanceof WAComponent ?
-                `${this.parent.id}.append(${this.id})` : `${this.parent.eid}.appendChild(${this.eid})` };
-`;
+                // initialize injects
+                if (this.injects) {
+                    iw.writeLine("");
+                    for (const iterator of this.injects) {
+                        iw.writeLine(`this.${iterator.key} = this.app.resolve(${iterator.value});`);
+                    }
+                }
 
-            if (hasIf) {
-                return `
-    if (${ HtmlContent.removeBrackets(hasIf.value)}) {
-        ${text}
-    }`;
-            }
+                if (this.element.name !== "null") {
+                    iw.writeLine("");
+                    iw.writeLine(`this.element = document.createElement("${this.element.name}}");`);
+                }
 
-            return text;
-        }
-    } catch (e) {
-        this.coreHtmlFile.reportError(this.element, e);
+                // write presenter...
+                this.writePresenter(iw);
+
+                this.writeAttributes(iw);
+
+                for (const iterator of this.children) {
+                    iterator.write(iw);
+                }
+            });
+
+        });
     }
+
+    public writeComponent(iw: IndentedWriter): void {
+
+        const elementName = this.element.name === "null" ? "" : `, document.createElement("${this.element.name}")`;
+
+        const hasIf = this.attributes.find((x) => x.name === "$if");
+        if (hasIf) {
+            this.attributes = this.attributes.filter( (x) => x.name !== hasIf.name);
+        }
+
+        iw.writeLine("");
+        iw.writeLine(`${this.id} = new ${this.baseType}(this.app${elementName});`);
+
+        this.writePresenter(iw);
+
+        for (const iterator of this.attributes) {
+            iterator.write(iw);
+        }
+
+        for (const iterator of this.children) {
+            iterator.write(iw);
+        }
+
+        if (this.parent instanceof WAComment) {
+            iw.writeLine("");
+            iw.writeLine(`${this.parent.id}.append(${this.id});`);
+        } else {
+            iw.writeLine("");
+            iw.writeLine(`${this.parent.eid}.appendChild(${this.eid});`);
+        }
 
     }
 }

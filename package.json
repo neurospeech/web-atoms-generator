@@ -20,6 +20,7 @@
   "dependencies": {
     "htmlparser2": "^3.10.1",
     "manakin": "^0.5.2",
+    "n-readlines": "^1.0.0",
     "systemjs": "^0.20.18",
     "xmldoc": "^1.1.2"
   },
