@@ -32,13 +32,14 @@ export class CoreHtmlFile implements IMarkupFile {
     private mFileLines: ISourceLines = null;
     public get fileLines(): ISourceLines {
         if (!this.mFileLines) {
-            let last: number = 0;
+            // tslint:disable-next-line: no-var-keyword
+            var last: number = 0;
             const nl = this.content.split("\n").map((x) => {
                 const n = last;
                 last += x.length + 1;
                 return {
                     start: n,
-                    length: x.length
+                    length: x.length + 1
                 };
             });
             this.mFileLines = nl;
@@ -99,7 +100,7 @@ export class CoreHtmlFile implements IMarkupFile {
 
             generatedText = ReplaceTilt.replace(generatedText, p.dir);
 
-            generatedText += `//# sourceMappingUrl=${root.name}.ts.map`;
+            generatedText += `\n//# sourceMappingUrl=${root.name}.ts.map`;
             FileApi.writeSync(fname, generatedText);
             FileApi.writeSync(fname + ".map", JSON.stringify(root.sourceMap));
         } catch (error) {
