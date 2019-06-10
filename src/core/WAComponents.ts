@@ -513,6 +513,13 @@ export class WAComponent extends WAElement {
             });
 
         });
+
+        // write templates
+        for (const iterator of this.templates) {
+            iw.writeLine("");
+
+            iterator.write(iw);
+        }
     }
 
     public writeComponent(iw: IndentedWriter): void {
@@ -525,7 +532,7 @@ export class WAComponent extends WAElement {
         }
 
         iw.writeLine("");
-        iw.writeLine(`${this.id} = new ${this.baseType}(this.app${elementName});`);
+        iw.writeLine(`const ${this.id} = new ${this.baseType}(this.app${elementName});`);
 
         this.writePresenter(iw);
 
