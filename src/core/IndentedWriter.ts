@@ -26,7 +26,8 @@ export default class IndentedWriter {
         if (lines === undefined || lines === null) {
             return;
         }
-        this.pending.push(lines);
+        // this.pending.push(lines);
+        this.writeLine(lines);
     }
 
     public indent(): IDisposable {

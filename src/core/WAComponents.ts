@@ -320,15 +320,21 @@ export class WAElement extends WANode {
             attribute.write(iw);
         }
 
-        if (iw.pending.length) {
-            iw.writeLine(`${this.atomParent.id}.runAfterInit( () => {`);
-            iw.writeInNewBlock( () => {
-                for (const iterator of iw.pending) {
-                    iw.writeLine(iterator);
-                }
-            });
-            iw.writeLine("}");
-            iw.pending.length = 0;
+        // if (iw.pending.length) {
+        //     iw.writeLine(`${this.atomParent.id}.runAfterInit( () => {`);
+        //     iw.writeInNewBlock( () => {
+        //         for (const iterator of iw.pending) {
+        //             iw.writeLine(iterator);
+        //         }
+        //     });
+        //     iw.writeLine("});");
+        //     iw.pending.length = 0;
+        // }
+    }
+
+    public writeChildren(iw: IndentedWriter): void {
+        for (const iterator of this.children) {
+            iterator.write(iw);
         }
     }
 
@@ -349,9 +355,7 @@ export class WAElement extends WANode {
 
             this.writeAttributes(iw);
 
-            for (const iterator of this.children) {
-                iterator.write(iw);
-            }
+            this.writeChildren(iw);
 
         } catch (e) {
             this.coreHtmlFile.reportError(this.element, e);
