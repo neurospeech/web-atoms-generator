@@ -101,9 +101,9 @@ export class CoreHtmlFile implements IMarkupFile {
 
             generatedText = ReplaceTilt.replace(generatedText, p.dir);
 
-            generatedText += `\n//# sourceMappingUrl=${root.name}.ts.map`;
+            // generatedText += `\n//# sourceMappingUrl=${root.name}.ts.map`;
             FileApi.writeSync(fname, generatedText);
-            FileApi.writeSync(fname + ".map", JSON.stringify(root.sourceMap));
+            // FileApi.writeSync(fname + ".map", JSON.stringify(root.sourceMap));
         } catch (error) {
             // tslint:disable-next-line:no-console
             console.error(error);
