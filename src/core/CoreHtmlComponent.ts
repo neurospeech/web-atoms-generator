@@ -1,9 +1,11 @@
+import { RawSourceMap } from "source-map";
 import { IHtmlNode } from "../html-node";
 import { IMarkupComponent } from "../imarkup-file";
 import { IWAConfig } from "../types";
 import { CoreHtmlFile } from "./CoreHtmlFile";
 import { DefaultImports } from "./DefaultImports";
 import IndentedWriter from "./IndentedWriter";
+import ISourceLines from "./ISourceLines";
 import { WAComponent, WAElement } from "./WAComponents";
 
 export class CoreHtmlComponent
@@ -13,6 +15,7 @@ export class CoreHtmlComponent
     public name: string;
     public nsNamespace: string;
     public generated: string = "// tslint:disable\r\n";
+    public sourceMap: RawSourceMap;
     public config: IWAConfig;
     // public root: WAComponent;
     private index: number = 1;
@@ -47,13 +50,18 @@ export class CoreHtmlComponent
         // }
         return name;
     }
-    public generateCode(): void {
+    public generateCode(name: string, m: ISourceLines): void {
         // let us resolve all names...
         this.resolveNames(this);
         // this.generated = this.toString();
-        const iw = new IndentedWriter();
+        const iw = new IndentedWriter(name, m);
+        if (this.generated) {
+            iw.writeLine(this.generated);
+        }
         this.write(iw);
         this.generated = iw.toString();
+
+        this.sourceMap = iw.sourceMap;
     }
     public writeLine(line?: string): void {
         this.generated += (line || "") + "\r\n";

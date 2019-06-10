@@ -1,21 +1,62 @@
 import IDisposable from "./IDisposable";
 
+import { SourceMapGenerator, RawSourceMap } from "source-map";
+import { IHtmlNode } from "../html-node";
+import ISourceLines, { ISourceLineInfo } from "./ISourceLines";
+
 export default class IndentedWriter {
 
     public readonly pending: string[] = [];
 
     private content: string[] = [];
 
-    constructor(private indentText: string = "\t") {
+    private sourceMapGenerator: SourceMapGenerator;
+
+    public get sourceMap(): RawSourceMap {
+        return this.sourceMapGenerator.toJSON();
+    }
+
+    constructor(
+        private source: string,
+        private lineIndexes: ISourceLines,
+        private indentText: string = "\t") {
+        this.sourceMapGenerator = new SourceMapGenerator();
     }
 
     public writeLine(
-        lines: string
+        lines: string,
+        nodeInfo?: IHtmlNode
     ): void {
         if (lines === undefined || lines === null) {
             return;
         }
+        let position: ISourceLineInfo = null;
+        if (nodeInfo) {
+            const start = nodeInfo.startIndex;
+            if (start) {
+                const l = this.lineIndexes.find((x) => x.start + x.length < start);
+                if (l) {
+                    position = {
+                        start: l.start,
+                        length: start - l.start
+                    };
+                }
+            }
+        }
         for (const iterator of lines.split("\n")) {
+            if (position) {
+                this.sourceMapGenerator.addMapping({
+                    source: this.source,
+                    generated: {
+                        line: this.content.length,
+                        column: 0
+                    },
+                    original: {
+                        line: position.start,
+                        column: position.length
+                    }
+                });
+            }
             this.content.push(`${this.indentText}${iterator}`);
         }
     }

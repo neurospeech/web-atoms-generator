@@ -7,6 +7,7 @@ import { IMarkupComponent, IMarkupFile } from "../imarkup-file";
 import { IWAConfig } from "../types";
 import { CoreHtmlComponent } from "./CoreHtmlComponent";
 import { IImportDefinitions } from "./IImportDefinitions";
+import ISourceLines from "./ISourceLines";
 import { ReplaceTilt } from "./ReplaceTilt";
 import { WAComponent } from "./WAComponents";
 
@@ -28,14 +29,17 @@ export class CoreHtmlFile implements IMarkupFile {
 
     public content: string;
 
-    private mFileLines: number[] = null;
-    public get fileLines(): number [] {
+    private mFileLines: ISourceLines = null;
+    public get fileLines(): ISourceLines {
         if (!this.mFileLines) {
             let last: number = 0;
             const nl = this.content.split("\n").map((x) => {
                 const n = last;
                 last += x.length + 1;
-                return n;
+                return {
+                    start: n,
+                    length: x.length
+                };
             });
             this.mFileLines = nl;
         }
@@ -50,13 +54,12 @@ export class CoreHtmlFile implements IMarkupFile {
         const en = element.startIndex || 0;
         let cn = 0;
         const lines = this.fileLines;
-        const ln = lines.findIndex( (x) => en < x );
-        const sln = lines[ln - 1];
-        cn = en - sln;
+        const ln = lines.find( (x) => x.start + x.length < en );
+        cn = en - ln.start;
         const errorText = `${er.message}`.split("\n").join(" ").split("\r").join("");
         const fn = this.file.toString().split("\\").join("/");
         // tslint:disable-next-line:no-console
-        console.error(`${fn}(${ln},${cn}): error TS0001: ${errorText}.`);
+        console.error(`${fn}(${ln.start},${cn}): error TS0001: ${errorText}.`);
     }
 
     public compile(packageContent: any): void {
@@ -86,7 +89,7 @@ export class CoreHtmlFile implements IMarkupFile {
 
             // root.generated = importStatement;
 
-            const root = this.nodes[0];
+            const root = this.nodes[0] as CoreHtmlComponent;
 
             const p = parse(this.file.toString());
 
@@ -96,7 +99,9 @@ export class CoreHtmlFile implements IMarkupFile {
 
             generatedText = ReplaceTilt.replace(generatedText, p.dir);
 
+            generatedText += `//# sourceMappingUrl=${root.name}.ts.map`;
             FileApi.writeSync(fname, generatedText);
+            FileApi.writeSync(fname + ".map", JSON.stringify(root.sourceMap));
         } catch (error) {
             // tslint:disable-next-line:no-console
             console.error(error);
@@ -151,12 +156,14 @@ export class CoreHtmlFile implements IMarkupFile {
         this.nodes.push(root);
 
         root.config = this.config;
-        root.generateCode();
-
         if (script) {
-            root.generated = (script.data || script.children.map((s) => s.data).join("\r\n") ) + "\r\n"
-                + root.generated;
+            root.generated = (script.data || script.children.map((s) => s.data).join("\r\n") ) + "\r\n";
         }
+
+        const p = parse(this.file as string);
+
+        root.generateCode(p.root + p.ext, this.fileLines);
+
     }
 
 }

@@ -372,7 +372,7 @@ export class WATextElement extends WAElement {
 
     public write(iw: IndentedWriter): void {
         iw.writeLine("");
-        iw.writeLine(`const ${this.id} = document.createTextNode(${JSON.stringify(this.element.data)});`);
+        iw.writeLine(`const ${this.id} = document.createTextNode(${JSON.stringify(this.element.data)});`, this.element);
 
         this.writePresenter(iw);
 
