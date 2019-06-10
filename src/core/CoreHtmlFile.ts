@@ -56,7 +56,7 @@ export class CoreHtmlFile implements IMarkupFile {
         const en = element.startIndex || 0;
         let cn = 0;
         const lines = this.fileLines;
-        const ln = lines.find( (x) => x.start + x.length < en );
+        const ln = lines.find( (x) => x.start + x.length < en ) || lines[0];
         cn = en - ln.start;
         const errorText = `${er.message}`.split("\n").join(" ").split("\r").join("");
         const fn = this.file.toString().split("\\").join("/");
@@ -164,7 +164,7 @@ export class CoreHtmlFile implements IMarkupFile {
 
         const p = parse(this.file as string);
 
-        root.generateCode(p.root + p.ext, this.fileLines);
+        root.generateCode(p.base + p.ext, this.fileLines);
 
     }
 
