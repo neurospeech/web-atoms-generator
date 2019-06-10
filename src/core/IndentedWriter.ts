@@ -54,7 +54,7 @@ export default class IndentedWriter {
                     },
                     original: {
                         line: position.line,
-                        column: position.length
+                        column: position.length > 0 ? position.length : 0
                     }
                 });
             }

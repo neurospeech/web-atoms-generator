@@ -164,7 +164,7 @@ export class CoreHtmlFile implements IMarkupFile {
 
         const p = parse(this.file as string);
 
-        root.generateCode(p.base + p.ext, this.fileLines);
+        root.generateCode(p.base, this.fileLines);
 
     }
 
