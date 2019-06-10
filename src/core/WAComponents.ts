@@ -343,15 +343,15 @@ export class WAElement extends WANode {
 
         try {
             iw.writeLine("");
-            iw.writeLine(`const ${this.id} = document.createElement("${this.element.name}"`);
+            iw.writeLine(`const ${this.id} = document.createElement("${this.element.name}");`);
 
             this.writePresenter(iw);
 
             iw.writeLine("");
             if (this.parent instanceof WAComment) {
-                iw.writeLine(`${this.parent.id}.append(${this.id})`);
+                iw.writeLine(`${this.parent.id}.append(${this.id});`);
             } else {
-                iw.writeLine(`${this.parent.eid}.appendChild(${this.id})`);
+                iw.writeLine(`${this.parent.eid}.appendChild(${this.id});`);
             }
 
             this.writeAttributes(iw);
