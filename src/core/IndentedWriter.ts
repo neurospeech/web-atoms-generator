@@ -27,7 +27,7 @@ export default class IndentedWriter {
             return;
         }
         // this.pending.push(lines);
-        this.writeLine(lines);
+        // this.writeLine(lines);
     }
 
     public indent(): IDisposable {
