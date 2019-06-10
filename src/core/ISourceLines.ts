@@ -1,4 +1,5 @@
 export interface ISourceLineInfo {
+    line: number;
     start: number;
     length: number;
 }

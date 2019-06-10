@@ -34,10 +34,11 @@ export class CoreHtmlFile implements IMarkupFile {
         if (!this.mFileLines) {
             // tslint:disable-next-line: no-var-keyword
             var last: number = 0;
-            const nl = this.content.split("\n").map((x) => {
+            const nl = this.content.split("\n").map((x, i) => {
                 const n = last;
                 last += x.length + 1;
                 return {
+                    line: i,
                     start: n,
                     length: x.length + 1
                 };
@@ -60,7 +61,7 @@ export class CoreHtmlFile implements IMarkupFile {
         const errorText = `${er.message}`.split("\n").join(" ").split("\r").join("");
         const fn = this.file.toString().split("\\").join("/");
         // tslint:disable-next-line:no-console
-        console.error(`${fn}(${ln.start},${cn}): error TS0001: ${errorText}.`);
+        console.error(`${fn}(${ln.line},${cn}): error TS0001: ${errorText}.`);
     }
 
     public compile(packageContent: any): void {

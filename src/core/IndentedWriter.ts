@@ -1,6 +1,6 @@
 import IDisposable from "./IDisposable";
 
-import { SourceMapGenerator, RawSourceMap } from "source-map";
+import { RawSourceMap, SourceMapGenerator } from "source-map";
 import { IHtmlNode } from "../html-node";
 import ISourceLines, { ISourceLineInfo } from "./ISourceLines";
 
@@ -37,6 +37,7 @@ export default class IndentedWriter {
                 const l = this.lineIndexes.find((x) => x.start + x.length < start);
                 if (l) {
                     position = {
+                        line: l.line,
                         start: l.start,
                         length: start - l.start
                     };
@@ -52,7 +53,7 @@ export default class IndentedWriter {
                         column: 0
                     },
                     original: {
-                        line: position.start,
+                        line: position.line,
                         column: position.length
                     }
                 });
