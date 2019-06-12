@@ -348,7 +348,7 @@ export class WAElement extends WANode {
             this.writePresenter(iw);
 
             iw.writeLine("");
-            if (this.parent instanceof WAComment) {
+            if (this.parent instanceof WAComponent) {
                 iw.writeLine(`${this.parent.id}.append(${this.id});`);
             } else {
                 iw.writeLine(`${this.parent.eid}.appendChild(${this.id});`);
