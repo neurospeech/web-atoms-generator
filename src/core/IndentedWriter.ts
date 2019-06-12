@@ -91,11 +91,11 @@ export default class IndentedWriter {
     public writeInNewBrackets(
         startLine: string,
         fx: (writer: IndentedWriter) => void): void {
-        const i = this.indent();
         this.writeLine(`${startLine} {`);
+        const i = this.indent();
         fx(this);
-        this.writeLine("}");
         i.dispose();
+        this.writeLine("}");
     }
 
     public toString(): string {
