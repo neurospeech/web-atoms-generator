@@ -487,7 +487,7 @@ export class WAComponent extends WAElement {
 
             if (this.element.name !== "null" || this.injects) {
                 iw.writeLine("");
-                iw.writeInNewBrackets("constructor(app: any, e: any)", () => {
+                iw.writeInNewBrackets("constructor(app: any, e?: any)", () => {
                     if (this.element.name !== "null") {
                         iw.writeLine(`super(app, e || document.createElement("${this.element.name}"));`);
                     } else {
