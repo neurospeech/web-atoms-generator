@@ -30,7 +30,7 @@ export class HtmlContent {
         const vx = AtomEvaluator.instance.parse(v);
         v = "";
         const plist: string = vx.path.map((p, i) => `v${i + 1}`).join(",");
-        if (plist === "v1" && vx.original === "v1") {
+        if (plist === "v1" && vx.original.trim() === "(v1)") {
             v += ` ${JSON.stringify(vx.path)}, false , null`;
         } else {
             v += ` ${JSON.stringify(vx.path)}, false , (${plist}) => ${vx.original}`;
