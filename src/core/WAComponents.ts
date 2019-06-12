@@ -472,16 +472,16 @@ export class WAComponent extends WAElement {
             // write injects
             if (this.injects) {
                 for (const iterator of this.injects) {
-                    iw.writeLine(`private ${iterator.key}: ${iterator.value};`);
                     iw.writeLine("");
+                    iw.writeLine(`private ${iterator.key}: ${iterator.value};`);
                 }
             }
 
             if (this.properties) {
                 for (const iterator of this.properties) {
+                    iw.writeLine("");
                     iw.writeLine(`@BindableProperty`);
                     iw.writeLine(`public ${iterator.key}: any = ${iterator.value};`);
-                    iw.writeLine("");
                 }
             }
 
@@ -503,12 +503,16 @@ export class WAComponent extends WAElement {
                 });
             }
 
+            iw.writeLine("");
             iw.writeInNewBrackets(`public create(): void`, () => {
+
+                iw.writeLine("");
 
                 iw.writeLine(`super.create();`);
 
+                iw.writeLine("");
+
                 if (this.export) {
-                    iw.writeLine("");
                     iw.writeLine(`const __creator = this;`);
                 }
 
