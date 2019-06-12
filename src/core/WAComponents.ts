@@ -485,6 +485,24 @@ export class WAComponent extends WAElement {
                 }
             }
 
+            if (this.element.name !== "null" || this.injects) {
+                iw.writeLine("");
+                iw.writeInNewBrackets("constructor(app: any, e: any)", () => {
+                    if (this.element.name !== "null") {
+                        iw.writeLine(`super(app, e || document.createElement("${this.element.name}"));`);
+                    } else {
+                        iw.writeLine(`super(app, e);`);
+                    }
+                    // initialize injects
+                    if (this.injects) {
+                        iw.writeLine("");
+                        for (const iterator of this.injects) {
+                            iw.writeLine(`this.${iterator.key} = this.app.resolve(${iterator.value});`);
+                        }
+                    }
+                });
+            }
+
             iw.writeInNewBrackets(`public create(): void`, () => {
 
                 iw.writeLine(`super.create();`);
@@ -492,19 +510,6 @@ export class WAComponent extends WAElement {
                 if (this.export) {
                     iw.writeLine("");
                     iw.writeLine(`const __creator = this;`);
-                }
-
-                // initialize injects
-                if (this.injects) {
-                    iw.writeLine("");
-                    for (const iterator of this.injects) {
-                        iw.writeLine(`this.${iterator.key} = this.app.resolve(${iterator.value});`);
-                    }
-                }
-
-                if (this.element.name !== "null") {
-                    iw.writeLine("");
-                    iw.writeLine(`this.element = document.createElement("${this.element.name}}");`);
                 }
 
                 // write presenter...
