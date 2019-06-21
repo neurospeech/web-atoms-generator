@@ -558,7 +558,7 @@ export class WAComponent extends WAElement {
             iterator.write(iw);
         }
 
-        if (this.parent instanceof WAComment) {
+        if (this.parent instanceof WAComponent) {
             iw.writeLine("");
             iw.writeLine(`${this.parent.id}.append(${this.id});`);
         } else {
