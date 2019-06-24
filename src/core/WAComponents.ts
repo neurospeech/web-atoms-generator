@@ -88,8 +88,8 @@ export class WAAttribute extends WANode {
                 const sv = v.substr(1, v.length - 2);
                 if (name === "styleClass" && v.includes(".controlStyle.")) {
 
-                    iw.writeLineDeferred(
-                        `${aid}.setPrimitiveValue(${this.parent.eid}, "styleClass", ${sv});`);
+// tslint:disable-next-line: max-line-length
+                    iw.writeLine(`${aid}.runAfterInit(() => ${aid}.setPrimitiveValue(${this.parent.eid}, "styleClass", ${sv}));`);
                     return;
                 }
                 iw.writeLine(`${aid}.setPrimitiveValue(${this.parent.eid}, "${name}", ${sv});`);
