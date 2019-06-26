@@ -195,6 +195,24 @@ export class WAElement extends WANode {
                         continue;
                     }
 
+                    if (key === "@property") {
+                        const wa = ((this as any) as WAComponent);
+                        const pl = wa.properties || (wa.properties = []);
+                        const s = (item as string);
+                        const sv = s.split(":");
+                        const k = sv[0];
+                        const tv = sv[1];
+                        let v: any;
+                        let t: any;
+                        if (tv) {
+                            const tvs = tv.split("=");
+                            t = tvs[0];
+                            v = tvs[1];
+                        }
+                        pl.push({ key: k, type: t, value: v  });
+                        continue;
+                    }
+
                     if (key === "atom-properties" || key === "properties") {
                         // tslint:disable-next-line:no-eval
                         const propertyList = (item as string)
@@ -411,7 +429,7 @@ export class WAComponent extends WAElement {
 
     public export: boolean = false;
 
-    public properties: Array<{ key: string, value: string }>;
+    public properties: Array<{ key: string, value: string, type?: string }>;
 
     public presenters: Array<{ key: string, value: string }>;
 
@@ -496,7 +514,12 @@ export class WAComponent extends WAElement {
                 for (const iterator of this.properties) {
                     iw.writeLine("");
                     iw.writeLine(`@BindableProperty`);
-                    iw.writeLine(`public ${iterator.key}: any = ${iterator.value};`);
+                    const type = iterator.type || "any";
+                    if (iterator.value !== undefined) {
+                        iw.writeLine(`public ${iterator.key}: ${type} = ${iterator.value};`);
+                    } else {
+                        iw.writeLine(`public ${iterator.key}: ${type};`);
+                    }
                 }
             }
 
