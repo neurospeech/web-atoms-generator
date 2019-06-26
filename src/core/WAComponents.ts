@@ -542,17 +542,6 @@ export class WAComponent extends WAElement {
                         iw.writeLine(`super(app, e);`);
                     }
 
-                    // initialize non v2 properties...
-                    if (this.properties) {
-                        for (const iterator of this.properties) {
-                            if (iterator.v2 || iterator.value === undefined) {
-                                continue;
-                            }
-                            iw.writeLine("");
-                            iw.writeLine(`this.${iterator.key} = ${iterator.value};`);
-                        }
-                    }
-
                     // initialize injects
                     if (this.injects) {
                         iw.writeLine("");
@@ -570,9 +559,19 @@ export class WAComponent extends WAElement {
 
                 iw.writeLine(`super.create();`);
 
-                iw.writeLine("");
+                // initialize non v2 properties...
+                if (this.properties) {
+                    for (const iterator of this.properties) {
+                        if (iterator.v2 || iterator.value === undefined) {
+                            continue;
+                        }
+                        iw.writeLine("");
+                        iw.writeLine(`this.${iterator.key} = ${iterator.value};`);
+                    }
+                }
 
                 if (this.export) {
+                    iw.writeLine("");
                     iw.writeLine(`const __creator = this;`);
                 }
 
