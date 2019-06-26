@@ -195,21 +195,23 @@ export class WAElement extends WANode {
                         continue;
                     }
 
-                    if (key === "@property") {
+                    if (key === "@properties") {
                         const wa = ((this as any) as WAComponent);
-                        const pl = wa.properties || (wa.properties = []);
-                        const s = (item as string);
-                        const sv = s.split(":");
-                        const k = sv[0];
-                        const tv = sv[1];
-                        let v: any;
-                        let t: any;
-                        if (tv) {
-                            const tvs = tv.split("=");
-                            t = tvs[0];
-                            v = tvs[1];
-                        }
-                        pl.push({ key: k, type: t, value: v  });
+                        const sl = (item as string).split(",");
+                        const pl = sl.map((s) =>  {
+                            const sv = s.split(":");
+                            const k = sv[0];
+                            const tv = sv[1];
+                            let v: any;
+                            let t: any;
+                            if (tv) {
+                                const tvs = tv.split("=");
+                                t = tvs[0];
+                                v = tvs[1];
+                            }
+                            return { key: k, type: t, value: v  };
+                        });
+                        wa.properties = pl;
                         continue;
                     }
 
