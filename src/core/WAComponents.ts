@@ -6,6 +6,7 @@ import { Binding } from "./Binding";
 import { CoreHtmlFile } from "./CoreHtmlFile";
 import { HtmlContent } from "./HtmlContent";
 import IndentedWriter from "./IndentedWriter";
+import IDisposable from "./IDisposable";
 
 export class WANode {
 
@@ -600,8 +601,12 @@ export class WAComponent extends WAElement {
         const elementName = this.element.name === "null" ? "" : `, document.createElement("${this.element.name}")`;
 
         const hasIf = this.attributes.find((x) => x.name === "$if");
+        let d: IDisposable;
         if (hasIf) {
             this.attributes = this.attributes.filter( (x) => x.name !== hasIf.name);
+            const v = HtmlContent.removeBrackets(hasIf.value);
+            iw.writeLine(`if (${v}) {`);
+            d = iw.indent();
         }
 
         iw.writeLine("");
@@ -623,6 +628,11 @@ export class WAComponent extends WAElement {
         } else {
             iw.writeLine("");
             iw.writeLine(`${this.parent.eid}.appendChild(${this.eid});`);
+        }
+
+        if (d) {
+            iw.writeLine("}");
+            d.dispose();
         }
 
     }
