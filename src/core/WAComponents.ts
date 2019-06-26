@@ -208,6 +208,19 @@ export class WAElement extends WANode {
                         ((this as any) as WAComponent).properties = propertyList;
                         continue;
                     }
+                    if (key === "atom-presenters" || key === "presenters") {
+                        // tslint:disable-next-line:no-eval
+                        const propertyList = (item as string)
+                            .split(",")
+                            .map((s) => {
+                                const sv = s.split(":");
+                                const k = sv[0];
+                                const v = sv[1] || null;
+                                return { key: k, value: v };
+                            });
+                        ((this as any) as WAComponent).presenters = propertyList;
+                        continue;
+                    }
                     this.setAttribute(key, item);
                 }
             }
@@ -400,6 +413,8 @@ export class WAComponent extends WAElement {
 
     public properties: Array<{ key: string, value: string }>;
 
+    public presenters: Array<{ key: string, value: string }>;
+
     public injects: Array<{ key: string, value: string}>;
 
     public get templates() {
@@ -482,6 +497,14 @@ export class WAComponent extends WAElement {
                     iw.writeLine("");
                     iw.writeLine(`@BindableProperty`);
                     iw.writeLine(`public ${iterator.key}: any = ${iterator.value};`);
+                }
+            }
+
+            if (this.presenters) {
+                for (const iterator of this.presenters) {
+                    iw.writeLine("");
+                    iw.writeLine(`@BindableProperty`);
+                    iw.writeLine(`public ${iterator.key}: HTMLElement;`);
                 }
             }
 
