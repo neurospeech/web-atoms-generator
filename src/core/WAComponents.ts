@@ -5,8 +5,8 @@ import { IHtmlNode } from "../html-node";
 import { Binding } from "./Binding";
 import { CoreHtmlFile } from "./CoreHtmlFile";
 import { HtmlContent } from "./HtmlContent";
-import IndentedWriter from "./IndentedWriter";
 import IDisposable from "./IDisposable";
+import IndentedWriter from "./IndentedWriter";
 
 export class WANode {
 
@@ -213,6 +213,26 @@ export class WAElement extends WANode {
                             return { key: k, type: t, value: v, v2: true  };
                         });
                         wa.properties = pl;
+                        continue;
+                    }
+
+                    if (key === "@inject" || key === "inject") {
+                        const wa = ((this as any) as WAComponent);
+                        const sl = (item as string).split(",");
+                        const pl = sl.map((s) =>  {
+                            const sv = s.split(":");
+                            const k = sv[0];
+                            const tv = sv[1];
+                            let v: any;
+                            let t: any;
+                            if (tv) {
+                                const tvs = tv.split("=");
+                                t = tvs[0];
+                                v = tvs[1];
+                            }
+                            return { key: k, type: t, value: v, v2: true  };
+                        });
+                        wa.injects = pl;
                         continue;
                     }
 
