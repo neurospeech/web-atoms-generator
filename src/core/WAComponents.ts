@@ -230,7 +230,7 @@ export class WAElement extends WANode {
                                 t = tvs[0];
                                 v = tvs[1];
                             }
-                            return { key: k, type: t, value: v, v2: true  };
+                            return { key: k.trim(), type: t, value: v, v2: true  };
                         });
                         wa.injects = pl;
                         continue;
@@ -456,7 +456,7 @@ export class WAComponent extends WAElement {
 
     public presenters: Array<{ key: string, value: string }>;
 
-    public injects: Array<{ key: string, value: string}>;
+    public injects: Array<{ key: string, type: string}>;
 
     public get templates() {
         return this.mTemplates || (this.mTemplates = []);
@@ -529,7 +529,7 @@ export class WAComponent extends WAElement {
             if (this.injects) {
                 for (const iterator of this.injects) {
                     iw.writeLine("");
-                    iw.writeLine(`private ${iterator.key}: ${iterator.value};`);
+                    iw.writeLine(`private ${iterator.key}: ${iterator.type };`);
                 }
             }
 
@@ -566,7 +566,7 @@ export class WAComponent extends WAElement {
                     if (this.injects) {
                         iw.writeLine("");
                         for (const iterator of this.injects) {
-                            iw.writeLine(`this.${iterator.key} = this.app.resolve(${iterator.value});`);
+                            iw.writeLine(`this.${iterator.key} = this.app.resolve(${iterator.type});`);
                         }
                     }
                 });
