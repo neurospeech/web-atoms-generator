@@ -78,7 +78,7 @@ export class WAAttribute extends WANode {
 
         if (this.value.startsWith("{") && this.value.endsWith("}")) {
 
-            const v = HtmlContent.processOneTimeBinding(this.value, `${aid}.`);
+            const v = HtmlContent.processOneTimeBinding(this.value, aid);
 
             if (/^(viewmodel|localviewmodel|controlstyle)$/i.test(name)) {
                 iw.writeLine(`${aid}.${name} = ${HtmlContent.removeBrackets(v)};`);
