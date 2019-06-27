@@ -216,7 +216,7 @@ export class WAElement extends WANode {
                         continue;
                     }
 
-                    if (key === "@inject" || key === "inject") {
+                    if (key === "@inject" || key === "inject" || key === "atom-inject") {
                         const wa = ((this as any) as WAComponent);
                         const sl = (item as string).split(",");
                         const pl = sl.map((s) =>  {
