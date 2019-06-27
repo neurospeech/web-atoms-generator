@@ -40,21 +40,20 @@ export class HtmlContent {
             pathList: vx.path
         };
     }
-    public static processOneTimeBinding(v: string): string {
+    public static processOneTimeBinding(v: string, start: string = "this"): string {
         let original = v;
         v = v.substr(1, v.length - 2);
         const vx = AtomEvaluator.instance.parse(v);
         v = vx.original;
         for (let i: number = 0; i < vx.path.length; i++) {
             const p: string[] = vx.path[i];
-            const start: string = "this";
             const pr = p.reduce((pv, x) =>
-                (!pv.v.length) ?
-                { v: [`this.${x}`], t: `this.${x}` } :
-                {
-                    v: `${pv.v.join(".")}.${x}`.split("."), t:
-                    `(${pv.t}) ? ${pv.v.join(".")}.${x} : undefined`
-                } , { v: [], t: "" });
+                (!pv.v.length)
+                    ? { v: [`${start}.${x}`], t: `${start}.${x}` }
+                    : {
+                            v: `${pv.v.join(".")}.${x}`.split("."), t:
+                            `(${pv.t}) ? ${pv.v.join(".")}.${x} : undefined`
+                    } , { v: [], t: "" });
             // const pr = p.map( (x) => `${}` ).join(".");
             v = v.replace(`v${i + 1}`, `${pr.t}`);
             original = null;

@@ -78,7 +78,7 @@ export class WAAttribute extends WANode {
 
         if (this.value.startsWith("{") && this.value.endsWith("}")) {
 
-            const v = HtmlContent.processOneTimeBinding(this.value);
+            const v = HtmlContent.processOneTimeBinding(this.value, `${aid}.`);
 
             if (/^(viewmodel|localviewmodel|controlstyle)$/i.test(name)) {
                 iw.writeLine(`${aid}.${name} = ${HtmlContent.removeBrackets(v)};`);
@@ -98,8 +98,7 @@ export class WAAttribute extends WANode {
             }
 
             // iw.writeLineDeferred(`${aid}.setLocalValue(${this.parent.eid}, "${name}", ${v});`);
-            const ev = v.split("this.").join(`${aid}.`);
-            iw.writeLine(`${aid}.runAfterInit( () => ${aid}.setLocalValue(${this.parent.eid}, "${name}", ${ev}) );`);
+            iw.writeLine(`${aid}.runAfterInit( () => ${aid}.setLocalValue(${this.parent.eid}, "${name}", ${v}) );`);
             return;
         }
 
