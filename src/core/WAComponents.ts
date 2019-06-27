@@ -98,7 +98,8 @@ export class WAAttribute extends WANode {
             }
 
             // iw.writeLineDeferred(`${aid}.setLocalValue(${this.parent.eid}, "${name}", ${v});`);
-            iw.writeLine(`${aid}.runAfterInit( () => ${aid}.setLocalValue(${this.parent.eid}, "${name}", ${v}) );`);
+            const ev = v.split("this.").join(`${aid}.`);
+            iw.writeLine(`${aid}.runAfterInit( () => ${aid}.setLocalValue(${this.parent.eid}, "${name}", ${ev}) );`);
             return;
         }
 
