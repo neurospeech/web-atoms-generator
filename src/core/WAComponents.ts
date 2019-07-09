@@ -89,8 +89,11 @@ export class WAAttribute extends WANode {
                 const sv = v.substr(1, v.length - 2);
                 if (name === "styleClass" && v.includes(".controlStyle.")) {
 
+                    // As control style exists in `this`, we cannot invoke `runAfterInit` with aid as
+                    // current control might not be created yet.
+
 // tslint:disable-next-line: max-line-length
-                    iw.writeLine(`${aid}.runAfterInit(() => ${aid}.setPrimitiveValue(${this.parent.eid}, "styleClass", ${sv}));`);
+                    iw.writeLine(`this.runAfterInit(() => ${aid}.setPrimitiveValue(${this.parent.eid}, "styleClass", ${sv}));`);
                     return;
                 }
                 iw.writeLine(`${aid}.setPrimitiveValue(${this.parent.eid}, "${name}", ${sv});`);
