@@ -241,9 +241,11 @@ export class WAXComponent {
 
         let d: IDisposable = null;
 
+        let prefix = "";
+
         if (this.template) {
             d = iw.beginBrackets(`function ${this.name}_Creator(__creator: any): any`);
-            iw.writeLine("return ");
+            prefix = "return ";
         } else {
 
             iw.writeLine("// tslint:disable");
@@ -255,11 +257,11 @@ export class WAXComponent {
                     iw.writeLine(`import ${key} from \"${element}\";`);
                 }
             }
-            iw.writeLine("export default ");
+            prefix = "export default ";
         }
 
         // create class....
-        iw.writeInNewBrackets(`class ${this.name} extends AtomXFControl`, () => {
+        iw.writeInNewBrackets(`${prefix}class ${this.name} extends AtomXFControl`, () => {
 
             for (const iterator of this.controlImports) {
                 iw.writeLine("");
