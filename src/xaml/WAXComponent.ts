@@ -302,7 +302,9 @@ export class WAXComponent {
 
                 for (const iterator of attributeGroups) {
                     iw.writeLine("");
-                    iw.writeLine(`const ${iterator.key} = this.find("${iterator.key}");`);
+                    if (!iterator.key.startsWith("this.")) {
+                        iw.writeLine(`const ${iterator.key} = this.find("${iterator.key}");`);
+                    }
                     for (const child of iterator.values) {
                         child.write(iw);
                     }
