@@ -233,11 +233,7 @@ export class WAXComponent {
             (l, r) => l.elementName.localeCompare(r.elementName));
 
         const attributeGroups = ArrayHelper
-            .groupBy(attributes, (a) => a.elementName)
-            .map((a) => (a.values[0].e && a.values[0].e.attr.Name) ? a.values.join("\r\n") : `
-            const ${a.key} = this.find("${a.key}");
-            ${a.values.join("\r\n")}
-`);
+            .groupBy(attributes, (a) => a.elementName);
 
         const controlImports = this.controlImports.map((s) => {
             return `const ${s.name} = new ${s.type}(this.app);\r\nthis.${s.name} = ${s.name}.element;`;
@@ -304,7 +300,10 @@ export class WAXComponent {
 
                 for (const iterator of attributeGroups) {
                     iw.writeLine("");
-                    iw.writeLine(iterator);
+                    iw.writeLine(`const ${iterator.key} = this.find("${iterator.key}");`);
+                    for (const child of iterator.values) {
+                        child.write(iw);
+                    }
                 }
 
             });
