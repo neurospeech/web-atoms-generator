@@ -20,7 +20,7 @@ export class WAXComponent {
 
     public presenters: Array<{ key: string, value: string }>;
 
-    public injects: Array<{ key: string, type: string}>;
+    public injects: Array<{ key: string, type: string}> = [];
 
     constructor(
         public element: XmlElement,
