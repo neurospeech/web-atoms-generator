@@ -1,6 +1,8 @@
 import { XmlElement, XmlNode } from "xmldoc";
 import { ArrayHelper } from "../ArrayHelper";
 import { HtmlContent } from "../core/HtmlContent";
+import IDisposable from "../core/IDisposable";
+import IndentedWriter from "../core/IndentedWriter";
 
 export class WAXComponent {
 
@@ -14,7 +16,11 @@ export class WAXComponent {
 
     public controlImports: Array<{ type: string, name: string }> = [];
 
-    public properties: string[] = [];
+    public properties: Array<{ key: string, value: string, type?: string, v2?: boolean }>;
+
+    public presenters: Array<{ key: string, value: string }>;
+
+    public injects: Array<{ key: string, type: string}>;
 
     constructor(
         public element: XmlElement,
@@ -221,7 +227,7 @@ export class WAXComponent {
             template));
     }
 
-    public toString(): string {
+    public write(iw: IndentedWriter): void {
 
         const attributes = this.attributes.sort(
             (l, r) => l.elementName.localeCompare(r.elementName));
@@ -234,54 +240,82 @@ export class WAXComponent {
 `);
 
         const controlImports = this.controlImports.map((s) => {
-            return `const ${s.name} = new ${s.type}(this.app);
-            this.${s.name} = ${s.name}.element;
-`;
+            return `const ${s.name} = new ${s.type}(this.app);\r\nthis.${s.name} = ${s.name}.element;`;
         });
 
-        const classContent = `class ${this.name} extends AtomXFControl {
-
-                ${this.controlImports.map((s) => `public ${s.name};`).join("\r\n\t\t\t")}
-
-                ${this.properties.join("\r\n")}
-
-                protected create(): void {
-                    super.create();
-
-                    this.element = this.createControl("${this.resolveName(this.element.name)}");
-
-                    ${controlImports}
-
-                    this.loadXaml(\`${this.element.toStringWithIndent("\t")}\`);
-
-                    ${attributeGroups.join("\r\n")}
-                }
-            }
-
-            ${this.children.join("\r\n")}
-        `;
+        let d: IDisposable = null;
 
         if (this.template) {
-            return `
-// template
-function ${this.name}_Creator(__creator: any): any {
-    return ${classContent};
-}`;
-        }
+            d = iw.beginBrackets(`function ${this.name}_Creator(__creator: any): any`);
+            iw.writeLine("return ");
+        } else {
 
-        const imports: string[] = [];
-        for (const key in this.imports) {
-            if (this.imports.hasOwnProperty(key)) {
-                const element = this.imports[key];
-                imports.push(`import ${key} from \"${element}\";`);
+            iw.writeLine("// tslint:disable");
+
+            iw.writeLine(`import { AtomXFControl } from "web-atoms-core/dist/xf/controls/AtomXFControl";`);
+            for (const key in this.imports) {
+                if (this.imports.hasOwnProperty(key)) {
+                    const element = this.imports[key];
+                    iw.writeLine(`import ${key} from \"${element}\";`);
+                }
             }
+            iw.writeLine("export default ");
         }
 
-        return `
+        // create class....
+        iw.writeInNewBrackets(`class ${this.name} extends AtomXFControl`, () => {
 
-        ${imports.join("\r\n")}
+            for (const iterator of this.controlImports) {
+                iw.writeLine("");
+                iw.writeLine(`public ${iterator.name};`);
+            }
 
-        export default ${classContent}`;
+            for (const iterator of this.properties) {
+                iw.writeLine("");
+                iw.writeLine(`public ${iterator.key}: ${iterator.type};`);
+            }
+
+            for (const iterator of this.injects) {
+                iw.writeLine("");
+                iw.writeLine(`public ${iterator.key}: ${iterator.type};`);
+            }
+
+            // write create...
+            iw.writeInNewBrackets(`protected create(): void `, () => {
+
+                iw.writeLine("");
+                iw.writeLine("super.create();");
+
+                for (const iterator of this.injects) {
+                    iw.writeLine("");
+                    iw.writeLine(`this.${iterator.key} = this.app.resolve(${iterator.type});`);
+                }
+
+                iw.writeLine("");
+                iw.writeLine(`this.element = this.createControl("${this.resolveName(this.element.name)}");`);
+
+                for (const iterator of controlImports) {
+                    iw.writeLine("");
+                    iw.writeLine(iterator);
+                }
+
+                iw.writeLine("");
+                iw.writeLine(`this.loadXaml(\`${this.element.toStringWithIndent("\t")}\`);`);
+
+                for (const iterator of attributeGroups) {
+                    iw.writeLine("");
+                    iw.writeLine(iterator);
+                }
+
+            });
+
+        });
+
+        if (d) {
+            iw.writeLine(";");
+            d.dispose();
+        }
+
     }
 }
 
@@ -298,12 +332,11 @@ export class WAXAttribute {
 
     }
 
-    public toString(): string {
+    public write(iw: IndentedWriter): void {
 
         if (this.template) {
-            return `
-            ${this.id}.setTemplate(${this.elementName}, "${this.attributeName}", ${this.value});
-            `;
+            iw.writeLine(`${this.id}.setTemplate(${this.elementName}, "${this.attributeName}", ${this.value});`);
+            return;
         }
 
         const attributeName = this.attributeName;
@@ -313,42 +346,36 @@ export class WAXAttribute {
             this.value = this.value.substr(1);
             const v = HtmlContent.processOneTimeBinding(this.value);
             if (/^(viewmodel|localviewmodel)$/i.test(attributeName)) {
-                return `
-                ${this.id}.setLocalValue(${this.elementName}, "${attributeName}", ${HtmlContent.removeBrackets(v)});`;
-                }
+                // tslint:disable-next-line: max-line-length
+                iw.writeLine(`${this.id}.setLocalValue(${this.elementName}, "${attributeName}", ${HtmlContent.removeBrackets(v)});`);
+                return;
+            }
             if (v === this.value) {
                 const sv = v.substr(1, v.length - 2);
-                return `
-                ${this.id}.setPrimitiveValue(${this.elementName}, "${attributeName}", ${sv});`;
+                iw.writeLine(`${this.id}.setPrimitiveValue(${this.elementName}, "${attributeName}", ${sv});`);
+                return;
             }
-            return `
-            ${this.id}.runAfterInit( () =>
-            ${this.id}.setLocalValue(${this.elementName}, "${attributeName}", ${v}) );`;
+            // tslint:disable-next-line: max-line-length
+            iw.writeLine(`${this.id}.runAfterInit( () => ${this.id}.setLocalValue(${this.elementName}, "${attributeName}", ${v}) );`);
+            return;
         }
 
         if (this.value.startsWith("[") && this.value.endsWith("]")) {
             const v = HtmlContent.processOneWayBinding(this.value);
             const startsWithThis = v.pathList.findIndex( (p) => p[0] === "this" ) !== -1 ? ", __creator" : "";
-            return `
-            ${this.id}.bind(${this.elementName}, "${attributeName}", ${v.expression} ${startsWithThis});`;
+            iw.writeLine(
+                `${this.id}.bind(${this.elementName}, "${attributeName}", ${v.expression} ${startsWithThis});`);
+            return;
         }
 
         if (this.value.startsWith("$[") && this.value.endsWith("]")) {
             const v = HtmlContent.processTwoWayBinding(this.value, "true");
             const startsWithThis = v.pathList.findIndex( (p) => p[0] === "this" ) !== -1 ? ",null, __creator" : "";
-            return `
-            ${this.id}.bind(${this.elementName}, "${attributeName}", ${v.expression} ${startsWithThis});`;
+            iw.writeLine(
+                `${this.id}.bind(${this.elementName}, "${attributeName}", ${v.expression} ${startsWithThis});`);
+            return;
         }
 
-        // if (this.value.startsWith("^[") && this.value.endsWith("]")) {
-        //     const v = HtmlContent.processTwoWayBinding(this.value, `["change", "keyup", "keydown", "blur"]`);
-        //     const startsWithThis = v.pathList.findIndex( (p) => p[0] === "this" ) !== -1 ? ",null, __creator" : "";
-        //     return `
-        //     ${this.atomParent.id}.bind(${this.parent.eid}, "${name}", ${v.expression} ${startsWithThis});`;
-        // }
-
-        return `
-        ${this.id}.setLocalValue(${this.elementName}, "${this.attributeName}", ${this.value});
-        `;
+        iw.writeLine(`${this.id}.setLocalValue(${this.elementName}, "${this.attributeName}", ${this.value});`);
     }
 }

@@ -3,6 +3,7 @@ import IDisposable from "./IDisposable";
 import { RawSourceMap, SourceMapGenerator } from "source-map";
 import { IHtmlNode } from "../html-node";
 import ISourceLines, { ISourceLineInfo } from "./ISourceLines";
+import { isWorker } from "cluster";
 
 export default class IndentedWriter {
 
@@ -96,6 +97,19 @@ export default class IndentedWriter {
         fx(this);
         i.dispose();
         this.writeLine("}");
+    }
+
+    public beginBrackets(prefix?: string): IDisposable {
+        prefix = prefix ? `${prefix} {` : "{";
+        this.writeLine(prefix);
+        const d = this.indent();
+
+        return {
+            dispose: () => {
+                d.dispose();
+                this.writeLine("}");
+            }
+        };
     }
 
     public toString(): string {

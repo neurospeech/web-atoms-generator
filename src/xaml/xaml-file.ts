@@ -1,6 +1,7 @@
 import { existsSync, PathLike, readFileSync, statSync } from "fs";
 import { parse, sep } from "path";
 import { XmlDocument, XmlElement } from "xmldoc";
+import IndentedWriter from "../core/IndentedWriter";
 import { ReplaceTilt } from "../core/ReplaceTilt";
 import FileApi from "../FileApi";
 import { IMarkupComponent, IMarkupFile } from "../imarkup-file";
@@ -43,9 +44,7 @@ export class XamlFile implements IMarkupFile {
 
             generated = ReplaceTilt.replace(generated, p.dir);
 
-            FileApi.writeSync(fname, `// tslint:disable
-            import { AtomXFControl } from "web-atoms-core/dist/xf/controls/AtomXFControl";
-                ${generated}`);
+            FileApi.writeSync(fname, generated);
 
         } catch (e) {
             // tslint:disable-next-line:no-console
@@ -79,7 +78,11 @@ export class XamlFile implements IMarkupFile {
         //     console.log(iterator.toString());
         // }
 
-        return wa.toString();
+        const iw = new IndentedWriter(content, null, "\t");
+
+        wa.write(iw);
+
+        return iw.toString();
     }
 
 }
