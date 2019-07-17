@@ -16,7 +16,7 @@ export class WAXComponent {
 
     public controlImports: Array<{ type: string, name: string }> = [];
 
-    public properties: Array<{ key: string, value: string, type?: string, v2?: boolean }>;
+    public properties: Array<{ key: string, value: string, type?: string, v2?: boolean }> = [];
 
     public presenters: Array<{ key: string, value: string }>;
 
