@@ -310,6 +310,11 @@ export class WAXComponent {
 
         });
 
+        // write children...
+        for (const iterator of this.children) {
+            iterator.write(iw);
+        }
+
         if (d) {
             iw.writeLine(";");
             d.dispose();
