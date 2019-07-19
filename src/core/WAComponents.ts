@@ -532,7 +532,7 @@ export class WAComponent extends WAElement {
             if (this.injects) {
                 for (const iterator of this.injects) {
                     iw.writeLine("");
-                    iw.writeLine(`private ${iterator.key}: ${iterator.type };`);
+                    iw.writeLine(`protected ${iterator.key}: ${iterator.type };`);
                 }
             }
 
