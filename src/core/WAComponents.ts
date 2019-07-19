@@ -541,9 +541,7 @@ export class WAComponent extends WAElement {
                     iw.writeLine("");
                     iw.writeLine(`@BindableProperty`);
                     const type = iterator.type || "any";
-                    const init = iterator.v2
-                        ? ( iterator.value !== undefined ? ` = ${iterator.value}` : ""  )
-                        : "";
+                    const init = "";
                     iw.writeLine(`public ${iterator.key}: ${type} ${init};`);
                 }
             }
@@ -585,7 +583,14 @@ export class WAComponent extends WAElement {
                 // initialize non v2 properties...
                 if (this.properties) {
                     for (const iterator of this.properties) {
-                        if (iterator.v2 || iterator.value === undefined) {
+                        if (iterator.v2) {
+                            if (iterator.value) {
+                                iw.writeLine("");
+                                iw.writeLine(`this.${iterator.key} = ${iterator.value};`);
+                            }
+                            continue;
+                        }
+                        if (iterator.value === undefined) {
                             continue;
                         }
                         iw.writeLine("");
