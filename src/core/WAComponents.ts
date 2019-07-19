@@ -564,14 +564,6 @@ export class WAComponent extends WAElement {
                     } else {
                         iw.writeLine(`super(app, e);`);
                     }
-
-                    // initialize injects
-                    if (this.injects) {
-                        iw.writeLine("");
-                        for (const iterator of this.injects) {
-                            iw.writeLine(`this.${iterator.key} = this.app.resolve(${iterator.type});`);
-                        }
-                    }
                 });
             }
 
@@ -581,6 +573,14 @@ export class WAComponent extends WAElement {
                 iw.writeLine("");
 
                 iw.writeLine(`super.create();`);
+
+                // initialize injects
+                if (this.injects) {
+                    iw.writeLine("");
+                    for (const iterator of this.injects) {
+                        iw.writeLine(`this.${iterator.key} = this.app.resolve(${iterator.type});`);
+                    }
+                }
 
                 // initialize non v2 properties...
                 if (this.properties) {
