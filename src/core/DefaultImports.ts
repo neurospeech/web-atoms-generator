@@ -12,5 +12,6 @@ export const DefaultImports = [
     "AtomTabbedPage",
     "AtomPage",
     "AtomViewPager",
-    "AtomViewStack"
+    "AtomViewStack",
+    "AtomPageLink"
 ];
