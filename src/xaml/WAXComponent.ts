@@ -251,6 +251,7 @@ export class WAXComponent {
             iw.writeLine("// tslint:disable");
 
             iw.writeLine(`import { AtomXFControl } from "web-atoms-core/dist/xf/controls/AtomXFControl";`);
+            iw.writeLine(`import { AtomBridge } from "web-atoms-core/dist/core/AtomBridge";`);
             for (const key in this.imports) {
                 if (this.imports.hasOwnProperty(key)) {
                     const element = this.imports[key];
@@ -278,16 +279,20 @@ export class WAXComponent {
                 iw.writeLine(`public ${iterator.key}: ${iterator.type};`);
             }
 
+            if (this.element.name !== "null") {
+                iw.writeLine("");
+                iw.writeInNewBrackets("constructor(app: any, e?: any)", () => {
+                    iw.writeLine(
+                        `super(app, e || AtomBridge.instance.createControl("${
+                            this.resolveName(this.element.name)}");`);
+                });
+            }
+
             // write create...
             iw.writeInNewBrackets(`protected create(): void `, () => {
 
                 iw.writeLine("");
                 iw.writeLine("super.create();");
-
-                for (const iterator of this.injects) {
-                    iw.writeLine("");
-                    iw.writeLine(`this.${iterator.key} = this.app.resolve(${iterator.type});`);
-                }
 
                 iw.writeLine("");
                 iw.writeLine(`this.element = this.createControl("${this.resolveName(this.element.name)}");`);
