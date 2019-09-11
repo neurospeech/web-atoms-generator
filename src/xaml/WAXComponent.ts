@@ -294,8 +294,10 @@ export class WAXComponent {
                 iw.writeLine("");
                 iw.writeLine("super.create();");
 
-                iw.writeLine("");
-                iw.writeLine(`this.element = this.createControl("${this.resolveName(this.element.name)}");`);
+                for (const iterator of this.injects) {
+                    iw.writeLine("");
+                    iw.writeLine(`this.${iterator.key} = this.app.resolve(${iterator.type});`);
+                }
 
                 for (const iterator of controlImports) {
                     iw.writeLine("");
