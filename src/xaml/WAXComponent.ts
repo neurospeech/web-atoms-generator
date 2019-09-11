@@ -283,8 +283,8 @@ export class WAXComponent {
                 iw.writeLine("");
                 iw.writeInNewBrackets("constructor(app: any, e?: any)", () => {
                     iw.writeLine(
-                        `super(app, e || AtomBridge.instance.createControl("${
-                            this.resolveName(this.element.name)}");`);
+                        `super(app, e || AtomBridge.instance.create("${
+                            this.resolveName(this.element.name)}"));`);
                 });
             }
 
