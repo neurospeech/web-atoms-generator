@@ -525,8 +525,16 @@ export class WAComponent extends WAElement {
 
         const e = this.export ? "export default" : "return";
 
+        if (this.export) {
+            iw.writeLine(`const __moduleName = this.filename;`);
+        }
+
         // write class...
         iw.writeInNewBrackets( `${e} class ${this.name} extends ${this.baseType}`, () => {
+
+            if (this.export) {
+                iw.writeLine(`public static readonly _$_url = __moduleName ;`);
+            }
 
             // write injects
             if (this.injects) {
