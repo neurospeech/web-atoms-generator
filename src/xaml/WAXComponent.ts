@@ -243,6 +243,8 @@ export class WAXComponent {
 
         let prefix = "";
 
+        let setFilePath = false;
+
         if (this.template) {
             d = iw.beginBrackets(`function ${this.name}_Creator(__creator: any): any`);
             prefix = "return ";
@@ -258,11 +260,19 @@ export class WAXComponent {
                     iw.writeLine(`import ${key} from \"${element}\";`);
                 }
             }
+            iw.writeLine("declare var UMD: any;");
+            iw.writeLine(`const __moduleName = this.filename;`);
+
             prefix = "export default ";
+            setFilePath = true;
         }
 
         // create class....
         iw.writeInNewBrackets(`${prefix}class ${this.name} extends AtomXFControl`, () => {
+
+            if (setFilePath) {
+                iw.writeLine(`public static readonly _$_url = UMD.resolvePath(__moduleName) ;`);
+            }
 
             for (const iterator of this.controlImports) {
                 iw.writeLine("");

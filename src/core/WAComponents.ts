@@ -526,6 +526,7 @@ export class WAComponent extends WAElement {
         const e = this.export ? "export default" : "return";
 
         if (this.export) {
+            iw.writeLine("declare var UMD: any;");
             iw.writeLine(`const __moduleName = this.filename;`);
         }
 
@@ -533,7 +534,7 @@ export class WAComponent extends WAElement {
         iw.writeInNewBrackets( `${e} class ${this.name} extends ${this.baseType}`, () => {
 
             if (this.export) {
-                iw.writeLine(`public static readonly _$_url = __moduleName ;`);
+                iw.writeLine(`public static readonly _$_url = UMD.resolvePath(__moduleName) ;`);
             }
 
             // write injects
