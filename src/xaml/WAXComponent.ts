@@ -271,7 +271,7 @@ export class WAXComponent {
         iw.writeInNewBrackets(`${prefix}class ${this.name} extends AtomXFControl`, () => {
 
             if (setFilePath) {
-                iw.writeLine(`public static readonly _$_url = UMD.resolvePath(__moduleName) ;`);
+                iw.writeLine(`public static readonly _$_url = __moduleName ;`);
             }
 
             for (const iterator of this.controlImports) {

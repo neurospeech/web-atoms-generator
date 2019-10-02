@@ -534,7 +534,7 @@ export class WAComponent extends WAElement {
         iw.writeInNewBrackets( `${e} class ${this.name} extends ${this.baseType}`, () => {
 
             if (this.export) {
-                iw.writeLine(`public static readonly _$_url = UMD.resolvePath(__moduleName) ;`);
+                iw.writeLine(`public static readonly _$_url = __moduleName ;`);
             }
 
             // write injects
