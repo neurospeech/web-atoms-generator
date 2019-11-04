@@ -29,10 +29,11 @@
   "devDependencies": {
     "@types/node": "^8.10.49",
     "@types/xmldoc": "^1.1.4",
+    "@web-atoms/core": "^1.0.84",
+    "@web-atoms/unit-test": "^1.0.12",
     "systemjs": "^0.20.18",
     "ts-promise": "^0.3.4",
     "tslint": "^5.17.0",
-    "typescript": "^2.9.2",
-    "web-atoms-core": "^1.0.681"
+    "typescript": "^2.9.2"
   }
 }

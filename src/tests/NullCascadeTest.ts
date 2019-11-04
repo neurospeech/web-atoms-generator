@@ -1,7 +1,7 @@
-import { Assert } from "web-atoms-core/dist/unit/Assert";
-import { Category } from "web-atoms-core/dist/unit/Category";
-import { Test } from "web-atoms-core/dist/unit/Test";
-import { TestItem } from "web-atoms-core/dist/unit/TestItem";
+import Assert from "@web-atoms/unit-test/dist/Assert";
+import Category from "@web-atoms/unit-test/dist/Category";
+import Test from "@web-atoms/unit-test/dist/Test";
+import TestItem from "@web-atoms/unit-test/dist/TestItem";
 import { HtmlContent } from "../core/HtmlContent";
 
 @Category("Null Cascade")

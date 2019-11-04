@@ -1,5 +1,5 @@
 // tslint:disable:ordered-imports no-console
-import { TestRunner } from "web-atoms-core/dist/unit/TestRunner";
+import TestRunner from "@web-atoms/unit-test/dist/TestRunner";
 
 // import "./xaml/group-by-test";
 // import "./xaml/xaml-file-test";
