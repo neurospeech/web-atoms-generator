@@ -30,7 +30,7 @@ export class CoreHtmlComponent
     public resolve(name: string): string {
         if (DefaultImports.indexOf(name) !== -1) {
             if (!this.file.imports[name]) {
-                this.file.imports[name] = { name, import: `web-atoms-core/dist/web/controls/${name}` };
+                this.file.imports[name] = { name, import: `@web-atoms/core/dist/web/controls/${name}` };
             }
         }
         // const tokens = name.split(":");

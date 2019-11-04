@@ -252,8 +252,8 @@ export class WAXComponent {
 
             iw.writeLine("// tslint:disable");
 
-            iw.writeLine(`import { AtomXFControl } from "web-atoms-core/dist/xf/controls/AtomXFControl";`);
-            iw.writeLine(`import { AtomBridge } from "web-atoms-core/dist/core/AtomBridge";`);
+            iw.writeLine(`import { AtomXFControl } from "@web-atoms/core/dist/xf/controls/AtomXFControl";`);
+            iw.writeLine(`import { AtomBridge } from "@web-atoms/core/dist/core/AtomBridge";`);
             for (const key in this.imports) {
                 if (this.imports.hasOwnProperty(key)) {
                     const element = this.imports[key];

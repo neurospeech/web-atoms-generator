@@ -76,7 +76,7 @@ export class ImageFile implements IMarkupFile {
 
         const b: string[] = b64.match(/(.{1,80})/g);
         const s = `// tslint:disable
-import WebImage from "web-atoms-core/dist/core/WebImage";
+import WebImage from "@web-atoms/core/dist/core/WebImage";
 
 const base64 = [${b.map((str) => JSON.stringify(str)).join(",\r\n\t\t")}];
 
@@ -96,7 +96,7 @@ export default new WebImage(\`data:${mimeType};base64,\${base64.join("")}\`);
         // }
 
         const s = `// tslint:disable
-import WebImage from "web-atoms-core/dist/core/WebImage";
+import WebImage from "@web-atoms/core/dist/core/WebImage";
 declare var UMD: any;
 export default new WebImage(UMD.resolvePath("${this.packageContent.name}/${n.join("/")}"));
                 `;

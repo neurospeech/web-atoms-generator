@@ -147,7 +147,7 @@ export class CoreHtmlFile implements IMarkupFile {
 
         this.imports.BindableProperty = {
             name: "BindableProperty",
-            import: "web-atoms-core/dist/core/BindableProperty"
+            import: "@web-atoms/core/dist/core/BindableProperty"
         };
 
         const root = new CoreHtmlComponent(this, roots[0], name, "AtomControl");

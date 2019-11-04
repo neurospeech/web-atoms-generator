@@ -10,7 +10,7 @@ export class TestCase extends TestItem {
     public test(): void {
         const chf = new CoreHtmlFile("stripe-control", {
             imports: {
-                atom: "web-atoms-core/bin/controls/"
+                atom: "@web-atoms/core/bin/controls/"
             }
         });
 
