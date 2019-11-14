@@ -54,7 +54,6 @@ export class HtmlContent {
                             v: `${pv.v.join(".")}.${x}`.split("."), t:
                             `(${pv.t}) ? ${pv.v.join(".")}.${x} : undefined`
                     } , { v: [], t: "" });
-            // const pr = p.map( (x) => `${}` ).join(".");
             v = v.replace(`v${i + 1}`, `${pr.t}`);
             original = null;
         }
