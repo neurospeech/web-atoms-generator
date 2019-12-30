@@ -492,10 +492,10 @@ export class WAComponent extends WAElement {
         // write class...
         iw.writeInNewBrackets( `${e} class ${this.name} extends ${this.baseType}`, () => {
 
-            if (this.export) {
+            if (this.export && this.element.attribs && this.element.attribs.for) {
                 iw.writeLine("");
                 iw.writeInNewBrackets("constructor(app: any, e: any)", () => {
-                    iw.writeLine("super(");
+                    iw.writeLine(`super(app, e || document.createElement("${this.element.attribs.for}"));`);
                 });
             }
 

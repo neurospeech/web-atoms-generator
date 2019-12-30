@@ -82,16 +82,12 @@ export default class IndentedWriter {
     public indent(): IDisposable {
         const i = this.indentText;
         this.indentText = this.indentText + this.indentChar;
+        const it = this.indentText;
+        this.changeLast(i, it);
         return {
             dispose: () => {
 
-                const last = this.content.length - 1;
-                if (last >= 0) {
-                    const line = this.content[last];
-                    if (line === "\r\n" + this.indentText) {
-                        this.content[last] = "\r\n" + i;
-                    }
-                }
+                this.changeLast(it, i);
 
                 this.indentText = i;
             }
@@ -129,6 +125,17 @@ export default class IndentedWriter {
 
     public toString(): string {
         return this.content.join("").split("\r\n").map((x) => x.trim() ? x : "").join("\r\n");
+    }
+
+    private changeLast(check: string, replace: string) {
+        const last = this.content.length - 1;
+        if (last >= 0) {
+            const line = this.content[last];
+            if (line.endsWith(check)) {
+                this.content[last] = line.substr(0, line.length - check.length - 1) + replace;
+            }
+        }
+
     }
 
 }
