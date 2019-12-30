@@ -12,7 +12,16 @@ export class HtmlContent {
         }
         return text;
     }
-    public static processTwoWayBinding(v: string, events: string): ICompiledPath {
+
+    public static processTwoWayBindingTSX(text: string): string {
+        text = HtmlContent.removeBrackets(text.substr(1));
+        if (text.startsWith("$")) {
+            text = text.substr(1);
+        }
+        return `x.${text}`;
+    }
+
+    public static processTwoWayBinding(v: string, events: string = "change"): ICompiledPath {
         v = v.substr(2, v.length - 3);
         if (v.startsWith("$")) {
             v = v.substr(1);
@@ -40,6 +49,15 @@ export class HtmlContent {
             pathList: vx.path
         };
     }
+
+    public static toEvent(text: string): string {
+        const v = HtmlContent.removeBrackets(HtmlContent.processOneTimeBinding(text, "x")).trim().substr(1);
+        if (v.startsWith(")")) {
+            return `(x${v}`;
+        }
+        return `(s, e${v.substr(1)}`;
+    }
+
     public static processOneTimeBinding(v: string, start: string = "this"): string {
         let original = v;
         v = v.substr(1, v.length - 2);

@@ -78,7 +78,7 @@ export class ComponentGenerator {
 		this.files = [];
 
 
-		this.watch();
+		// this.watch();
 		this.compile();
 		console.log(`${(new Date()).toLocaleTimeString()} - Compilation complete. Watching for file changes.`);
 		console.log("    ");
@@ -134,9 +134,9 @@ export class ComponentGenerator {
 			${this.writeNames(this.files, packageContent.name)}
 `;
 
-		FileApi.writeSync(this.folder + "/ModuleFiles.ts", content);
+		// FileApi.writeSync(this.folder + "/ModuleFiles.ts", content);
 
-		console.log(`Modules written to ${this.folder}/ModuleFiles.ts`);
+		// console.log(`Modules written to ${this.folder}/ModuleFiles.ts`);
 
 		return;
 	}

@@ -1,4 +1,4 @@
-import { existsSync, PathLike, readFileSync, statSync} from "fs";
+import { existsSync, PathLike, readFileSync, statSync, unlinkSync} from "fs";
 import { DomHandler, Parser } from "htmlparser2";
 import { parse, sep } from "path";
 import FileApi from "../FileApi";
@@ -78,6 +78,8 @@ export class CoreHtmlFile implements IMarkupFile {
             this.lastTime = this.currentTime;
 
             let importStatement: string = "// tslint:disable\r\n";
+            importStatement += `import Bind from "@web-atoms/core/dist/core/xnode/Bind"\r\n`;
+            importStatement += `import XNode from "@web-atoms/core/dist/core/xnode/XNode"\r\n`;
             for (const key in this.imports) {
                 if (this.imports.hasOwnProperty(key)) {
                     const element = this.imports[key];
@@ -102,7 +104,10 @@ export class CoreHtmlFile implements IMarkupFile {
             generatedText = ReplaceTilt.replace(generatedText, p.dir);
 
             // generatedText += `\n//# sourceMappingUrl=${root.name}.ts.map`;
-            FileApi.writeSync(fname, generatedText);
+            if (existsSync(fname)) {
+                unlinkSync(fname);
+            }
+            FileApi.writeSync(fname + "x", generatedText);
             // FileApi.writeSync(fname + ".map", JSON.stringify(root.sourceMap));
         } catch (error) {
             // tslint:disable-next-line:no-console
@@ -149,6 +154,16 @@ export class CoreHtmlFile implements IMarkupFile {
             name: "BindableProperty",
             import: "@web-atoms/core/dist/core/BindableProperty"
         };
+
+        // this.imports.XNode = {
+        //     name: "XNode",
+        //     import: "@web-atoms/core/dist/core/xnode/XNode"
+        // };
+
+        // this.imports.Bind = {
+        //     name: "Bind",
+        //     import: "@web-atoms/core/dist/core/xnode/Bind"
+        // };
 
         const root = new CoreHtmlComponent(this, roots[0], name, "AtomControl");
         // root.root = new WAComponent(this, roots[0], name, "AtomControl") ;
