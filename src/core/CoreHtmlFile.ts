@@ -53,15 +53,20 @@ export class CoreHtmlFile implements IMarkupFile {
     }
 
     public reportError(element: IHtmlNode, er: Error): void {
-        const en = element.startIndex || 0;
-        let cn = 0;
-        const lines = this.fileLines;
-        const ln = lines.find( (x) => x.start + x.length < en ) || lines[0];
-        cn = en - ln.start;
-        const errorText = `${er.message}`.split("\n").join(" ").split("\r").join("");
-        const fn = this.file.toString().split("\\").join("/");
-        // tslint:disable-next-line:no-console
-        console.error(`${fn}(${ln.line},${cn}): error TS0001: ${errorText}.`);
+        try {
+            const en = element.startIndex || 0;
+            let cn = 0;
+            const lines = this.fileLines;
+            const ln = lines.find( (x) => x.start + x.length < en ) || lines[0];
+            cn = en - ln.start;
+            const errorText = `${er.message}`.split("\n").join(" ").split("\r").join("");
+            const fn = this.file.toString().split("\\").join("/");
+            // tslint:disable-next-line:no-console
+            console.error(`${fn}(${ln.line},${cn}): error TS0001: ${errorText}.`);
+        } catch (ex) {
+            // tslint:disable-next-line: no-console
+            console.error(er);
+        }
     }
 
     public compile(packageContent: any): void {
@@ -78,8 +83,8 @@ export class CoreHtmlFile implements IMarkupFile {
             this.lastTime = this.currentTime;
 
             let importStatement: string = "// tslint:disable\r\n";
-            importStatement += `import Bind from "@web-atoms/core/dist/core/xnode/Bind"\r\n`;
-            importStatement += `import XNode from "@web-atoms/core/dist/core/xnode/XNode"\r\n`;
+            importStatement += `import Bind from "@web-atoms/core/dist/core/Bind"\r\n`;
+            importStatement += `import XNode from "@web-atoms/core/dist/core/XNode"\r\n`;
             for (const key in this.imports) {
                 if (this.imports.hasOwnProperty(key)) {
                     const element = this.imports[key];

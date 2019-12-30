@@ -1,9 +1,9 @@
 import IDisposable from "./IDisposable";
 
+import { isWorker } from "cluster";
 import { RawSourceMap, SourceMapGenerator } from "source-map";
 import { IHtmlNode } from "../html-node";
 import ISourceLines, { ISourceLineInfo } from "./ISourceLines";
-import { isWorker } from "cluster";
 
 export default class IndentedWriter {
 
@@ -22,6 +22,15 @@ export default class IndentedWriter {
         private lineIndexes: ISourceLines,
         private indentText: string = "\t") {
         this.sourceMapGenerator = new SourceMapGenerator();
+    }
+
+    public write(line: string) {
+        if (this.content.length > 0) {
+            const last = this.content.length - 1;
+            this.content[last] = this.content[last] + line.trim() + " ";
+            return;
+        }
+        this.content.push(line.trim() + " ");
     }
 
     public writeLine(

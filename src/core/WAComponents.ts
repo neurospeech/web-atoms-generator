@@ -1,4 +1,5 @@
 import { CoreHtmlComponent } from "./CoreHtmlComponent";
+import { DefaultImports } from "./DefaultImports";
 
 import { GeneratorContext } from "../generator-context";
 import { IHtmlNode } from "../html-node";
@@ -59,6 +60,8 @@ export class WAAttribute extends WANode {
             name = name.substring(5);
         }
 
+        iw.writeLine("");
+
         const aid = this.atomParent.id;
 
         name = name.split("-").map(
@@ -67,35 +70,33 @@ export class WAAttribute extends WANode {
         if (this.value.startsWith("{") && this.value.endsWith("}")) {
 
             if (/^event/i.test(name)) {
-                iw.writeLine(`${name}={Bind.event(${HtmlContent.toEvent(this.value)})}`);
+                iw.write(`${name}={Bind.event(${HtmlContent.toEvent(this.value)})}`);
             } else {
-                const v = HtmlContent.removeBrackets(HtmlContent.processOneTimeBinding(this.value, "x"));
-                iw.writeLine(`${name}={Bind.oneTime((x) => ${v})}`);
+                const v = HtmlContent.processTwoWayBindingTSX(this.value);
+                iw.write(`${name}={Bind.oneTime(${v})}`);
             }
             return;
         }
 
         if (this.value.startsWith("[") && this.value.endsWith("]")) {
             const v =  HtmlContent.processTwoWayBindingTSX(this.value);
-            iw.writeLine(`${name}={Bind.oneWay((x) => ${v})}`);
+            iw.write(`${name}={Bind.oneWay(${v})}`);
             return;
         }
 
         if (this.value.startsWith("$[") && this.value.endsWith("]")) {
             const v =  HtmlContent.processTwoWayBindingTSX(this.value);
-            iw.writeLine(`${name}={Bind.twoWays((x) => ${v})}`);
+            iw.write(`${name}={Bind.twoWays(${v})}`);
             return;
         }
 
         if (this.value.startsWith("^[") && this.value.endsWith("]")) {
-            const v = HtmlContent.processTwoWayBinding(this.value, `["change", "keyup", "keydown", "blur"]`);
-            const startsWithThis = v.pathList.findIndex( (p) => p[0] === "this" ) !== -1 ? ",null, __creator" : "";
-            iw.writeLine(
-                `${aid}.bind(${this.parent.eid}, "${name}", ${v.expression} ${startsWithThis});`);
+            const v =  HtmlContent.processTwoWayBindingTSX(this.value);
+            iw.write(`${name}={Bind.twoWays(${v}, ["change", "keyup", "keydown", "blur"])}`);
             return;
         }
 
-        iw.writeLine(`${name}="${this.value}"`);
+        iw.write(`${name}="${this.value}"`);
 
     }
 
@@ -112,7 +113,7 @@ export class WAElement extends WANode {
     public presenterParent: { name: string, parent: WAComponent };
 
     public id: string;
-    defaultStyle: any;
+    public defaultStyle: any;
 
     public get eid(): string {
         if (this instanceof WAComponent) {
@@ -243,7 +244,9 @@ export class WAElement extends WANode {
                 }
             }
         } catch (er) {
-            this.coreHtmlFile.reportError(this.element, er);
+            // tslint:disable-next-line: no-console
+            console.error(er);
+            // this.coreHtmlFile.reportError(this.element, er);
         }
 
     }
@@ -285,8 +288,9 @@ export class WAElement extends WANode {
 
         const at = e.attribs ? e.attribs["atom-type"] : null;
         if (at) {
-            const ac = new WAComponent(this, e, "", at);
-            this.addChild(ac);
+            // const ac = new WAComponent(this, e, "", at);
+            // this.coreHtmlFile.imports[at] = { name: at, import: `@web-atoms/core/dist/web/${at}` };
+            this.addChild(new WAElement(this, e));
         } else {
             this.addChild(new WAElement(this, e));
         }
@@ -298,14 +302,19 @@ export class WAElement extends WANode {
             // since first character is upper case, it is a component...
             const tokens = name.split(".");
 
-            e.name = tokens[0];
+            // e.name = tokens[0];
 
-            e.children = [{
-                name: tokens[1],
-                children: e.children
-            }];
-            // e.attribs["atom-type"] = tokens[0];
-            // e.name = (tokens[1] || "null").toLowerCase();
+            // e.children = [{
+            //     name: tokens[1],
+            //     children: e.children
+            // }];
+            e.attribs["atom-type"] = tokens[0];
+            // const n = tokens[0];
+            // e.name = (tokens[1] ? tokens[1].toLocaleLowerCase() : tokens[0]);
+            e.name = tokens[0];
+            if (tokens[1]) {
+                e.attribs.for = tokens[1];
+            }
         }
     }
 
@@ -313,6 +322,13 @@ export class WAElement extends WANode {
 
         if (!this.id) {
             this.id = `e${this.namedParent.ids++}`;
+        }
+
+        const name = this.name || this.element.name;
+        if (DefaultImports.indexOf(name) !== -1) {
+            if (!this.coreHtmlFile.imports[name]) {
+                this.coreHtmlFile.imports[name] = { name, import: `@web-atoms/core/dist/web/controls/${name}` };
+            }
         }
 
         for (const iterator of this.children) {
@@ -355,11 +371,13 @@ export class WAElement extends WANode {
     public write(iw: IndentedWriter): void {
 
         try {
-            iw.writeLine(`<${this.element.name}`);
+            iw.write(`<${this.element.name}`);
+            const d = iw.indent();
             this.writeAttributes(iw);
             iw.writeLine(">");
 
             this.writeChildren(iw);
+            d.dispose();
 
             iw.writeLine(`</${this.element.name}>`);
 
@@ -388,7 +406,7 @@ export class WAComment extends WAElement {
             .map((s) => `// ${s}`)
             .join("\n");
 
-        iw.writeLine(`// ${this.id}\r\n${comment}`);
+        iw.writeLine(`{/* ${this.id}\r\n${comment} */}`);
     }
 }
 
@@ -403,8 +421,8 @@ export class WAComponent extends WAElement {
     public presenters: Array<{ key: string, value: string }>;
 
     public injects: Array<{ key: string, type: string}>;
-    viewModel: any;
-    localViewModel: any;
+    public viewModel: any;
+    public localViewModel: any;
 
     public get templates() {
         return this.mTemplates || (this.mTemplates = []);
@@ -449,6 +467,7 @@ export class WAComponent extends WAElement {
     }
 
     public write(iw: IndentedWriter): void {
+
         try {
             if (this.name) {
                 if (this.export) {
@@ -537,11 +556,21 @@ export class WAComponent extends WAElement {
                 // write presenter...
                 this.writePresenter(iw);
 
+                const tag = "div";
+                iw.writeLine(`this.render(`);
+                iw.write(`<${tag}`);
+                const d = iw.indent();
                 this.writeAttributes(iw);
+                iw.writeLine(`>`);
 
                 for (const iterator of this.children) {
                     iterator.write(iw);
                 }
+
+                d.dispose();
+
+                iw.writeLine(`</${tag}>`);
+                iw.writeLine(`);`);
             });
 
         });
@@ -551,7 +580,7 @@ export class WAComponent extends WAElement {
     public writeComponent(iw: IndentedWriter): void {
 
         iw.writeLine("this.render(");
-        iw.writeLine(`<${this.element.name}`);
+        iw.write(`<${this.element.name}`);
         const d = iw.indent();
 
         this.writePresenter(iw);

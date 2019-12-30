@@ -14,11 +14,27 @@ export class HtmlContent {
     }
 
     public static processTwoWayBindingTSX(text: string): string {
-        text = HtmlContent.removeBrackets(text.substr(1));
-        if (text.startsWith("$")) {
+        let isTwoWays = false;
+        if (/^(\$|\^)/.test(text)) {
             text = text.substr(1);
+            isTwoWays = true;
         }
-        return `x.${text}`;
+        text = HtmlContent.removeBrackets(text).trim();
+
+        if (isTwoWays) {
+            if (!text.startsWith("$")) {
+                text = "$" + text;
+            }
+        }
+
+        if (text.startsWith("{")) {
+            text = `(${text})`;
+        }
+        text = text.replace(/\$/g, "x.").replace(/x\.this\./g, "this.");
+        if (/x\./.test(text)) {
+            return `(x) => ${text}`;
+        }
+        return `() => ${text}`;
     }
 
     public static processTwoWayBinding(v: string, events: string = "change"): ICompiledPath {
