@@ -84,10 +84,6 @@ export class WAAttribute extends WANode {
         if (this.value.startsWith("$[") && this.value.endsWith("]")) {
             const v =  HtmlContent.processTwoWayBindingTSX(this.value);
             iw.writeLine(`${name}={Bind.twoWays((x) => ${v})}`);
-
-            // const startsWithThis = v.pathList.findIndex( (p) => p[0] === "this" ) !== -1 ? ",null, __creator" : "";
-            // iw.writeLine(
-            //     `${aid}.bind(${this.parent.eid}, "${name}", ${v.expression} ${startsWithThis});`);
             return;
         }
 
@@ -301,8 +297,15 @@ export class WAElement extends WANode {
         if (name && name.charAt(0).toUpperCase() === name.charAt(0)) {
             // since first character is upper case, it is a component...
             const tokens = name.split(".");
-            e.attribs["atom-type"] = tokens[0];
-            e.name = (tokens[1] || "null").toLowerCase();
+
+            e.name = tokens[0];
+
+            e.children = [{
+                name: tokens[1],
+                children: e.children
+            }];
+            // e.attribs["atom-type"] = tokens[0];
+            // e.name = (tokens[1] || "null").toLowerCase();
         }
     }
 
