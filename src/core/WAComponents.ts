@@ -492,6 +492,13 @@ export class WAComponent extends WAElement {
         // write class...
         iw.writeInNewBrackets( `${e} class ${this.name} extends ${this.baseType}`, () => {
 
+            if (this.export) {
+                iw.writeLine("");
+                iw.writeInNewBrackets("constructor(app: any, e: any)", () => {
+                    iw.writeLine("super(");
+                });
+            }
+
             // write injects
             if (this.injects) {
                 for (const iterator of this.injects) {
