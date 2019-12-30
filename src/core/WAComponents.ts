@@ -66,15 +66,15 @@ export class WAAttribute extends WANode {
         name = name.split("-").map(
             (a, i) => (i ? a.charAt(0).toUpperCase() : a.charAt(0).toLowerCase())  + a.substr(1) ).join("");
 
-        if (name === "defaultStyle" || name === "defaultControlStyle") {
-            iw.writeLine(`${aid}.defaultControlStyle = ${ HtmlContent.removeBrackets(this.value)};`);
-            return;
-        }
+        // if (name === "defaultStyle" || name === "defaultControlStyle") {
+        //     iw.writeLine(`${aid}.defaultControlStyle = ${ HtmlContent.removeBrackets(this.value)};`);
+        //     return;
+        // }
 
-        if (this.template) {
-            iw.writeLine(`${aid}.${name} = ${this.template}Creator(this);`);
-            return;
-        }
+        // if (this.template) {
+        //     iw.writeLine(`${aid}.${name} = ${this.template}Creator(this);`);
+        //     return;
+        // }
 
         if (this.value.startsWith("{") && this.value.endsWith("}")) {
 
@@ -151,6 +151,7 @@ export class WAElement extends WANode {
     public presenterParent: { name: string, parent: WAComponent };
 
     public id: string;
+    defaultStyle: any;
 
     public get eid(): string {
         if (this instanceof WAComponent) {
@@ -170,16 +171,19 @@ export class WAElement extends WANode {
 
             this.processTagName(element);
 
-            if (element.attribs) {
-                const defaultStyle = element.attribs["default-style"] || element.attribs.defaultStyle;
-                if (defaultStyle) {
-                    this.setAttribute("defaultStyle", defaultStyle);
-                }
-            }
-
             for (const key in this.element.attribs) {
                 if (this.element.attribs.hasOwnProperty(key)) {
                     const item = this.element.attribs[key];
+
+                    if (/default\-style|defaultStyle/i.test(key)) {
+                        this.defaultStyle = item;
+                        continue;
+                    }
+
+                    if (/viewModel$/i.test(key)) {
+                        this[key] = item;
+                        continue;
+                    }
 
                     if (/^((atom\-type)|((atom-)?template)|(default\-style)|(defaultStyle))/i.test(key)) {
                         continue;
@@ -316,21 +320,21 @@ export class WAElement extends WANode {
             return;
         }
 
-        const tt = e.attribs ? (e.attribs.template || e.attribs["atom-template"]) : null;
+        // const tt = e.attribs ? (e.attribs.template || e.attribs["atom-template"]) : null;
 
-        if (tt) {
+        // if (tt) {
 
-            const np = this.namedParent;
-            const ap = this.atomParent;
+        //     const np = this.namedParent;
+        //     const ap = this.atomParent;
 
-            const tn = `${np.name}_${tt}_${ap.templates.length + 1}_${WAElement.tid++}`;
+        //     const tn = `${np.name}_${tt}_${ap.templates.length + 1}_${WAElement.tid++}`;
 
-            const tc = new WAComponent(this, e, tn);
-            np.templates.push(tc);
+        //     const tc = new WAComponent(this, e, tn);
+        //     np.templates.push(tc);
 
-            ap.setAttribute(tt, null, tn);
-            return;
-        }
+        //     ap.setAttribute(tt, null, tn);
+        //     return;
+        // }
 
         this.processTagName(e);
 
@@ -525,17 +529,17 @@ export class WAComponent extends WAElement {
 
         const e = this.export ? "export default" : "return";
 
-        if (this.export) {
-            iw.writeLine("declare var UMD: any;");
-            iw.writeLine(`const __moduleName = this.filename;`);
-        }
+        // if (this.export) {
+        //     iw.writeLine("declare var UMD: any;");
+        //     iw.writeLine(`const __moduleName = this.filename;`);
+        // }
 
         // write class...
         iw.writeInNewBrackets( `${e} class ${this.name} extends ${this.baseType}`, () => {
 
-            if (this.export) {
-                iw.writeLine(`public static readonly _$_url = __moduleName ;`);
-            }
+            // if (this.export) {
+            //     iw.writeLine(`public static readonly _$_url = __moduleName ;`);
+            // }
 
             // write injects
             if (this.injects) {
@@ -563,19 +567,19 @@ export class WAComponent extends WAElement {
                 }
             }
 
-            if (this.element.name !== "null") {
-                iw.writeLine("");
-                iw.writeInNewBrackets("constructor(app: any, e?: any)", () => {
-                    iw.writeLine(`super(app, e || document.createElement("${this.element.name}"));`);
-                });
-            }
+            // if (this.element.name !== "null") {
+            //     iw.writeLine("");
+            //     iw.writeInNewBrackets("constructor(app: any, e?: any)", () => {
+            //         iw.writeLine(`super(app, e || document.createElement("${this.element.name}"));`);
+            //     });
+            // }
 
             iw.writeLine("");
             iw.writeInNewBrackets(`public create(): void`, () => {
 
-                iw.writeLine("");
+                if (this.viewModel) {
 
-                iw.writeLine(`super.create();`);
+                }
 
                 // initialize injects
                 if (this.injects) {
