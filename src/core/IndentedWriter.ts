@@ -20,17 +20,13 @@ export default class IndentedWriter {
     constructor(
         private source: string,
         private lineIndexes: ISourceLines,
-        private indentText: string = "\t") {
+        private indentText: string = "",
+        private indentChar: string = "\t") {
         this.sourceMapGenerator = new SourceMapGenerator();
     }
 
     public write(line: string) {
-        if (this.content.length > 0) {
-            const last = this.content.length - 1;
-            this.content[last] = this.content[last] + line.trim() + " ";
-            return;
-        }
-        this.content.push(line.trim() + " ");
+        this.content.push(line);
     }
 
     public writeLine(
@@ -68,7 +64,8 @@ export default class IndentedWriter {
             //         }
             //     });
             // }
-            this.content.push(`${this.indentText}${iterator}`);
+            this.content.push(iterator);
+            this.content.push("\r\n" + this.indentText);
         }
     }
 
@@ -84,9 +81,18 @@ export default class IndentedWriter {
 
     public indent(): IDisposable {
         const i = this.indentText;
-        this.indentText = this.indentText + i[0];
+        this.indentText = this.indentText + this.indentChar;
         return {
             dispose: () => {
+
+                const last = this.content.length - 1;
+                if (last >= 0) {
+                    const line = this.content[last];
+                    if (line === "\r\n" + this.indentText) {
+                        this.content[last] = "\r\n" + i;
+                    }
+                }
+
                 this.indentText = i;
             }
         };
@@ -122,7 +128,7 @@ export default class IndentedWriter {
     }
 
     public toString(): string {
-        return this.content.join("\n");
+        return this.content.join("").split("\r\n").map((x) => x.trim() ? x : "").join("\r\n");
     }
 
 }

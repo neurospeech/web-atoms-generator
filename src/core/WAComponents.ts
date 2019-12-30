@@ -138,7 +138,7 @@ export class WAElement extends WANode {
                     const item = this.element.attribs[key];
 
                     if (/default\-style|defaultStyle/i.test(key)) {
-                        this.defaultStyle = item;
+                        this.defaultStyle = HtmlContent.removeBrackets(item);
                         continue;
                     }
 
@@ -147,7 +147,7 @@ export class WAElement extends WANode {
                         continue;
                     }
 
-                    if (/^((atom\-type)|((atom-)?template)|(default\-style)|(defaultStyle))/i.test(key)) {
+                    if (/^((atom\-type)|(default\-style)|(defaultStyle))/i.test(key)) {
                         continue;
                     }
 
@@ -496,7 +496,7 @@ export class WAComponent extends WAElement {
             if (this.injects) {
                 for (const iterator of this.injects) {
                     iw.writeLine("");
-                    iw.writeLine(`protected ${iterator.key}: ${iterator.type };`);
+                    iw.writeLine(`protected ${iterator.key.trim()}: ${iterator.type.trim() };`);
                 }
             }
 
@@ -506,14 +506,14 @@ export class WAComponent extends WAElement {
                     iw.writeLine(`@BindableProperty`);
                     const type = iterator.type || "any";
                     const init = "";
-                    iw.writeLine(`public ${iterator.key}: ${type} ${init};`);
+                    iw.writeLine(`public ${iterator.key.trim()}: ${type.trim()} ${init};`);
                 }
             }
 
             if (this.presenters) {
                 for (const iterator of this.presenters) {
                     iw.writeLine("");
-                    iw.writeLine(`public ${iterator.key}: HTMLElement;`);
+                    iw.writeLine(`public ${iterator.key.trim()}: HTMLElement;`);
                 }
             }
 
@@ -524,7 +524,7 @@ export class WAComponent extends WAElement {
                 if (this.injects) {
                     iw.writeLine("");
                     for (const iterator of this.injects) {
-                        iw.writeLine(`this.${iterator.key} = this.app.resolve(${iterator.type});`);
+                        iw.writeLine(`this.${iterator.key.trim()} = this.app.resolve(${iterator.type.trim()});`);
                     }
                 }
 
@@ -535,21 +535,24 @@ export class WAComponent extends WAElement {
                     iw.writeLine(`this.localViewModel = ${this.localViewModel};`);
                 }
 
+                if (this.defaultStyle) {
+                    iw.writeLine(`this.defaultControlStyle = ${this.defaultStyle.trim()};`);
+                }
+
                 // initialize non v2 properties...
+                iw.writeLine("");
                 if (this.properties) {
                     for (const iterator of this.properties) {
                         if (iterator.v2) {
                             if (iterator.value) {
-                                iw.writeLine("");
-                                iw.writeLine(`this.${iterator.key} = ${iterator.value};`);
+                                iw.writeLine(`this.${iterator.key.trim()} = ${iterator.value.trim()};`);
                             }
                             continue;
                         }
                         if (iterator.value === undefined) {
                             continue;
                         }
-                        iw.writeLine("");
-                        iw.writeLine(`this.${iterator.key} = ${iterator.value};`);
+                        iw.writeLine(`this.${iterator.key.trim()} = ${iterator.value.trim()};`);
                     }
                 }
 
