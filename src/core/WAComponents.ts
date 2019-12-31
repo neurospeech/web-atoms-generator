@@ -492,11 +492,16 @@ export class WAComponent extends WAElement {
         // write class...
         iw.writeInNewBrackets( `${e} class ${this.name} extends ${this.baseType}`, () => {
 
-            if (this.export && this.element.attribs && this.element.attribs.for) {
-                iw.writeLine("");
-                iw.writeInNewBrackets("constructor(app: any, e: any)", () => {
-                    iw.writeLine(`super(app, e || document.createElement("${this.element.attribs.for}"));`);
-                });
+            if (this.export) {
+                const en = this.element.name || (this.element.attribs ? this.element.attribs.for : undefined);
+                if (en) {
+                    if (en[0] === en[0].toLocaleLowerCase()) {
+                        iw.writeLine("");
+                        iw.writeInNewBrackets("constructor(app: any, e?: any)", () => {
+                            iw.writeLine(`super(app, e || document.createElement("${en}"));`);
+                        });
+                    }
+                }
             }
 
             // write injects
