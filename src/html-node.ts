@@ -7,5 +7,6 @@ export interface IHtmlNode {
     name?: string;
     attribs?: any;
     children?: IHtmlNode[];
+    parent?: IHtmlNode;
 
 }

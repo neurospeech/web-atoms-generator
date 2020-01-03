@@ -104,6 +104,8 @@ export class CoreHtmlFile implements IMarkupFile {
 
             const fname = p.dir + sep + root.name + ".ts";
 
+            const oname = p.dir + sep + root.name + p.ext;
+
             let generatedText: string = importStatement + root.generated;
 
             generatedText = ReplaceTilt.replace(generatedText, p.dir);
@@ -111,6 +113,12 @@ export class CoreHtmlFile implements IMarkupFile {
             // generatedText += `\n//# sourceMappingUrl=${root.name}.ts.map`;
             if (existsSync(fname)) {
                 unlinkSync(fname);
+            }
+
+            if(process.argv.find((s) => s === "-d")) {
+                if (oname.endsWith(".html")) {
+                    unlinkSync(this.file);
+                }
             }
             FileApi.writeSync(fname + "x", generatedText);
             // FileApi.writeSync(fname + ".map", JSON.stringify(root.sourceMap));

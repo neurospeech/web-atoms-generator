@@ -67,6 +67,11 @@ export class WAAttribute extends WANode {
         name = name.split("-").map(
             (a, i) => (i ? a.charAt(0).toUpperCase() : a.charAt(0).toLowerCase())  + a.substr(1) ).join("");
 
+        if (name === "presenter") {
+            iw.write(`${name}={Bind.presenter("${this.value}")}`);
+            return;
+        }
+
         if (this.value.startsWith("{") && this.value.endsWith("}")) {
 
             if (/^event/i.test(name)) {
@@ -157,13 +162,13 @@ export class WAElement extends WANode {
                         continue;
                     }
 
-                    if (key === "atom-presenter" || key === "presenter") {
-                        this.presenterParent = {
-                            name: item,
-                            parent: this.atomParent
-                        };
-                        continue;
-                    }
+                    // if (key === "atom-presenter" || key === "presenter") {
+                    //     this.presenterParent = {
+                    //         name: item,
+                    //         parent: this.atomParent
+                    //     };
+                    //     continue;
+                    // }
 
                     if (key === "@properties") {
                         const wa = ((this as any) as WAComponent);
@@ -286,13 +291,33 @@ export class WAElement extends WANode {
 
         this.processTagName(e);
 
+        let owner = this as WAElement;
+
+        const tn = e.attribs && e.attribs.template;
+        if (tn) {
+            // we need to climb up till we find atom-type attribute...
+            let self = this as WAElement;
+            while ( self && !(self.element.attribs && self.element.attribs["atom-type"])) {
+                self = self.parent;
+            }
+            if (self) {
+                delete e.attribs.template;
+                const t = new WAElement(self, {
+                    name: self.element.attribs["atom-type"] + ":" +  tn,
+                    attribs: {},
+                    children: []});
+                self.addChild(t);
+                owner = t;
+            }
+        }
+
         const at = e.attribs ? e.attribs["atom-type"] : null;
         if (at) {
             // const ac = new WAComponent(this, e, "", at);
             // this.coreHtmlFile.imports[at] = { name: at, import: `@web-atoms/core/dist/web/${at}` };
-            this.addChild(new WAElement(this, e));
+            owner.addChild(new WAElement(owner, e));
         } else {
-            this.addChild(new WAElement(this, e));
+            owner.addChild(new WAElement(owner, e));
         }
     }
 
@@ -315,6 +340,9 @@ export class WAElement extends WANode {
             if (tokens[1]) {
                 e.attribs.for = tokens[1];
             }
+        }
+        if (e.name) {
+            e.name = e.name.replace(":", ".");
         }
     }
 
