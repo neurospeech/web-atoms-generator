@@ -569,7 +569,9 @@ export class WAComponent extends WAElement {
                 iw.writeLine("");
 
                 function extract(text: string) {
-                    return text.split("(")[1].split(")")[0];
+                    let t = text.split("(")[1].split(")")[0];
+                    t = t.split(",")[0];
+                    return t;
                 }
 
                 if (this.viewModel) {
