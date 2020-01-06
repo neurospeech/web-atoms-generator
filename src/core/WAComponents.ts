@@ -557,6 +557,15 @@ export class WAComponent extends WAElement {
                 }
             }
 
+            if (this.viewModel || this.localViewModel) {
+                iw.writeLine("");
+                if (this.viewModel) {
+                    iw.writeLine(`public viewModel: ${this.viewModel};`);
+                } else {
+                    iw.writeLine(`public localViewModel: ${this.localViewModel};`);
+                }
+            }
+
             iw.writeLine("");
             iw.writeInNewBrackets(`public create(): void`, () => {
 
