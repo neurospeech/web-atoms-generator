@@ -559,10 +559,15 @@ export class WAComponent extends WAElement {
 
             if (this.viewModel || this.localViewModel) {
                 iw.writeLine("");
+
+                function extract(text: string) {
+                    return text.split("(")[1].split(")")[0];
+                }
+
                 if (this.viewModel) {
-                    iw.writeLine(`public viewModel: ${this.viewModel};`);
+                    iw.writeLine(`public viewModel: ${extract(this.viewModel)};`);
                 } else {
-                    iw.writeLine(`public localViewModel: ${this.localViewModel};`);
+                    iw.writeLine(`public localViewModel: ${extract(this.localViewModel)};`);
                 }
             }
 
