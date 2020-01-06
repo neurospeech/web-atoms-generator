@@ -616,7 +616,7 @@ export class WAComponent extends WAElement {
                         if (iterator.value === undefined) {
                             continue;
                         }
-                        iw.writeLine(`this.${iterator.key.trim()} = ${iterator.value.trim()};`);
+                        iw.writeLine(`this.${iterator.key.trim()} = ${iterator.value ? iterator.value.trim() : null};`);
                     }
                 }
 
