@@ -60,6 +60,14 @@ export class WAAttribute extends WANode {
             name = name.substring(5);
         }
 
+        if (!name) {
+            return;
+        }
+
+        if (name === ";") {
+            return;
+        }
+
         iw.writeLine("");
 
         const aid = this.atomParent.id;
