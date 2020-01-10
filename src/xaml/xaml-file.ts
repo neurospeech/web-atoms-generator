@@ -1,4 +1,4 @@
-import { existsSync, PathLike, readFileSync, statSync } from "fs";
+import { existsSync, PathLike, readFileSync, statSync, unlinkSync } from "fs";
 import { parse, sep } from "path";
 import { XmlDocument, XmlElement } from "xmldoc";
 import IndentedWriter from "../core/IndentedWriter";
@@ -42,9 +42,20 @@ export class XamlFile implements IMarkupFile {
 
             const fname = p.dir + sep + p.name + ".ts";
 
+            const oname = p.dir + sep + p.name + p.ext;
+
             generated = ReplaceTilt.replace(generated, p.dir);
 
-            FileApi.writeSync(fname, generated);
+            if (existsSync(fname)) {
+                unlinkSync(fname);
+            }
+
+            if(process.argv.find((s) => s === "-d")) {
+                if (oname.endsWith(".xaml")) {
+                    unlinkSync(this.file);
+                }
+            }
+            FileApi.writeSync(fname + "x", generated);
 
         } catch (e) {
             // tslint:disable-next-line:no-console
