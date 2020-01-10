@@ -311,7 +311,7 @@ export class WAElement extends WANode {
             if (self) {
                 delete e.attribs.template;
                 const t = new WAElement(self, {
-                    name: self.element.attribs["atom-type"] + ":" +  tn,
+                    name: self.element.attribs["atom-type"] + ":" +  HtmlContent.toCamelCase(tn),
                     attribs: {},
                     children: []});
                 self.addChild(t);

@@ -89,6 +89,20 @@ export class WAXComponent {
             e.name = "XF." + e.name;
         }
 
+        if (e.name === "WA.AtomImage") {
+            e.name = "XF.Image";
+            e.attr.Url = e.attr.SourceUrl;
+            delete e.attr.SourceUrl;
+        }
+
+        if (e.name === "pages:PopupPage") {
+            e.name = "RgPluginsPopup.PopupPage";
+        }
+
+        if (e.name.startsWith("AtomComboBox:AtomComboBox")) {
+            e.name = e.name.replace("AtomComboBox:AtomComboBox", "AtomComboBox");
+        }
+
         const removeChildren: Array<{ parent: XmlElement, child: XmlElement }> = [];
         for (const iterator of e.children) {
             if (iterator.type === "element") {
@@ -141,7 +155,13 @@ export class WAXComponent {
 
                 removeAttributes.push(key);
                 if (e.attr[key]) {
-                    const cn = key.charAt(0).toLowerCase() + key.substr(1);
+                    const cn =
+                        key.indexOf(".") === -1
+                        ? (
+                            key.indexOf(":") === -1 ? key.charAt(0).toLowerCase() + key.substr(1) :
+                            key.split(":").map((a, i) => i === 0 ? a.toUpperCase() : a).join(".")
+                            )
+                        : key;
                     changed[cn] = e.attr[key];
                 }
             }
@@ -196,46 +216,6 @@ export class WAXComponent {
         return null;
     }
 
-    // public setName(e: XmlElement): string {
-    //     let name: string = e.attr ? (e.attr.name || e.attr.Name || e.attr["x:Name"]) : null;
-    //     if (name) {
-    //         return name;
-    //     }
-    //     name = `e${this.lastId++}`;
-    //     e.attr = e.attr || {};
-    //     e.attr["x:Name"] = name;
-    //     return name;
-    // }
-
-    public resolveName(name: string): string {
-        if (this.parent) {
-            return this.parent.resolveName(name);
-        }
-        let ns: string = null;
-        if (name.includes(":")) {
-            const tokens = name.split(":");
-            ns = tokens[0];
-            name = tokens[1];
-        } else {
-            ns = "__default";
-        }
-
-        ns = this.xmlNS[ns];
-
-        if (!ns) {
-            // tslint:disable-next-line:no-console
-            console.error(`Failed to resolve ${name} with ${JSON.stringify(this.xmlNS, undefined, 2)}`);
-            return name;
-        }
-
-        if (ns === "http://xamarin.com/schemas/2014/forms") {
-            return `Xamarin.Forms.${name}`;
-        }
-        ns = ns.split(":")[1];
-        ns = ns.split(";")[0];
-        return `${ns}.${name}`;
-    }
-
     public write(iw: IndentedWriter): void {
 
         const controlImports = this.controlImports.map((s) => {
@@ -257,8 +237,11 @@ export class WAXComponent {
 
             iw.writeLine(`import { AtomXFControl } from "@web-atoms/core/dist/xf/controls/AtomXFControl";`);
             iw.writeLine(`import { AtomBridge } from "@web-atoms/core/dist/core/AtomBridge";`);
-            iw.writeLine(`import * as XF from "@web-atoms/xf-controls/dist/controls/XF";`);
+            iw.writeLine(`import XF from "@web-atoms/xf-controls/dist/controls/XF";`);
+            iw.writeLine(`import X from "@web-atoms/xf-controls/dist/controls/X";`);
             iw.writeLine(`import * as WA from "@web-atoms/xf-controls/dist/controls/WA";`);
+            iw.writeLine(`import AtomComboBox from "@web-atoms/xf-controls/dist/AtomComboBox";`);
+            iw.writeLine(`import * as RgPluginsPopup from "@web-atoms/xf-controls/dist/controls/RgPluginsPopup";`);
             iw.writeLine(`import XNode from "@web-atoms/core/dist/core/XNode";`);
             iw.writeLine(`import Bind from "@web-atoms/core/dist/core/Bind";`);
             iw.writeLine(`declare var bridge: any;`);
@@ -332,6 +315,11 @@ export class WAXComponent {
                 xml = xml.replace(/\"\{/gi, "{");
                 xml = xml.replace(/\}\"/gi, "}");
                 xml = xml.replace(/\&gt\;/gi, ">");
+                xml = xml.replace(/(?<a>[a-z]+\:[a-z]+)\=(?<b>\"[^\"]+\")/gmi, "{ ...  $1($2) }");
+                xml = xml.replace(/(?<a>[a-z]+\.[a-z]+)\=\"(?<b>[^\"]+)\"/gmi, "{ ...  XF.$1($2) }");
+                xml = xml.replace(/(?<a>\<\!\-\-)(?<b>(.)+)(?<c>\-\-\>)/gm, "{ /*  $2 */}");
+                xml = xml.replace(/(?<a>\{StaticResource)(?<b>[^\}]+)(?<c>\})/gm,
+                "{Bind.oneTime(() => this.staticResource(\"$2\"))}");
                 iw.writeLine(`this.render(${xml});`);
 
                 // for (const iterator of attributeGroups) {

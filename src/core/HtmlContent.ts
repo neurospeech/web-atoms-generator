@@ -2,6 +2,11 @@ import { AtomEvaluator } from "../atom-evaluator";
 import { ICompiledPath } from "./ICompiledPath";
 
 export class HtmlContent {
+
+    public static toCamelCase(text: string): string {
+        return text.charAt(0).toLowerCase() + text.substr(1);
+    }
+
     public static removeBrackets(text: string): string {
         text = text.trim();
         if (text.startsWith("{") || text.startsWith("[")) {
@@ -17,7 +22,9 @@ export class HtmlContent {
         let isTwoWays = false;
         if (/^(\$|\^)/.test(text)) {
             text = text.substr(1);
-            isTwoWays = true;
+            if (text.startsWith("[")) {
+                isTwoWays = true;
+            }
         }
         text = HtmlContent.removeBrackets(text).trim();
 
@@ -30,7 +37,7 @@ export class HtmlContent {
         if (text.startsWith("{")) {
             text = `(${text})`;
         }
-        text = text.replace(/\$/g, "x.").replace(/x\.this\./g, "this.");
+        text = text.replace(/(?<a>\$)(?<b>[a-z]+)/gi, "x.$2").replace(/x\.this\./g, "this.");
         if (/x\./.test(text)) {
             return `(x) => ${text}`;
         }
@@ -71,7 +78,7 @@ export class HtmlContent {
         if (v.startsWith(")")) {
             return `(x${v}`;
         }
-        return `(s, e${v.substr(1)}`;
+        return `(x, e${v.substr(1)}`;
     }
 
     public static processOneTimeBinding(v: string, start: string = "this"): string {
