@@ -125,7 +125,7 @@ export class WAXComponent {
 
             if (e.attr.hasOwnProperty(key)) {
                 const element = (e.attr[key] || "").trim();
-                if (((element.startsWith("${")
+                if ( key.indexOf(".") !== -1 || ((element.startsWith("${")
                     || element.startsWith("{{")
                         ) && element.endsWith("}"))
                     || (element.startsWith("[") && element.endsWith("]"))
@@ -161,7 +161,7 @@ export class WAXComponent {
             value = HtmlContent.processTwoWayBindingTSX(value);
             return `{Bind.twoWays(${value})}`;
         }
-        if (value.startsWith("${")) {
+        if (value.startsWith("${") || value.startsWith("{{")) {
 
             if (this.element === e && /viewModel/.test(key)) {
                 let i = value.indexOf("(");
@@ -173,8 +173,7 @@ export class WAXComponent {
             }
 
             if (/^event/i.test(key)) {
-                value = HtmlContent.removeBrackets(value.substr(1));
-                value = value.replace(/\$/, "this.");
+                value = HtmlContent.toEvent(value.substr(1));
                 return `{Bind.event(${value})}`;
             }
             value = HtmlContent.processTwoWayBindingTSX(value);
