@@ -50,7 +50,7 @@ export class XamlFile implements IMarkupFile {
                 unlinkSync(fname);
             }
 
-            if(process.argv.find((s) => s === "-d")) {
+            if (process.argv.find((s) => s === "-d")) {
                 if (oname.endsWith(".xaml")) {
                     unlinkSync(this.file);
                 }

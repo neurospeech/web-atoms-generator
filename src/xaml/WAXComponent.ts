@@ -101,10 +101,8 @@ export class WAXComponent {
         }
 
         for (const iterator of removeChildren) {
-            const index = iterator.parent.children.indexOf(iterator.child);
             const fc = iterator.child.children.filter((x) => x.type === "element")[0];
-            iterator.parent.children = iterator.parent.children.splice(index, 1,
-                fc);
+            iterator.parent.children = iterator.parent.children.map((c) => c === iterator.child ? fc : c );
             this.process(fc as XmlElement);
         }
 
